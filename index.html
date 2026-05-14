@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TPR 2026 — Sistema de Avaliação</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #4CAF50;
+    --green-dark: #2e7d32;
+    --green-light: #81c784;
+    --green-bg: #e8f5e9;
+    --amber: #FF8F00;
+    --amber-light: #FFE082;
+    --teal: #00796B;
+    --coral: #E64A19;
+    --blue: #1565C0;
+    --gray: #455a64;
+    --light: #f5f7f5;
+    --white: #ffffff;
+    --text: #1a2e1a;
+    --text-muted: #607d60;
+    --border: #c8e6c9;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--green-dark);
+    color: white;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header-sub { font-size: 12px; opacity: 0.7; font-weight: 300; }
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-admin { background: var(--amber); color: #1a1a1a; }
+  .badge-sala { background: var(--teal); color: white; }
+  .badge-arena { background: var(--coral); color: white; }
+  .btn-logout {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Barlow', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── TELAS ── */
+  .screen { display: none; padding: 24px 16px; max-width: 540px; margin: 0 auto; }
+  .screen.active { display: block; }
+  .screen-wide { max-width: 900px; }
+
+  /* ── CARD ── */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--green-dark);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--green-bg);
+  }
+
+  /* ── LOGIN ── */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(160deg, var(--green-dark) 0%, #1b5e20 60%, #2e7d32 100%);
+  }
+  .login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--green-dark);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .login-logo-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 4px;
+  }
+  .login-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 3px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:0.7} }
+
+  /* ── INPUTS ── */
+  .form-group { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(76,175,80,0.15);
+  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23607d60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+
+  /* ── BOTÕES ── */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--green-dark); color: white; }
+  .btn-primary:hover { background: #1b5e20; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,125,50,0.4); }
+  .btn-secondary { background: var(--green-bg); color: var(--green-dark); }
+  .btn-secondary:hover { background: #c8e6c9; }
+  .btn-danger { background: #ffebee; color: #c62828; }
+  .btn-danger:hover { background: #ffcdd2; }
+  .btn-amber { background: var(--amber); color: white; }
+  .btn-sm { padding: 8px 16px; width: auto; font-size: 13px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  /* ── ERRO ── */
+  .error-msg {
+    background: #ffebee;
+    color: #c62828;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .success-msg {
+    background: var(--green-bg);
+    color: var(--green-dark);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  /* ── RUBRICAS ── */
+  .criterio-block {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+  .criterio-block.selected { border-color: var(--green); background: var(--green-bg); }
+  .criterio-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .criterio-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .rubrica-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .rubrica-opt {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .rubrica-opt:hover { border-color: var(--green); }
+  .rubrica-opt.active { background: var(--green-dark); border-color: var(--green-dark); color: white; }
+  .rubrica-opt .score { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; display: block; }
+  .rubrica-opt .score-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; opacity: 0.8; }
+  .excede-comment { margin-top: 10px; display: none; }
+  .excede-comment textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--amber);
+    border-radius: 8px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 70px;
+  }
+  .excede-comment textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(255,143,0,0.2); }
+  .excede-note { font-size: 12px; color: var(--amber); font-weight: 600; margin-bottom: 6px; }
+
+  /* ── MISSÕES ARENA ── */
+  .missao-group { margin-bottom: 20px; }
+  .missao-group-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .robo-a .missao-group-title { background: #fce4ec; color: #880e4f; }
+  .robo-b .missao-group-title { background: #e3f2fd; color: #0d47a1; }
+  .missao-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .missao-item:hover { border-color: var(--green); }
+  .missao-item.done { background: var(--green-bg); border-color: var(--green); }
+  .missao-item.done .missao-pts { color: var(--green-dark); font-weight: 700; }
+  .missao-name { font-size: 14px; flex: 1; }
+  .missao-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-muted); margin-left: 10px; }
+  .missao-check { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 50%; margin-left: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+  .missao-item.done .missao-check { background: var(--green); border-color: var(--green); }
+  .missao-check::after { content: '✓'; font-size: 13px; color: white; display: none; }
+  .missao-item.done .missao-check::after { display: block; }
+  .total-pts {
+    text-align: center;
+    padding: 16px;
+    background: var(--green-dark);
+    color: white;
+    border-radius: var(--radius-sm);
+    margin-top: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .total-pts .num { font-size: 48px; font-weight: 900; line-height: 1; }
+  .total-pts .label { font-size: 13px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── ADMIN PAINEL ── */
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media(max-width: 500px) { .admin-grid { grid-template-columns: 1fr; } .rubrica-options { grid-template-columns: repeat(2,1fr); } }
+  .admin-tile {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    text-align: center;
+  }
+  .admin-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--green); }
+  .admin-tile-icon { font-size: 32px; margin-bottom: 8px; }
+  .admin-tile-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-transform: uppercase; color: var(--green-dark); }
+  .admin-tile-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── TABELA ── */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: var(--green-dark); color: white; padding: 10px 12px; text-align: left; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--green-bg); }
+  .table-wrap { overflow-x: auto; border-radius: var(--radius-sm); box-shadow: var(--shadow); }
+
+  /* ── RANKING TELÃO ── */
+  .telao-wrap {
+    min-height: 100vh;
+    background: #0d1f0d;
+    color: white;
+    padding: 0;
+    display: none;
+  }
+  .telao-wrap.active { display: block; }
+  .telao-header {
+    background: var(--green-dark);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .telao-title { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+  .telao-subtitle { font-size: 14px; opacity: 0.7; }
+  .telao-live { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .live-dot { width: 10px; height: 10px; background: #f44336; border-radius: 50%; animation: pulse 1s infinite; }
+  .telao-table { padding: 30px 40px; }
+  .telao-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 120px 140px;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.3s;
+  }
+  .telao-row:nth-child(1) { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3); }
+  .telao-row:nth-child(2) { background: rgba(192,192,192,0.1); border-color: rgba(192,192,192,0.2); }
+  .telao-row:nth-child(3) { background: rgba(205,127,50,0.1); border-color: rgba(205,127,50,0.2); }
+  .telao-pos { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; color: rgba(255,255,255,0.4); text-align: center; }
+  .telao-row:nth-child(1) .telao-pos { color: gold; }
+  .telao-row:nth-child(2) .telao-pos { color: silver; }
+  .telao-row:nth-child(3) .telao-pos { color: #cd7f32; }
+  .telao-equipe { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; }
+  .telao-col-label { font-size: 11px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px; }
+  .telao-col-val { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; }
+  .telao-total { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 900; color: var(--green-light); }
+  .telao-header-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 120px 140px;
+    gap: 16px;
+    padding: 0 20px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.4;
+  }
+
+  /* ── MISC ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .text-muted { color: var(--text-muted); font-size: 13px; }
+  .mt-12 { margin-top: 12px; }
+  .back-btn { display: flex; align-items: center; gap: 6px; color: var(--green-dark); font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px; background: none; border: none; padding: 0; font-family: 'Barlow', sans-serif; }
+  .back-btn:hover { text-decoration: underline; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .chip-green { background: var(--green-bg); color: var(--green-dark); }
+  .chip-amber { background: #fff8e1; color: #e65100; }
+  .nota-display { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 900; color: var(--green-dark); text-align: center; }
+  .nota-label { text-align: center; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+  .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .inline-flex { display: flex; gap: 10px; align-items: center; }
+  .tag-alias { background: #e8f5e9; color: var(--green-dark); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .edit-nota-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .edit-nota-row input[type=number] { width: 70px; padding: 8px 10px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     TELA DE LOGIN
+══════════════════════════════════════════ -->
+<div id="screen-login" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-title">TPR <span class="login-dot"></span> 2026</div>
+      <div class="login-logo-sub">Torneio Pessoense de Robótica</div>
+    </div>
+    <div id="login-error" class="error-msg">Nome ou senha incorretos.</div>
+    <div class="form-group">
+      <label>Nome / Login</label>
+      <input type="text" id="login-nome" placeholder="Seu nome de juiz" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <div style="position:relative">
+        <input type="password" id="login-senha" placeholder="••••••••" style="padding-right:44px">
+        <button type="button" onclick="toggleSenha()" id="btn-ver-senha" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:18px;line-height:1;padding:0" title="Mostrar/ocultar senha">👁</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
+    <p class="text-muted mt-12" style="text-align:center;font-size:12px;">Sessão expira após 30 min de inatividade</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HEADER (logado)
+══════════════════════════════════════════ -->
+<div id="app-header" style="display:none">
+  <div class="header">
+    <div>
+      <div class="header-title">TPR 2026</div>
+      <div class="header-sub">Sistema de Avaliação</div>
+    </div>
+    <div class="header-user">
+      <span id="header-badge" class="badge"></span>
+      <span id="header-nome" style="font-size:14px"></span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MENU PRINCIPAL (juiz)
+══════════════════════════════════════════ -->
+<div id="screen-menu" class="screen">
+  <div class="card" style="margin-top:24px">
+    <div class="card-title">O que deseja fazer?</div>
+    <div id="menu-perfil-sala" style="display:none">
+      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaSala()">📋 Avaliar Projeto de Inovação</button>
+    </div>
+    <div id="menu-perfil-arena" style="display:none">
+      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🤖 Registrar Rodada de Arena</button>
+    </div>
+    <button class="btn btn-secondary" onclick="irParaTelao()">📺 Ver Painel do Telão</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JUIZ DE SALA — selecionar equipe
+══════════════════════════════════════════ -->
+<div id="screen-sala-equipe" class="screen">
+  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
+  <div class="card">
+    <div class="card-title">Avaliação de Projeto</div>
+    <div class="form-group">
+      <label>Selecione a equipe</label>
+      <select id="sala-equipe-select">
+        <option value="">-- Escolha a equipe --</option>
+      </select>
+    </div>
+    <div id="sala-avaliadas-info" class="text-muted" style="margin-bottom:16px;font-size:13px;"></div>
+    <button class="btn btn-primary" onclick="irParaRubricas()">Iniciar Avaliação</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JUIZ DE SALA — rubricas
+══════════════════════════════════════════ -->
+<div id="screen-rubricas" class="screen">
+  <button class="back-btn" onclick="voltar('screen-sala-equipe')">← Voltar</button>
+  <div class="card">
+    <div class="card-title" id="rubricas-equipe-nome">Projeto de Inovação</div>
+    <p class="text-muted" style="margin-bottom:20px;font-size:13px;">Avalie cada critério de 1 a 4. Se marcar <strong>Excede (4)</strong>, o comentário é obrigatório.</p>
+
+    <div id="criterios-container"></div>
+
+    <div class="divider"></div>
+    <div class="nota-display" id="nota-preview">0</div>
+    <div class="nota-label">pontos totais (máx. 20)</div>
+
+    <div id="rubrica-error" class="error-msg" style="margin-top:16px"></div>
+    <button class="btn btn-primary mt-12" onclick="enviarRubricas()">Confirmar e Enviar Avaliação</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JUIZ DE ARENA — selecionar aliança
+══════════════════════════════════════════ -->
+<div id="screen-arena-alianca" class="screen">
+  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
+  <div class="card">
+    <div class="card-title">Rodada de Arena</div>
+    <div class="form-group">
+      <label>Equipe — Robô A (lado vermelho)</label>
+      <select id="arena-equipe-a">
+        <option value="">-- Selecione --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Equipe — Robô B (lado azul)</label>
+      <select id="arena-equipe-b">
+        <option value="">-- Selecione --</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="irParaMissoes()">Iniciar Registro de Missões</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JUIZ DE ARENA — missões
+══════════════════════════════════════════ -->
+<div id="screen-missoes" class="screen">
+  <button class="back-btn" onclick="voltar('screen-arena-alianca')">← Voltar</button>
+  <div class="card">
+    <div class="card-title">Registro de Missões</div>
+    <div class="chips" id="arena-alianca-chips"></div>
+    <p class="text-muted" style="margin-bottom:16px;font-size:13px;">Toque em cada missão para marcar como concluída. Toque novamente para desmarcar.</p>
+
+    <div class="robo-a missao-group">
+      <div class="missao-group-title">🔴 Robô A</div>
+      <div id="missoes-a"></div>
+    </div>
+    <div class="robo-b missao-group">
+      <div class="missao-group-title">🔵 Robô B</div>
+      <div id="missoes-b"></div>
+    </div>
+
+    <div class="total-pts">
+      <div class="num" id="arena-total-pts">0</div>
+      <div class="label">pontos da aliança (máx. 100)</div>
+    </div>
+
+    <div id="arena-error" class="error-msg" style="margin-top:16px"></div>
+    <button class="btn btn-primary mt-12" onclick="enviarArena()">Confirmar e Enviar Rodada</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ADMIN — painel
+══════════════════════════════════════════ -->
+<div id="screen-admin" class="screen screen-wide">
+  <div style="margin-top:24px">
+    <div class="admin-grid">
+      <div class="admin-tile" onclick="irAdmin('juizes')">
+        <div class="admin-tile-icon">👥</div>
+        <div class="admin-tile-title">Gerenciar Juízes</div>
+        <div class="admin-tile-desc">Cadastrar e remover juízes</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('equipes')">
+        <div class="admin-tile-icon">🏆</div>
+        <div class="admin-tile-title">Gerenciar Equipes</div>
+        <div class="admin-tile-desc">Cadastrar equipes participantes</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-sala')">
+        <div class="admin-tile-icon">📋</div>
+        <div class="admin-tile-title">Notas de Sala</div>
+        <div class="admin-tile-desc">Ver e editar avaliações de projeto</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-arena')">
+        <div class="admin-tile-icon">🤖</div>
+        <div class="admin-tile-title">Notas de Arena</div>
+        <div class="admin-tile-desc">Ver e editar rodadas de arena</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('senha')">
+        <div class="admin-tile-icon">🔑</div>
+        <div class="admin-tile-title">Alterar Senhas</div>
+        <div class="admin-tile-desc">Senha do evento e do admin</div>
+      </div>
+      <div class="admin-tile" onclick="irParaTelao()">
+        <div class="admin-tile-icon">📺</div>
+        <div class="admin-tile-title">Painel Telão</div>
+        <div class="admin-tile-desc">Placar público da arena</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ADMIN — sub-telas
+══════════════════════════════════════════ -->
+<div id="screen-admin-sub" class="screen screen-wide">
+  <button class="back-btn" onclick="voltar('screen-admin')">← Painel Admin</button>
+  <div class="card">
+    <div class="card-title" id="admin-sub-title"></div>
+    <div id="admin-sub-content"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TELÃO
+══════════════════════════════════════════ -->
+<div id="screen-telao" class="telao-wrap">
+  <div class="telao-header">
+    <div>
+      <div class="telao-title">🏆 Placar da Arena</div>
+      <div class="telao-subtitle">Torneio Pessoense de Robótica 2026</div>
+    </div>
+    <div class="telao-live">
+      <div class="live-dot"></div>
+      AO VIVO
+      <button class="btn-logout" style="margin-left:16px" onclick="voltarDoTelao()">Sair do Telão</button>
+    </div>
+  </div>
+  <div class="telao-table">
+    <div class="telao-header-row">
+      <div>#</div>
+      <div>Equipe</div>
+      <div>Rodadas</div>
+      <div>Pontos Arena</div>
+      <div>Total</div>
+    </div>
+    <div id="telao-lista"></div>
+  </div>
+</div>
+
+<script>
+// ── FIREBASE REST API ──
+const DB_URL = 'https://tpr-2026-innov-default-rtdb.firebaseio.com';
+
+async function fbGet(path) {
+  const r = await fetch(`${DB_URL}/${path}.json`);
+  return r.json();
+}
+async function fbSet(path, val) {
+  await fetch(`${DB_URL}/${path}.json`, { method: 'PUT', body: JSON.stringify(val) });
+}
+async function fbPush(path, val) {
+  const r = await fetch(`${DB_URL}/${path}.json`, { method: 'POST', body: JSON.stringify(val) });
+  return r.json();
+}
+async function fbUpdate(path, val) {
+  await fetch(`${DB_URL}/${path}.json`, { method: 'PATCH', body: JSON.stringify(val) });
+}
+async function fbDelete(path) {
+  await fetch(`${DB_URL}/${path}.json`, { method: 'DELETE' });
+}
+function fbListen(path, cb) {
+  // Polling a cada 5s para telão em tempo real
+  cb(); // primeira chamada imediata
+  return setInterval(cb, 5000);
+}
+
+// ── ESTADO ──
+let currentUser = null;
+let currentPerfil = null;
+let equipes = [];
+let juizes = [];
+let inactivityTimer = null;
+const INACTIVITY_MS = 30 * 60 * 1000;
+
+// ── CRITÉRIOS DE AVALIAÇÃO ──
+const CRITERIOS = [
+  { id: 'identificacao', nome: 'Identificação', desc: 'A equipe definiu uma questão de problema clara e bem pesquisada.' },
+  { id: 'projeto', nome: 'Projeto', desc: 'A equipe trabalhou em conjunto na criação de um plano de projeto e no desenvolvimento de evidências de suas ideias.' },
+  { id: 'criacao', nome: 'Criação', desc: 'A equipe desenvolveu uma ideia original ou aprimorou uma ideia existente com um modelo/desenho do protótipo.' },
+  { id: 'iteracao', nome: 'Iteração', desc: 'A equipe compartilhou suas ideias, buscou opiniões e incluiu melhorias em sua solução.' },
+  { id: 'comunicacao', nome: 'Comunicação', desc: 'A equipe fez uma apresentação eficaz de sua solução, seu impacto sobre outras pessoas e comemoraram o progresso.' }
+];
+const LABELS = ['', 'Iniciante', 'Em desenvolvimento', 'Cumprido', 'Excede'];
+
+// ── MISSÕES DA ARENA ──
+const MISSOES_A = [
+  { id: 'limpeza_rio', nome: 'Limpeza do Rio Jaguaribe', pts: 15 },
+  { id: 'salvar_animal', nome: 'Salvar animal fora do habitat natural', pts: 10 },
+  { id: 'levar_lixo_b', nome: 'Levar lixo para área de lançamento B', pts: 10 },
+  { id: 'devolver_animal_mata', nome: 'Devolver animal para mata nativa', pts: 15 }
+];
+const MISSOES_B = [
+  { id: 'desobstruir_trilha', nome: 'Desobstruir trilha do jardim botânico', pts: 15 },
+  { id: 'recolher_animal', nome: 'Recolher animal perdido na cidade', pts: 10 },
+  { id: 'levar_animal_a', nome: 'Levar animal para área de lançamento A', pts: 15 },
+  { id: 'deposito_lixo', nome: 'Colocar resíduos no depósito de lixo', pts: 10 }
+];
+
+// ══ VER SENHA ══
+function toggleSenha() {
+  const input = document.getElementById('login-senha');
+  const btn = document.getElementById('btn-ver-senha');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+// ══ INACTIVIDADE ══
+function resetInactivity() {
+  clearTimeout(inactivityTimer);
+  if (currentUser) inactivityTimer = setTimeout(logout, INACTIVITY_MS);
+}
+document.addEventListener('click', resetInactivity);
+document.addEventListener('keydown', resetInactivity);
+
+// ══ INICIALIZAÇÃO ══
+async function init() {
+  mostrarTela('screen-login');
+  await garantirConfigs();
+}
+
+async function garantirConfigs() {
+  const config = await fbGet('config');
+  if (!config) {
+    await fbSet('config', { senha_evento: 'tpr2026', senha_admin: 'admin2026' });
+  }
+}
+
+// ══ LOGIN ══
+window.fazerLogin = async function() {
+  const nome = document.getElementById('login-nome').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  if (!nome || !senha) { errEl.textContent = 'Preencha nome e senha.'; errEl.style.display = 'block'; return; }
+
+  const btnEntrar = document.querySelector('#screen-login .btn-primary');
+  btnEntrar.textContent = 'Entrando...'; btnEntrar.disabled = true;
+
+  try {
+    const config = await fbGet('config');
+
+    // Admin?
+    if (nome.toLowerCase() === 'admin' && senha === config.senha_admin) {
+      currentUser = 'admin'; currentPerfil = 'admin';
+      entrar(); return;
+    }
+
+    // Senha do evento errada?
+    if (senha !== config.senha_evento) {
+      errEl.textContent = 'Senha incorreta.'; errEl.style.display = 'block'; return;
+    }
+
+    // Verifica juiz
+    const juizesData = await fbGet('juizes') || {};
+    const juizEntry = Object.entries(juizesData).find(([k,v]) => v.nome.toLowerCase() === nome.toLowerCase());
+    if (!juizEntry) {
+      errEl.textContent = 'Juiz não encontrado. Contate o admin.'; errEl.style.display = 'block'; return;
+    }
+
+    currentUser = juizEntry[1].nome;
+    currentPerfil = juizEntry[1].perfil;
+    entrar();
+  } catch(e) {
+    errEl.textContent = 'Erro de conexão. Verifique a internet.'; errEl.style.display = 'block';
+  } finally {
+    btnEntrar.textContent = 'ENTRAR'; btnEntrar.disabled = false;
+  }
+}
+
+function entrar() {
+  document.getElementById('app-header').style.display = 'block';
+  document.getElementById('header-nome').textContent = currentUser;
+  const badge = document.getElementById('header-badge');
+  if (currentPerfil === 'admin') { badge.textContent = 'Admin'; badge.className = 'badge badge-admin'; }
+  else if (currentPerfil === 'sala') { badge.textContent = 'Juiz de Sala'; badge.className = 'badge badge-sala'; }
+  else { badge.textContent = 'Juiz de Arena'; badge.className = 'badge badge-arena'; }
+
+  if (currentPerfil === 'admin') {
+    mostrarTela('screen-admin');
+  } else {
+    document.getElementById('menu-perfil-sala').style.display = currentPerfil === 'sala' ? 'block' : 'none';
+    document.getElementById('menu-perfil-arena').style.display = currentPerfil === 'arena' ? 'block' : 'none';
+    mostrarTela('screen-menu');
+  }
+  resetInactivity();
+}
+
+window.logout = function() {
+  currentUser = null; currentPerfil = null;
+  clearTimeout(inactivityTimer);
+  document.getElementById('app-header').style.display = 'none';
+  document.getElementById('login-nome').value = '';
+  document.getElementById('login-senha').value = '';
+  mostrarTela('screen-login');
+}
+
+// ══ NAVEGAÇÃO ══
+function mostrarTela(id) {
+  document.querySelectorAll('.screen, .telao-wrap, .login-wrap').forEach(el => {
+    el.classList.remove('active');
+    if (el.classList.contains('telao-wrap')) el.style.display = 'none';
+    if (el.classList.contains('login-wrap')) el.style.display = 'none';
+  });
+  const el = document.getElementById(id);
+  if (el.classList.contains('telao-wrap')) { el.style.display = 'block'; }
+  else if (el.classList.contains('login-wrap')) { el.style.display = 'flex'; }
+  else { el.classList.add('active'); }
+}
+
+window.voltar = function(tela) { mostrarTela(tela); }
+
+// ══ CARREGAR EQUIPES ══
+async function carregarEquipes() {
+  const data = await fbGet('equipes');
+  equipes = [];
+  if (data) {
+    Object.entries(data).forEach(([k,v]) => equipes.push({ id: k, ...v }));
+    equipes.sort((a,b) => a.nome.localeCompare(b.nome));
+  }
+}
+
+function popularSelect(selectId, excluir = null) {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = '<option value="">-- Selecione --</option>';
+  equipes.forEach(e => {
+    if (e.id !== excluir) sel.innerHTML += `<option value="${e.id}">${e.nome}</option>`;
+  });
+}
+
+// ══ SALA — SELECIONAR EQUIPE ══
+window.irParaSala = async function() {
+  await carregarEquipes();
+  popularSelect('sala-equipe-select');
+  const data = await fbGet('avaliacoes_sala') || {};
+  let count = Object.values(data).filter(v => v.juiz === currentUser).length;
+  document.getElementById('sala-avaliadas-info').textContent = count > 0 ? `Você já avaliou ${count} equipe(s) hoje.` : '';
+  mostrarTela('screen-sala-equipe');
+}
+
+window.irParaRubricas = async function() {
+  const equipeId = document.getElementById('sala-equipe-select').value;
+  if (!equipeId) { alert('Selecione uma equipe.'); return; }
+  const equipe = equipes.find(e => e.id === equipeId);
+  document.getElementById('rubricas-equipe-nome').textContent = equipe.nome;
+  renderCriterios();
+  mostrarTela('screen-rubricas');
+}
+
+function renderCriterios() {
+  const cont = document.getElementById('criterios-container');
+  cont.innerHTML = '';
+  CRITERIOS.forEach(c => {
+    cont.innerHTML += `
+      <div class="criterio-block" id="block-${c.id}">
+        <div class="criterio-label">${c.nome}</div>
+        <div class="criterio-desc">${c.desc}</div>
+        <div class="rubrica-options">
+          ${[1,2,3,4].map(n => `
+            <div class="rubrica-opt" id="opt-${c.id}-${n}" onclick="selecionarRubrica('${c.id}',${n})">
+              <span class="score">${n}</span>
+              <span class="score-label">${LABELS[n]}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="excede-comment" id="excede-${c.id}">
+          <div class="excede-note">⚠️ Excede exige comentário obrigatório</div>
+          <textarea id="comment-${c.id}" placeholder="Justifique o Excede..."></textarea>
+        </div>
+      </div>`;
+  });
+  atualizarNota();
+}
+
+window.selecionarRubrica = function(criterioId, valor) {
+  [1,2,3,4].forEach(n => {
+    document.getElementById(`opt-${criterioId}-${n}`).classList.toggle('active', n === valor);
+  });
+  const block = document.getElementById(`block-${criterioId}`);
+  block.classList.toggle('selected', true);
+  block.dataset.valor = valor;
+  const exeEl = document.getElementById(`excede-${criterioId}`);
+  exeEl.style.display = valor === 4 ? 'block' : 'none';
+  atualizarNota();
+}
+
+function atualizarNota() {
+  let total = 0;
+  CRITERIOS.forEach(c => {
+    const block = document.getElementById(`block-${c.id}`);
+    total += parseInt(block.dataset.valor || 0);
+  });
+  document.getElementById('nota-preview').textContent = total;
+}
+
+window.enviarRubricas = async function() {
+  const equipeId = document.getElementById('sala-equipe-select').value;
+  const errEl = document.getElementById('rubrica-error');
+  errEl.style.display = 'none';
+  let notas = {};
+  let valido = true;
+
+  CRITERIOS.forEach(c => {
+    const block = document.getElementById(`block-${c.id}`);
+    const val = parseInt(block.dataset.valor || 0);
+    if (!val) { errEl.textContent = `Avalie o critério "${c.nome}".`; errEl.style.display = 'block'; valido = false; return; }
+    if (val === 4) {
+      const comment = document.getElementById(`comment-${c.id}`).value.trim();
+      if (!comment) { errEl.textContent = `Comentário obrigatório para "${c.nome}" (Excede).`; errEl.style.display = 'block'; valido = false; return; }
+      notas[c.id] = { valor: val, comentario: comment };
+    } else {
+      notas[c.id] = { valor: val };
+    }
+  });
+
+  if (!valido) return;
+  const total = CRITERIOS.reduce((s,c) => s + notas[c.id].valor, 0);
+  await fbPush('avaliacoes_sala', { equipeId, juiz: currentUser, notas, total, timestamp: Date.now() });
+  alert(`✅ Avaliação enviada! Total: ${total}/20`);
+  mostrarTela('screen-menu');
+}
+
+// ══ ARENA ══
+window.irParaArena = async function() {
+  await carregarEquipes();
+  popularSelect('arena-equipe-a');
+  popularSelect('arena-equipe-b');
+  mostrarTela('screen-arena-alianca');
+}
+
+window.irParaMissoes = function() {
+  const a = document.getElementById('arena-equipe-a').value;
+  const b = document.getElementById('arena-equipe-b').value;
+  if (!a || !b) { alert('Selecione as duas equipes.'); return; }
+  if (a === b) { alert('As equipes da aliança devem ser diferentes.'); return; }
+
+  const eqA = equipes.find(e => e.id === a);
+  const eqB = equipes.find(e => e.id === b);
+  document.getElementById('arena-alianca-chips').innerHTML = `
+    <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 Robô A: ${eqA.nome}</span>
+    <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 Robô B: ${eqB.nome}</span>`;
+
+  renderMissoes();
+  mostrarTela('screen-missoes');
+}
+
+function renderMissoes() {
+  const render = (containerId, missoes) => {
+    const cont = document.getElementById(containerId);
+    cont.innerHTML = '';
+    missoes.forEach(m => {
+      cont.innerHTML += `
+        <div class="missao-item" id="missao-${m.id}" onclick="toggleMissao('${m.id}', ${m.pts})">
+          <span class="missao-name">${m.nome}</span>
+          <span class="missao-pts">${m.pts} pts</span>
+          <div class="missao-check"></div>
+        </div>`;
+    });
+  };
+  render('missoes-a', MISSOES_A);
+  render('missoes-b', MISSOES_B);
+  atualizarPtsArena();
+}
+
+window.toggleMissao = function(id, pts) {
+  const el = document.getElementById(`missao-${id}`);
+  el.classList.toggle('done');
+  atualizarPtsArena();
+}
+
+function atualizarPtsArena() {
+  let total = 0;
+  [...MISSOES_A, ...MISSOES_B].forEach(m => {
+    if (document.getElementById(`missao-${m.id}`)?.classList.contains('done')) total += m.pts;
+  });
+  document.getElementById('arena-total-pts').textContent = total;
+}
+
+window.enviarArena = async function() {
+  const a = document.getElementById('arena-equipe-a').value;
+  const b = document.getElementById('arena-equipe-b').value;
+  const errEl = document.getElementById('arena-error');
+  errEl.style.display = 'none';
+
+  let missoesA = {}, missoesB = {};
+  let ptsA = 0, ptsB = 0;
+  MISSOES_A.forEach(m => {
+    const done = document.getElementById(`missao-${m.id}`)?.classList.contains('done');
+    missoesA[m.id] = done;
+    if (done) ptsA += m.pts;
+  });
+  MISSOES_B.forEach(m => {
+    const done = document.getElementById(`missao-${m.id}`)?.classList.contains('done');
+    missoesB[m.id] = done;
+    if (done) ptsB += m.pts;
+  });
+
+  const totalAlianca = ptsA + ptsB;
+  await fbPush('rodadas_arena', { equipeA: a, equipeB: b, missoesA, missoesB, ptsA, ptsB, totalAlianca, juiz: currentUser, timestamp: Date.now() });
+  alert(`✅ Rodada registrada! Total da aliança: ${totalAlianca}/100`);
+  mostrarTela('screen-menu');
+}
+
+// ══ ADMIN ══
+window.irAdmin = async function(sub) {
+  mostrarTela('screen-admin-sub');
+  const title = document.getElementById('admin-sub-title');
+  const content = document.getElementById('admin-sub-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+
+  if (sub === 'juizes') {
+    title.textContent = 'Gerenciar Juízes';
+    const data = await fbGet('juizes') || {};
+    let rows = Object.entries(data).map(([k,v]) => `
+      <tr>
+        <td>${v.nome}</td>
+        <td><span class="tag-alias">${v.perfil === 'sala' ? 'Juiz de Sala' : 'Juiz de Arena'}</span></td>
+        <td><button class="btn btn-danger btn-sm" onclick="removerJuiz('${k}')">Remover</button></td>
+      </tr>`).join('');
+    content.innerHTML = `
+      <div class="table-wrap" style="margin-bottom:20px"><table>
+        <tr><th>Nome</th><th>Perfil</th><th>Ação</th></tr>
+        ${rows || '<tr><td colspan="3" style="text-align:center;color:#999">Nenhum juiz cadastrado</td></tr>'}
+      </table></div>
+      <div class="divider"></div>
+      <p style="font-weight:600;margin-bottom:12px">Cadastrar novo juiz</p>
+      <div class="form-group"><label>Nome</label><input id="novo-juiz-nome" placeholder="Nome completo"></div>
+      <div class="form-group"><label>Perfil</label>
+        <select id="novo-juiz-perfil">
+          <option value="sala">Juiz de Sala</option>
+          <option value="arena">Juiz de Arena</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="cadastrarJuiz()">Cadastrar Juiz</button>`;
+  }
+
+  else if (sub === 'equipes') {
+    title.textContent = 'Gerenciar Equipes';
+    await carregarEquipes();
+    let rows = equipes.map(e => `
+      <tr>
+        <td>${e.nome}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="removerEquipe('${e.id}')">Remover</button></td>
+      </tr>`).join('');
+    content.innerHTML = `
+      <div class="table-wrap" style="margin-bottom:20px"><table>
+        <tr><th>Nome da Equipe</th><th>Ação</th></tr>
+        ${rows || '<tr><td colspan="2" style="text-align:center;color:#999">Nenhuma equipe cadastrada</td></tr>'}
+      </table></div>
+      <div class="divider"></div>
+      <p style="font-weight:600;margin-bottom:12px">Cadastrar nova equipe</p>
+      <div class="form-group"><label>Nome da equipe</label><input id="nova-equipe-nome" placeholder="Nome da equipe"></div>
+      <button class="btn btn-primary" onclick="cadastrarEquipe()">Cadastrar Equipe</button>`;
+  }
+
+  else if (sub === 'notas-sala') {
+    title.textContent = 'Notas de Sala';
+    await carregarEquipes();
+    const data = await fbGet('avaliacoes_sala') || {};
+    let rows = Object.entries(data).map(([k,v]) => {
+      const eq = equipes.find(e => e.id === v.equipeId);
+      return `<tr>
+        <td>${eq ? eq.nome : v.equipeId}</td>
+        <td>${v.juiz}</td>
+        <td style="font-weight:700;color:var(--green-dark)">${v.total}/20</td>
+        <td>${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
+        <td><button class="btn btn-amber btn-sm" onclick="editarNotaSala('${k}')">Editar</button></td>
+      </tr>`;
+    }).join('');
+    content.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>Equipe</th><th>Juiz</th><th>Nota</th><th>Horário</th><th>Ação</th></tr>
+      ${rows || '<tr><td colspan="5" style="text-align:center;color:#999">Nenhuma avaliação ainda</td></tr>'}
+    </table></div>`;
+  }
+
+  else if (sub === 'notas-arena') {
+    title.textContent = 'Notas de Arena';
+    await carregarEquipes();
+    const data = await fbGet('rodadas_arena') || {};
+    let rows = Object.entries(data).map(([k,v]) => {
+      const eqA = equipes.find(e => e.id === v.equipeA);
+      const eqB = equipes.find(e => e.id === v.equipeB);
+      return `<tr>
+        <td>${eqA ? eqA.nome : v.equipeA}</td>
+        <td>${eqB ? eqB.nome : v.equipeB}</td>
+        <td style="font-weight:700;color:var(--green-dark)">${v.totalAlianca}/100</td>
+        <td>${v.juiz}</td>
+        <td>${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
+        <td><button class="btn btn-amber btn-sm" onclick="editarNotaArena('${k}')">Editar</button></td>
+      </tr>`;
+    }).join('');
+    content.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>Equipe A</th><th>Equipe B</th><th>Total</th><th>Juiz</th><th>Horário</th><th>Ação</th></tr>
+      ${rows || '<tr><td colspan="6" style="text-align:center;color:#999">Nenhuma rodada ainda</td></tr>'}
+    </table></div>`;
+  }
+
+  else if (sub === 'senha') {
+    title.textContent = 'Alterar Senhas';
+    content.innerHTML = `
+      <div id="senha-msg" class="success-msg"></div>
+      <p style="font-weight:600;margin-bottom:12px">Senha do evento (juízes)</p>
+      <div class="form-group"><label>Nova senha do evento</label><input type="password" id="nova-senha-evento" placeholder="Nova senha"></div>
+      <button class="btn btn-primary" style="margin-bottom:24px" onclick="alterarSenha('evento')">Salvar senha do evento</button>
+      <div class="divider"></div>
+      <p style="font-weight:600;margin:16px 0 12px">Senha do admin</p>
+      <div class="form-group"><label>Nova senha do admin</label><input type="password" id="nova-senha-admin" placeholder="Nova senha admin"></div>
+      <button class="btn btn-primary" onclick="alterarSenha('admin')">Salvar senha do admin</button>`;
+  }
+}
+
+window.cadastrarJuiz = async function() {
+  const nome = document.getElementById('novo-juiz-nome').value.trim();
+  const perfil = document.getElementById('novo-juiz-perfil').value;
+  if (!nome) { alert('Digite o nome do juiz.'); return; }
+  await fbPush('juizes', { nome, perfil });
+  alert('Juiz cadastrado!');
+  irAdmin('juizes');
+}
+
+window.removerJuiz = async function(id) {
+  if (!confirm('Remover este juiz?')) return;
+  await fbDelete(`juizes/${id}`);
+  irAdmin('juizes');
+}
+
+window.cadastrarEquipe = async function() {
+  const nome = document.getElementById('nova-equipe-nome').value.trim();
+  if (!nome) { alert('Digite o nome da equipe.'); return; }
+  await fbPush('equipes', { nome });
+  alert('Equipe cadastrada!');
+  irAdmin('equipes');
+}
+
+window.removerEquipe = async function(id) {
+  if (!confirm('Remover esta equipe?')) return;
+  await fbDelete(`equipes/${id}`);
+  irAdmin('equipes');
+}
+
+window.alterarSenha = async function(tipo) {
+  const val = document.getElementById(`nova-senha-${tipo}`).value.trim();
+  if (!val || val.length < 4) { alert('A senha deve ter ao menos 4 caracteres.'); return; }
+  const campo = tipo === 'evento' ? 'senha_evento' : 'senha_admin';
+  await fbUpdate('config', { [campo]: val });
+  const msg = document.getElementById('senha-msg');
+  msg.textContent = `Senha ${tipo === 'evento' ? 'do evento' : 'do admin'} alterada com sucesso!`;
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+window.editarNotaSala = async function(id) {
+  const av = await fbGet(`avaliacoes_sala/${id}`);
+  await carregarEquipes();
+  const eq = equipes.find(e => e.id === av.equipeId);
+  const content = document.getElementById('admin-sub-content');
+  let fields = CRITERIOS.map(c => `
+    <div class="edit-nota-row">
+      <span style="flex:1;font-size:14px">${c.nome}</span>
+      <input type="number" min="1" max="4" value="${av.notas[c.id]?.valor || 1}" id="edit-${c.id}" style="width:60px;padding:6px 8px">
+    </div>`).join('');
+  content.innerHTML = `
+    <p style="margin-bottom:16px"><strong>Equipe:</strong> ${eq ? eq.nome : av.equipeId} &nbsp;|&nbsp; <strong>Juiz:</strong> ${av.juiz}</p>
+    ${fields}
+    <div id="edit-log-msg" class="success-msg" style="margin-top:12px"></div>
+    <div class="inline-flex" style="margin-top:16px">
+      <button class="btn btn-primary btn-sm" onclick="salvarEdicaoSala('${id}')">Salvar alteração</button>
+      <button class="btn btn-secondary btn-sm" onclick="irAdmin('notas-sala')">Cancelar</button>
+    </div>`;
+}
+
+window.salvarEdicaoSala = async function(id) {
+  const av = await fbGet(`avaliacoes_sala/${id}`);
+  let novas = { ...av.notas };
+  let total = 0;
+  CRITERIOS.forEach(c => {
+    const v = Math.min(4, Math.max(1, parseInt(document.getElementById(`edit-${c.id}`).value) || 1));
+    novas[c.id] = { ...novas[c.id], valor: v };
+    total += v;
+  });
+  await fbUpdate(`avaliacoes_sala/${id}`, { notas: novas, total, editadoPor: currentUser, editadoEm: Date.now() });
+  const msg = document.getElementById('edit-log-msg');
+  msg.textContent = `✅ Salvo! Novo total: ${total}/20`;
+  msg.style.display = 'block';
+}
+
+window.editarNotaArena = async function(id) {
+  const rod = await fbGet(`rodadas_arena/${id}`);
+  await carregarEquipes();
+  const eqA = equipes.find(e => e.id === rod.equipeA);
+  const eqB = equipes.find(e => e.id === rod.equipeB);
+  const content = document.getElementById('admin-sub-content');
+  const renderMissoesEdit = (missoes, dados) => missoes.map(m => `
+    <div class="missao-item ${dados[m.id] ? 'done' : ''}" id="edit-missao-${m.id}" onclick="toggleEditMissao('${m.id}')">
+      <span class="missao-name">${m.nome}</span>
+      <span class="missao-pts">${m.pts} pts</span>
+      <div class="missao-check"></div>
+    </div>`).join('');
+  content.innerHTML = `
+    <p style="margin-bottom:16px">
+      <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${eqA ? eqA.nome : rod.equipeA}</span>
+      <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 ${eqB ? eqB.nome : rod.equipeB}</span>
+    </p>
+    <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div>${renderMissoesEdit(MISSOES_A, rod.missoesA)}</div>
+    <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${renderMissoesEdit(MISSOES_B, rod.missoesB)}</div>
+    <div id="edit-arena-msg" class="success-msg"></div>
+    <div class="inline-flex" style="margin-top:16px">
+      <button class="btn btn-primary btn-sm" onclick="salvarEdicaoArena('${id}')">Salvar alteração</button>
+      <button class="btn btn-secondary btn-sm" onclick="irAdmin('notas-arena')">Cancelar</button>
+    </div>`;
+}
+
+window.toggleEditMissao = function(id) {
+  document.getElementById(`edit-missao-${id}`)?.classList.toggle('done');
+}
+
+window.salvarEdicaoArena = async function(id) {
+  let mA = {}, mB = {}, pA = 0, pB = 0;
+  MISSOES_A.forEach(m => { const d = document.getElementById(`edit-missao-${m.id}`)?.classList.contains('done'); mA[m.id] = d; if(d) pA += m.pts; });
+  MISSOES_B.forEach(m => { const d = document.getElementById(`edit-missao-${m.id}`)?.classList.contains('done'); mB[m.id] = d; if(d) pB += m.pts; });
+  await fbUpdate(`rodadas_arena/${id}`, { missoesA: mA, missoesB: mB, ptsA: pA, ptsB: pB, totalAlianca: pA + pB, editadoPor: currentUser, editadoEm: Date.now() });
+  const msg = document.getElementById('edit-arena-msg');
+  msg.textContent = `✅ Salvo! Novo total: ${pA + pB}/100`;
+  msg.style.display = 'block';
+}
+
+// ══ TELÃO ══
+window.irParaTelao = function() {
+  mostrarTela('screen-telao');
+  iniciarTelao();
+}
+
+window.voltarDoTelao = function() {
+  if (currentUser) mostrarTela(currentPerfil === 'admin' ? 'screen-admin' : 'screen-menu');
+  else mostrarTela('screen-login');
+}
+
+async function atualizarTelao() {
+  const rodadas = await fbGet('rodadas_arena') || {};
+  await carregarEquipes();
+  const placar = {};
+  equipes.forEach(e => placar[e.id] = { nome: e.nome, rodadas: 0, totalPts: 0 });
+  Object.values(rodadas).forEach(r => {
+    if (placar[r.equipeA]) { placar[r.equipeA].rodadas++; placar[r.equipeA].totalPts += r.totalAlianca; }
+    if (placar[r.equipeB]) { placar[r.equipeB].rodadas++; placar[r.equipeB].totalPts += r.totalAlianca; }
+  });
+  const sorted = Object.values(placar).filter(e => e.rodadas > 0).sort((a,b) => b.totalPts - a.totalPts);
+  const lista = document.getElementById('telao-lista');
+  if (!lista) return;
+  lista.innerHTML = sorted.length ? sorted.map((e,i) => `
+    <div class="telao-row">
+      <div class="telao-pos">${i+1}</div>
+      <div class="telao-equipe">${e.nome}</div>
+      <div><div class="telao-col-label">Rodadas</div><div class="telao-col-val">${e.rodadas}</div></div>
+      <div><div class="telao-col-label">Pontos</div><div class="telao-col-val">${e.totalPts}</div></div>
+      <div class="telao-total">${e.totalPts} pts</div>
+    </div>`).join('')
+  : '<p style="color:rgba(255,255,255,0.4);text-align:center;padding:40px">Aguardando rodadas...</p>';
+}
+
+let telaoInterval = null;
+function iniciarTelao() {
+  atualizarTelao();
+  if (telaoInterval) clearInterval(telaoInterval);
+  telaoInterval = setInterval(atualizarTelao, 5000);
+}
+
+// ── INIT ──
+init();
+</script></body></html>

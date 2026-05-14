@@ -223,11 +223,23 @@
   <button class="back-btn" onclick="voltar('screen-sala-equipe')">← Voltar</button>
   <div class="card">
     <div class="card-title" id="rubricas-equipe-nome">Projeto de Inovação</div>
-    <p class="text-muted" style="margin-bottom:20px;font-size:13px">Avalie de 1 a 4. Se marcar <strong>Excede</strong>, o comentário é obrigatório. Os campos "Muito bom" e "Pensem sobre" são opcionais.</p>
+    <p class="text-muted" style="margin-bottom:20px;font-size:13px">Avalie de 1 a 4. Se marcar <strong>Excede</strong>, o comentário é obrigatório.</p>
     <div id="criterios-container"></div>
     <div class="divider"></div>
     <div class="nota-display" id="nota-preview">0</div>
     <div class="nota-label">pontos totais (máx. 20)</div>
+    <div class="divider"></div>
+    <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">Feedback geral da apresentação <span style="font-weight:400;color:var(--text-muted)">(opcional)</span></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--teal);text-transform:uppercase;margin-bottom:6px">✅ Muito bom...</div>
+        <textarea id="fb-geral-pos" placeholder="O que a equipe fez bem..." style="min-height:80px;resize:vertical;font-size:14px"></textarea>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--coral);text-transform:uppercase;margin-bottom:6px">💡 Pensem sobre...</div>
+        <textarea id="fb-geral-mel" placeholder="O que pode melhorar..." style="min-height:80px;resize:vertical;font-size:14px"></textarea>
+      </div>
+    </div>
     <div id="rubrica-error" class="error-msg" style="margin-top:16px"></div>
     <button class="btn btn-primary mt-12" onclick="enviarRubricas()">Confirmar e Enviar Avaliação</button>
   </div>
@@ -296,7 +308,7 @@
     </div>
   </div>
   <div class="telao-body">
-    <div class="telao-header-row"><div>#</div><div>Equipe</div><div>Rodadas</div><div>Pontos</div><div>Total</div></div>
+    <div class="telao-header-row"><div>#</div><div>Aliança</div><div>Rodadas</div><div>Pontos</div><div>Total</div></div>
     <div class="telao-lista-wrap"><div class="telao-lista" id="telao-lista"></div></div>
   </div>
 </div>
@@ -446,10 +458,6 @@ function renderCrit() {
         <div class="excede-note">⚠️ Excede exige comentário obrigatório</div>
         <textarea id="com-${c.id}" placeholder="Justifique o Excede..."></textarea>
       </div>
-      <div class="criterio-feedback">
-        <div class="fb-pos"><div class="fb-label">✅ Muito bom...</div><textarea id="fbp-${c.id}" placeholder="O que a equipe fez bem..."></textarea></div>
-        <div class="fb-mel"><div class="fb-label">💡 Pensem sobre...</div><textarea id="fbm-${c.id}" placeholder="O que pode melhorar..."></textarea></div>
-      </div>
     </div>`).join('');
   updNota();
 }
@@ -478,11 +486,13 @@ window.enviarRubricas = async function() {
     if(!val){err.textContent=`Avalie o critério "${c.nome}".`;err.style.display='block';ok=false;return;}
     const comentario=val===4?document.getElementById(`com-${c.id}`).value.trim():'';
     if(val===4&&!comentario){err.textContent=`Comentário obrigatório para "${c.nome}" (Excede).`;err.style.display='block';ok=false;return;}
-    notas[c.id]={valor:val,comentario,feedbackPositivo:document.getElementById(`fbp-${c.id}`).value.trim(),feedbackMelhoria:document.getElementById(`fbm-${c.id}`).value.trim()};
+    notas[c.id]={valor:val,comentario};
   });
   if(!ok)return;
   const total=CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
-  await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,timestamp:Date.now()});
+  const feedbackPositivo=document.getElementById('fb-geral-pos').value.trim();
+  const feedbackMelhoria=document.getElementById('fb-geral-mel').value.trim();
+  await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,timestamp:Date.now()});
   alert(`✅ Avaliação enviada! Total: ${total}/20`);show('screen-menu');
 };
 
@@ -576,15 +586,17 @@ window.irAdmin = async function(sub) {
       const coms=CRIT.map(c=>{
         const n=v.notas?.[c.id]||{};let h='';
         if(n.comentario) h+=`<div class="comment-box">⚠️ <strong>${c.nome}:</strong> ${n.comentario}</div>`;
-        if(n.feedbackPositivo) h+=`<div class="feedback-pos-box">✅ <strong>${c.nome}:</strong> ${n.feedbackPositivo}</div>`;
-        if(n.feedbackMelhoria) h+=`<div class="feedback-mel-box">💡 <strong>${c.nome}:</strong> ${n.feedbackMelhoria}</div>`;
         return h;
       }).join('');
+      const fbGeral = [
+        v.feedbackPositivo ? `<div class="feedback-pos-box">✅ <strong>Muito bom:</strong> ${v.feedbackPositivo}</div>` : '',
+        v.feedbackMelhoria ? `<div class="feedback-mel-box">💡 <strong>Pensem sobre:</strong> ${v.feedbackMelhoria}</div>` : ''
+      ].join('');
       return `<tr>
         <td>${eq?eq.nome:v.equipeId}</td><td>${v.juiz}</td>
         <td style="font-weight:700;color:var(--green-dark)">${v.total}/20</td>
         <td>${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
-        <td>${coms||'<span style="color:#999;font-size:12px">—</span>'}</td>
+        <td>${coms||''}${fbGeral||(!coms&&!fbGeral?'<span style="color:#999;font-size:12px">—</span>':'')}</td>
         <td><div class="inline-flex">
           <button class="btn btn-amber btn-sm" onclick="editSala('${k}')">Editar</button>
           <button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button>
@@ -789,35 +801,60 @@ window.setVel = function(ms,btn) {
 async function updTelao() {
   const rod=await fbGet('rodadas_arena')||{};
   await loadEquipes();
-  const pl={};equipes.forEach(e=>pl[e.id]={nome:e.nome,rodadas:0,pts:0});
+
+  // Monta lista de alianças únicas com pontuação somada
+  const aliancas={};
   Object.values(rod).forEach(r=>{
-    if(pl[r.equipeA]){pl[r.equipeA].rodadas++;pl[r.equipeA].pts+=r.totalAlianca;}
-    if(pl[r.equipeB]){pl[r.equipeB].rodadas++;pl[r.equipeB].pts+=r.totalAlianca;}
+    const eA=equipes.find(e=>e.id===r.equipeA);
+    const eB=equipes.find(e=>e.id===r.equipeB);
+    const nA=eA?eA.nome:r.equipeA;
+    const nB=eB?eB.nome:r.equipeB;
+    // chave canônica (sempre menor + maior para não duplicar)
+    const chave=[r.equipeA,r.equipeB].sort().join('|');
+    if(!aliancas[chave]) aliancas[chave]={nomeA:nA,nomeB:nB,rodadas:0,pts:0};
+    aliancas[chave].rodadas++;
+    aliancas[chave].pts+=r.totalAlianca;
   });
-  const sorted=Object.values(pl).filter(e=>e.rodadas>0).sort((a,b)=>b.pts-a.pts);
+
+  const sorted=Object.values(aliancas).sort((a,b)=>b.pts-a.pts);
   const lista=document.getElementById('telao-lista');if(!lista)return;
   tRows=sorted.length;
-  lista.innerHTML=sorted.length?sorted.map((e,i)=>`
+  lista.innerHTML=sorted.length?sorted.map((a,i)=>`
     <div class="telao-row">
       <div class="telao-pos">${i+1}</div>
-      <div class="telao-equipe">${e.nome}</div>
-      <div><div class="telao-col-label">Rodadas</div><div class="telao-col-val">${e.rodadas}</div></div>
-      <div><div class="telao-col-label">Pontos</div><div class="telao-col-val">${e.pts}</div></div>
-      <div class="telao-total">${e.pts} pts</div>
+      <div>
+        <div class="telao-equipe">${a.nomeA}</div>
+        <div style="font-size:13px;opacity:0.6;margin-top:2px">+ ${a.nomeB}</div>
+      </div>
+      <div><div class="telao-col-label">Rodadas</div><div class="telao-col-val">${a.rodadas}</div></div>
+      <div><div class="telao-col-label">Pontos</div><div class="telao-col-val">${a.pts}</div></div>
+      <div class="telao-total">${a.pts} pts</div>
     </div>`).join('')
   :'<p style="color:rgba(255,255,255,0.4);text-align:center;padding:40px">Aguardando rodadas...</p>';
 }
 
 function startScroll() {
   const body=document.querySelector('.telao-body');if(!body)return;
-  const vis=Math.floor((body.clientHeight-40)/52);
+  const rowH=66; // altura de cada linha da aliança (maior por ter 2 nomes)
+  const vis=Math.floor((body.clientHeight-50)/rowH);
+  const bloco=5; // pula 5 linhas por vez
   tOff=0;
+  clearInterval(sInt);
   sInt=setInterval(()=>{
     if(tRows<=vis)return;
     const lista=document.getElementById('telao-lista');if(!lista)return;
-    tOff++;
-    if(tOff>tRows){tOff=0;lista.style.transition='none';lista.style.transform='translateY(0)';setTimeout(()=>{lista.style.transition='transform 0.6s ease';},50);return;}
-    lista.style.transform=`translateY(-${tOff*52}px)`;
+    tOff+=bloco;
+    if(tOff>=tRows){
+      // volta ao topo suavemente
+      setTimeout(()=>{
+        lista.style.transition='none';
+        lista.style.transform='translateY(0)';
+        tOff=0;
+        setTimeout(()=>lista.style.transition='transform 0.5s ease',50);
+      },600);
+      return;
+    }
+    lista.style.transform=`translateY(-${tOff*rowH}px)`;
   },vel);
 }
 

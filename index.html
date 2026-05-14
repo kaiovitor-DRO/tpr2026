@@ -198,9 +198,21 @@
 <div id="screen-menu" class="screen">
   <div class="card" style="margin-top:24px">
     <div class="card-title">O que deseja fazer?</div>
-    <div id="menu-sala" style="display:none"><button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaSala()">📋 Avaliar Projeto de Inovação</button></div>
+    <div id="menu-sala" style="display:none">
+      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaSala()">📋 Avaliar Projeto de Inovação</button>
+      <button class="btn btn-secondary" style="margin-bottom:12px" onclick="verMinhasAvaliacoes()">📝 Ver minhas avaliações</button>
+    </div>
     <div id="menu-arena" style="display:none"><button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🤖 Registrar Rodada de Arena</button></div>
     <button class="btn btn-secondary" onclick="irParaTelao()">📺 Ver Painel do Telão</button>
+  </div>
+</div>
+
+<!-- JUIZ: MINHAS AVALIAÇÕES -->
+<div id="screen-minhas-aval" class="screen">
+  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
+  <div class="card">
+    <div class="card-title">Minhas Avaliações</div>
+    <div id="minhas-aval-content"></div>
   </div>
 </div>
 
@@ -533,6 +545,61 @@ window.enviarArena = async function() {
   MB.forEach(m=>{const d=document.getElementById(`ms-${m.id}`)?.classList.contains('done');mB[m.id]=d;if(d)pB+=m.pts;});
   await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,juiz:me,timestamp:Date.now()});
   alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');
+};
+
+// ── MINHAS AVALIAÇÕES (juiz de sala) ──
+window.verMinhasAvaliacoes = async function() {
+  show('screen-minhas-aval');
+  const ct = document.getElementById('minhas-aval-content');
+  ct.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+  await loadEquipes();
+  const data = await fbGet('avaliacoes_sala') || {};
+  const minhas = Object.entries(data).filter(([k,v]) => v.juiz === me);
+
+  if (!minhas.length) {
+    ct.innerHTML = '<p class="text-muted" style="text-align:center;padding:20px">Você ainda não avaliou nenhuma equipe.</p>';
+    return;
+  }
+
+  ct.innerHTML = `<p class="text-muted" style="margin-bottom:16px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Somente leitura.</p>` +
+    minhas.map(([k,v]) => {
+      const eq = equipes.find(e => e.id === v.equipeId);
+      const nomeEq = eq ? eq.nome : v.equipeId;
+      const hora = new Date(v.timestamp).toLocaleTimeString('pt-BR');
+      const criteriosHtml = CRIT.map(c => {
+        const n = v.notas?.[c.id] || {};
+        return `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:14px">${c.nome}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--green-dark)">${n.valor||'—'}</span>
+              <span style="font-size:11px;color:var(--text-muted)">${LBL[n.valor]||''}</span>
+            </div>
+          </div>
+          ${n.comentario ? `<div class="comment-box">⚠️ ${n.comentario}</div>` : ''}`;
+      }).join('');
+
+      const feedbacks = [
+        v.feedbackPositivo ? `<div class="feedback-pos-box" style="margin-top:8px">✅ <strong>Muito bom:</strong> ${v.feedbackPositivo}</div>` : '',
+        v.feedbackMelhoria ? `<div class="feedback-mel-box" style="margin-top:6px">💡 <strong>Pensem sobre:</strong> ${v.feedbackMelhoria}</div>` : ''
+      ].filter(Boolean).join('');
+
+      return `
+        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green-dark)">${nomeEq}</div>
+              <div style="font-size:12px;color:var(--text-muted)">Avaliado às ${hora}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.total}</div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 20 pts</div>
+            </div>
+          </div>
+          ${criteriosHtml}
+          ${feedbacks ? `<div style="margin-top:4px">${feedbacks}</div>` : ''}
+        </div>`;
+    }).join('');
 };
 
 // ── ADMIN ──

@@ -725,15 +725,18 @@ window.editSala = async function(id) {
   document.getElementById('admin-sub-content').innerHTML=`
     <p style="margin-bottom:16px"><strong>Equipe:</strong> ${eq?eq.nome:av.equipeId} | <strong>Juiz:</strong> ${av.juiz}</p>
     ${CRIT.map(c=>{const n=av.notas?.[c.id]||{};return `
-      <div style="margin-bottom:14px;padding:12px;border:1.5px solid var(--border);border-radius:8px">
+      <div style="margin-bottom:12px;padding:12px;border:1.5px solid var(--border);border-radius:8px">
         <div style="font-weight:600;margin-bottom:8px">${c.nome}</div>
         <div class="form-group" style="margin-bottom:8px"><label>Nota (1–4)</label><input type="number" min="1" max="4" value="${n.valor||1}" id="ed-v-${c.id}"></div>
-        <div class="form-group" style="margin-bottom:8px"><label>Comentário Excede</label><textarea id="ed-c-${c.id}" style="min-height:48px">${n.comentario||''}</textarea></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div class="form-group" style="margin:0"><label>✅ Muito bom...</label><textarea id="ed-p-${c.id}" style="min-height:48px">${n.feedbackPositivo||''}</textarea></div>
-          <div class="form-group" style="margin:0"><label>💡 Pensem sobre...</label><textarea id="ed-m-${c.id}" style="min-height:48px">${n.feedbackMelhoria||''}</textarea></div>
-        </div>
+        <div class="form-group" style="margin:0"><label>Comentário Excede</label><textarea id="ed-c-${c.id}" style="min-height:48px">${n.comentario||''}</textarea></div>
       </div>`;}).join('')}
+    <div style="border:1.5px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
+      <div style="font-weight:600;margin-bottom:10px;font-size:14px">Feedback geral da apresentação</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group" style="margin:0"><label>✅ Muito bom...</label><textarea id="ed-fbpos" style="min-height:64px">${av.feedbackPositivo||''}</textarea></div>
+        <div class="form-group" style="margin:0"><label>💡 Pensem sobre...</label><textarea id="ed-fbmel" style="min-height:64px">${av.feedbackMelhoria||''}</textarea></div>
+      </div>
+    </div>
     <div id="ed-msg" class="success-msg" style="margin-top:12px"></div>
     <div class="inline-flex" style="margin-top:16px">
       <button class="btn btn-primary btn-sm" onclick="savSala('${id}')">Salvar</button>
@@ -745,10 +748,12 @@ window.savSala = async function(id) {
   let notas={},total=0;
   CRIT.forEach(c=>{
     const v=Math.min(4,Math.max(1,parseInt(document.getElementById(`ed-v-${c.id}`).value)||1));
-    notas[c.id]={valor:v,comentario:document.getElementById(`ed-c-${c.id}`).value.trim(),feedbackPositivo:document.getElementById(`ed-p-${c.id}`).value.trim(),feedbackMelhoria:document.getElementById(`ed-m-${c.id}`).value.trim()};
+    notas[c.id]={valor:v,comentario:document.getElementById(`ed-c-${c.id}`).value.trim()};
     total+=v;
   });
-  await fbPatch(`avaliacoes_sala/${id}`,{notas,total,editadoPor:me,editadoEm:Date.now()});
+  const feedbackPositivo=document.getElementById('ed-fbpos').value.trim();
+  const feedbackMelhoria=document.getElementById('ed-fbmel').value.trim();
+  await fbPatch(`avaliacoes_sala/${id}`,{notas,total,feedbackPositivo,feedbackMelhoria,editadoPor:me,editadoEm:Date.now()});
   const m=document.getElementById('ed-msg');m.textContent=`✅ Salvo! Total: ${total}/20`;m.style.display='block';
 };
 
@@ -823,8 +828,7 @@ async function updTelao() {
     <div class="telao-row">
       <div class="telao-pos">${i+1}</div>
       <div>
-        <div class="telao-equipe">${a.nomeA}</div>
-        <div style="font-size:13px;opacity:0.6;margin-top:2px">+ ${a.nomeB}</div>
+        <div class="telao-equipe">${a.nomeA} <span style="opacity:0.5;font-size:16px">+</span> ${a.nomeB}</div>
       </div>
       <div><div class="telao-col-label">Rodadas</div><div class="telao-col-val">${a.rodadas}</div></div>
       <div><div class="telao-col-label">Pontos</div><div class="telao-col-val">${a.pts}</div></div>

@@ -125,13 +125,7 @@
   .telao-lista-wrap { overflow: hidden; }
   .telao-lista { transition: transform 0.6s ease; }
   .telao-row { display: grid; grid-template-columns: 55px 1fr 90px 110px 120px; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
-  .telao-row:nth-child(1) { background: rgba(255,215,0,0.1); border-color: rgba(255,215,0,0.3); }
-  .telao-row:nth-child(2) { background: rgba(192,192,192,0.1); border-color: rgba(192,192,192,0.2); }
-  .telao-row:nth-child(3) { background: rgba(205,127,50,0.1); border-color: rgba(205,127,50,0.2); }
-  .telao-pos { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.3); text-align: center; }
-  .telao-row:nth-child(1) .telao-pos { color: gold; }
-  .telao-row:nth-child(2) .telao-pos { color: silver; }
-  .telao-row:nth-child(3) .telao-pos { color: #cd7f32; }
+  .telao-pos { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.4); text-align: center; }
   .telao-equipe { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
   .telao-col-label { font-size: 10px; opacity: 0.5; text-transform: uppercase; }
   .telao-col-val { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
@@ -241,7 +235,7 @@
     <div class="nota-display" id="nota-preview">0</div>
     <div class="nota-label">pontos totais (máx. 20)</div>
     <div class="divider"></div>
-    <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">Feedback geral da apresentação <span style="font-weight:400;color:var(--text-muted)">(opcional)</span></p>
+    <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">Feedback geral da apresentação</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
       <div>
         <div style="font-size:12px;font-weight:600;color:var(--teal);text-transform:uppercase;margin-bottom:6px">✅ Muito bom...</div>
@@ -501,9 +495,11 @@ window.enviarRubricas = async function() {
     notas[c.id]={valor:val,comentario};
   });
   if(!ok)return;
-  const total=CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
   const feedbackPositivo=document.getElementById('fb-geral-pos').value.trim();
   const feedbackMelhoria=document.getElementById('fb-geral-mel').value.trim();
+  if(!feedbackPositivo){errEl.textContent='Preencha o campo "Muito bom...".';errEl.style.display='block';return;}
+  if(!feedbackMelhoria){errEl.textContent='Preencha o campo "Pensem sobre...".';errEl.style.display='block';return;}
+  const total=CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
   await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,timestamp:Date.now()});
   alert(`✅ Avaliação enviada! Total: ${total}/20`);show('screen-menu');
 };
@@ -579,10 +575,22 @@ window.verMinhasAvaliacoes = async function() {
           ${n.comentario ? `<div class="comment-box">⚠️ ${n.comentario}</div>` : ''}`;
       }).join('');
 
-      const feedbacks = [
-        v.feedbackPositivo ? `<div class="feedback-pos-box" style="margin-top:8px">✅ <strong>Muito bom:</strong> ${v.feedbackPositivo}</div>` : '',
-        v.feedbackMelhoria ? `<div class="feedback-mel-box" style="margin-top:6px">💡 <strong>Pensem sobre:</strong> ${v.feedbackMelhoria}</div>` : ''
-      ].filter(Boolean).join('');
+      const feedbacks = `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text)">Feedback geral <span style="font-weight:400;color:var(--teal);font-size:12px">(você pode editar)</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;margin-bottom:4px">✅ Muito bom...</div>
+              <textarea id="fbpos-${k}" style="min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${v.feedbackPositivo||''}</textarea>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--coral);text-transform:uppercase;margin-bottom:4px">💡 Pensem sobre...</div>
+              <textarea id="fbmel-${k}" style="min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${v.feedbackMelhoria||''}</textarea>
+            </div>
+          </div>
+          <div id="fb-save-msg-${k}" class="success-msg"></div>
+          <button class="btn btn-primary btn-sm" onclick="salvarFeedbackJuiz('${k}')">Salvar feedback</button>
+        </div>`;
 
       return `
         <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
@@ -597,9 +605,19 @@ window.verMinhasAvaliacoes = async function() {
             </div>
           </div>
           ${criteriosHtml}
-          ${feedbacks ? `<div style="margin-top:4px">${feedbacks}</div>` : ''}
+          ${feedbacks}
         </div>`;
     }).join('');
+};
+
+window.salvarFeedbackJuiz = async function(id) {
+  const pos = document.getElementById(`fbpos-${id}`).value.trim();
+  const mel = document.getElementById(`fbmel-${id}`).value.trim();
+  await fbPatch(`avaliacoes_sala/${id}`, { feedbackPositivo: pos, feedbackMelhoria: mel });
+  const msg = document.getElementById(`fb-save-msg-${id}`);
+  msg.textContent = '✅ Feedback salvo!';
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
 };
 
 // ── ADMIN ──

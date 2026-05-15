@@ -196,8 +196,20 @@
       <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaSala()">📋 Avaliar Projeto de Inovação</button>
       <button class="btn btn-secondary" style="margin-bottom:12px" onclick="verMinhasAvaliacoes()">📝 Ver minhas avaliações</button>
     </div>
-    <div id="menu-arena" style="display:none"><button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🤖 Registrar Rodada de Arena</button></div>
+    <div id="menu-arena" style="display:none">
+      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🤖 Registrar Rodada de Arena</button>
+      <button class="btn btn-secondary" style="margin-bottom:12px" onclick="verMinhasRodadas()">📊 Ver rodadas registradas</button>
+    </div>
     <button class="btn btn-secondary" onclick="irParaTelao()">📺 Ver Painel do Telão</button>
+  </div>
+</div>
+
+<!-- JUIZ ARENA: MINHAS RODADAS -->
+<div id="screen-minhas-rodadas" class="screen">
+  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
+  <div class="card">
+    <div class="card-title">Rodadas Registradas</div>
+    <div id="minhas-rodadas-content"></div>
   </div>
 </div>
 
@@ -606,6 +618,55 @@ window.verMinhasAvaliacoes = async function() {
           </div>
           ${criteriosHtml}
           ${feedbacks}
+        </div>`;
+    }).join('');
+};
+
+window.verMinhasRodadas = async function() {
+  show('screen-minhas-rodadas');
+  const ct = document.getElementById('minhas-rodadas-content');
+  ct.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+  await loadEquipes();
+  const data = await fbGet('rodadas_arena') || {};
+  const minhas = Object.entries(data).filter(([k,v]) => v.juiz === me);
+
+  if (!minhas.length) {
+    ct.innerHTML = '<p class="text-muted" style="text-align:center;padding:20px">Você ainda não registrou nenhuma rodada.</p>';
+    return;
+  }
+
+  ct.innerHTML = `<p class="text-muted" style="margin-bottom:16px;font-size:13px">Total: <strong>${minhas.length}</strong> rodada(s) registrada(s). Somente leitura.</p>` +
+    minhas.map(([k,v]) => {
+      const eA = equipes.find(e => e.id === v.equipeA);
+      const eB = equipes.find(e => e.id === v.equipeB);
+      const nA = eA ? eA.nome : v.equipeA;
+      const nB = eB ? eB.nome : v.equipeB;
+      const hora = new Date(v.timestamp).toLocaleTimeString('pt-BR');
+
+      const renderMissoesLeitura = (missoes, dados, cor, label) => `
+        <div style="margin-bottom:12px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;padding:5px 10px;border-radius:4px;margin-bottom:8px;background:${cor.bg};color:${cor.text}">${label}</div>
+          ${missoes.map(m => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;margin-bottom:4px;background:${dados?.[m.id] ? 'var(--green-bg)' : '#f5f5f5'}">
+              <span style="font-size:13px;color:${dados?.[m.id] ? 'var(--green-dark)' : 'var(--text-muted)'}">${dados?.[m.id] ? '✅' : '⬜'} ${m.nome}</span>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:${dados?.[m.id] ? 'var(--green-dark)' : 'var(--text-muted)'}">${dados?.[m.id] ? m.pts : 0} pts</span>
+            </div>`).join('')}
+        </div>`;
+
+      return `
+        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green-dark)">${nA} + ${nB}</div>
+              <div style="font-size:12px;color:var(--text-muted)">Registrado às ${hora}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.totalAlianca}</div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 100 pts</div>
+            </div>
+          </div>
+          ${renderMissoesLeitura(MA, v.missoesA, {bg:'#fce4ec',text:'#880e4f'}, '🔴 Robô A — ' + nA)}
+          ${renderMissoesLeitura(MB, v.missoesB, {bg:'#e3f2fd',text:'#0d47a1'}, '🔵 Robô B — ' + nB)}
         </div>`;
     }).join('');
 };

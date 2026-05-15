@@ -40,8 +40,9 @@
   .btn-telao-direto:hover { background: rgba(255,255,255,0.25); }
   .form-group { margin-bottom: 18px; }
   label { display: block; font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  input, select, textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Barlow', sans-serif; font-size: 15px; color: var(--text); background: white; transition: border-color 0.2s; appearance: none; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(76,175,80,0.15); }
+  input:not([type=checkbox]), select, textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Barlow', sans-serif; font-size: 15px; color: var(--text); background: white; transition: border-color 0.2s; appearance: none; }
+  input:not([type=checkbox]):focus, select:focus, textarea:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(76,175,80,0.15); }
+  input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--blue); flex-shrink: 0; }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23607d60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
   .pass-wrap { position: relative; }
   .pass-wrap input { padding-right: 44px; }
@@ -511,16 +512,16 @@ window.enviarRubricas = async function() {
     if(!ok)return;
     const blk=document.getElementById(`blk-${c.id}`);
     const val=parseInt(blk.dataset.val||0);
-    if(!val){err.textContent=`Avalie o critério "${c.nome}".`;err.style.display='block';ok=false;return;}
+    if(!val){alert(`Avalie o critério "${c.nome}" antes de enviar.`);ok=false;return;}
     const comentario=val===4?document.getElementById(`com-${c.id}`).value.trim():'';
-    if(val===4&&!comentario){err.textContent=`Comentário obrigatório para "${c.nome}" (Excede).`;err.style.display='block';ok=false;return;}
+    if(val===4&&!comentario){alert(`Comentário obrigatório para "${c.nome}" (Excede).`);ok=false;return;}
     notas[c.id]={valor:val,comentario};
   });
   if(!ok)return;
   const feedbackPositivo=document.getElementById('fb-geral-pos').value.trim();
   const feedbackMelhoria=document.getElementById('fb-geral-mel').value.trim();
-  if(!feedbackPositivo){errEl.textContent='Preencha o campo "Muito bom...".';errEl.style.display='block';return;}
-  if(!feedbackMelhoria){errEl.textContent='Preencha o campo "Pensem sobre...".';errEl.style.display='block';return;}
+  if(!feedbackPositivo){alert('Preencha o campo "✅ Muito bom..." antes de enviar.');return;}
+  if(!feedbackMelhoria){alert('Preencha o campo "💡 Pensem sobre..." antes de enviar.');return;}
   const indicacao=document.getElementById('indicacao-proxima-fase').checked;
   const total=CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
   await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,indicacao,timestamp:Date.now()});

@@ -624,11 +624,14 @@ window.verMinhasAvaliacoes = async function() {
     return;
   }
 
-  ct.innerHTML = `<p class="text-muted" style="margin-bottom:16px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Somente leitura.</p>` +
+  ct.innerHTML = `<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Somente leitura.</p>
+    <div style="margin-bottom:16px">
+      <input type="text" id="filtro-minhas-aval" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-aval','cards-aval')" style="padding:10px 14px;font-size:14px">
+    </div>
+    <div id="cards-aval">` +
     minhas.map(([k,v]) => {
       const eq = equipes.find(e => e.id === v.equipeId);
-      const nomeEq = eq ? eq.nome : v.equipeId;
-      const hora = new Date(v.timestamp).toLocaleTimeString('pt-BR');
+      const nomeEq = eq ? eq.nome : v.equipeId;      const hora = new Date(v.timestamp).toLocaleTimeString('pt-BR');
       const criteriosHtml = CRIT.map(c => {
         const n = v.notas?.[c.id] || {};
         return `
@@ -675,7 +678,7 @@ window.verMinhasAvaliacoes = async function() {
           ${criteriosHtml}
           ${feedbacks}
         </div>`;
-    }).join('');
+    }).join('') + '</div>';
 };
 
 window.verMinhasRodadas = async function() {
@@ -691,7 +694,11 @@ window.verMinhasRodadas = async function() {
     return;
   }
 
-  ct.innerHTML = `<p class="text-muted" style="margin-bottom:16px;font-size:13px">Total: <strong>${minhas.length}</strong> rodada(s) registrada(s). Somente leitura.</p>` +
+  ct.innerHTML = `<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> rodada(s) registrada(s). Somente leitura.</p>
+    <div style="margin-bottom:16px">
+      <input type="text" id="filtro-minhas-rodadas" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-rodadas','cards-rodadas')" style="padding:10px 14px;font-size:14px">
+    </div>
+    <div id="cards-rodadas">` +
     minhas.map(([k,v]) => {
       const eA = equipes.find(e => e.id === v.equipeA);
       const eB = equipes.find(e => e.id === v.equipeB);
@@ -732,7 +739,7 @@ window.verMinhasRodadas = async function() {
             </div>
           </div>
         </div>`;
-    }).join('');
+    }).join('') + '</div>';
 };
 
 window.exportarCSV = async function() {
@@ -826,8 +833,16 @@ window.filtrarTabela = function(inputId, tabelaId) {
   if (!tabela) return;
   const linhas = tabela.querySelectorAll('tr:not(:first-child)');
   linhas.forEach(linha => {
-    const texto = linha.textContent.toLowerCase();
-    linha.style.display = texto.includes(termo) ? '' : 'none';
+    linha.style.display = linha.textContent.toLowerCase().includes(termo) ? '' : 'none';
+  });
+};
+
+window.filtrarCards = function(inputId, containerId) {
+  const termo = document.getElementById(inputId).value.toLowerCase();
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.querySelectorAll(':scope > div').forEach(card => {
+    card.style.display = card.textContent.toLowerCase().includes(termo) ? '' : 'none';
   });
 };
 

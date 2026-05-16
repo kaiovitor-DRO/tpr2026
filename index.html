@@ -298,6 +298,28 @@
     <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div><div id="missoes-a"></div></div>
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div><div id="missoes-b"></div></div>
     <div class="total-pts"><div class="num" id="arena-total">0</div><div class="label">pontos da aliança (máx. 100)</div></div>
+
+    <!-- VALORES NA RODADA -->
+    <div style="margin-top:20px">
+      <p style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text)">Valores durante a rodada <span style="font-weight:400;color:var(--text-muted);font-size:12px">(critério de desempate individual)</span></p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label id="label-valores-a" style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
+          <input type="checkbox" id="valores-a" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-a-nome">🔴 Equipe A — demonstrou valores durante a rodada</div>
+            <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
+          </div>
+        </label>
+        <label id="label-valores-b" style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
+          <input type="checkbox" id="valores-b" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-b-nome">🔵 Equipe B — demonstrou valores durante a rodada</div>
+            <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
     <div id="arena-error" class="error-msg" style="margin-top:16px"></div>
     <button class="btn btn-primary mt-12" onclick="enviarArena()">Confirmar e Enviar Rodada</button>
   </div>
@@ -554,6 +576,12 @@ window.irParaMissoes = function() {
   document.getElementById('arena-chips').innerHTML=`
     <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${eA.nome}</span>
     <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 ${eB.nome}</span>`;
+  // Atualiza nomes nos checkboxes de valores
+  document.getElementById('valores-a-nome').textContent=`🔴 ${eA.nome} — demonstrou valores durante a rodada`;
+  document.getElementById('valores-b-nome').textContent=`🔵 ${eB.nome} — demonstrou valores durante a rodada`;
+  // Limpa checkboxes
+  document.getElementById('valores-a').checked=false;
+  document.getElementById('valores-b').checked=false;
   renderMiss();show('screen-missoes');
 };
 
@@ -576,7 +604,9 @@ window.enviarArena = async function() {
   let mA={},mB={},pA=0,pB=0;
   MA.forEach(m=>{const d=document.getElementById(`ms-${m.id}`)?.classList.contains('done');mA[m.id]=d;if(d)pA+=m.pts;});
   MB.forEach(m=>{const d=document.getElementById(`ms-${m.id}`)?.classList.contains('done');mB[m.id]=d;if(d)pB+=m.pts;});
-  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,juiz:me,timestamp:Date.now()});
+  const valoresA=document.getElementById('valores-a').checked;
+  const valoresB=document.getElementById('valores-b').checked;
+  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,valoresA,valoresB,juiz:me,timestamp:Date.now()});
   alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');
 };
 
@@ -693,6 +723,14 @@ window.verMinhasRodadas = async function() {
           </div>
           ${renderMissoesLeitura(MA, v.missoesA, {bg:'#fce4ec',text:'#880e4f'}, '🔴 Robô A — ' + nA)}
           ${renderMissoesLeitura(MB, v.missoesB, {bg:'#e3f2fd',text:'#0d47a1'}, '🔵 Robô B — ' + nB)}
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+            <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresA ? 'background:#e0f2f1;color:#00796b' : 'background:#f5f5f5;color:#aaa'}">
+              🤝 ${nA}: ${v.valoresA ? 'Demonstrou valores' : 'Sem registro de valores'}
+            </div>
+            <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresB ? 'background:#e0f2f1;color:#00796b' : 'background:#f5f5f5;color:#aaa'}">
+              🤝 ${nB}: ${v.valoresB ? 'Demonstrou valores' : 'Sem registro de valores'}
+            </div>
+          </div>
         </div>`;
     }).join('');
 };
@@ -708,8 +746,8 @@ window.exportarCSV = async function() {
   // Monta mapa de arena por equipe
   const arenaMap = {};
   Object.values(arena).forEach(r => {
-    arenaMap[r.equipeA] = r.totalAlianca;
-    arenaMap[r.equipeB] = r.totalAlianca;
+    arenaMap[r.equipeA] = { pts: r.totalAlianca, valores: r.valoresA || false };
+    arenaMap[r.equipeB] = { pts: r.totalAlianca, valores: r.valoresB || false };
   });
 
   // Cabeçalho do CSV
@@ -731,6 +769,7 @@ window.exportarCSV = async function() {
     'Muito bom (feedback geral)',
     'Pensem sobre (feedback geral)',
     'Nota Arena (0-100)',
+    'Valores na Arena',
     'Nota Final (0-100)'
   ];
 
@@ -739,30 +778,27 @@ window.exportarCSV = async function() {
   Object.values(sala).forEach(v => {
     const eq = equipes.find(e => e.id === v.equipeId);
     const nomeEq = eq ? eq.nome : v.equipeId;
-    const ptsArena = arenaMap[v.equipeId] ?? '';
+    const ad = arenaMap[v.equipeId];
+    const ptsArena = ad ? ad.pts : '';
+    const valoresArena = ad ? (ad.valores ? 'Sim' : 'Não') : '';
     const mediaSala = v.total;
     const ptsSala = (mediaSala / 20) * 100;
     const notaFinal = ptsArena !== '' ? (ptsSala * 0.75 + ptsArena * 0.25).toFixed(1) : (ptsSala * 0.75).toFixed(1);
 
     const n = v.notas || {};
     const linha = [
-      nomeEq,
-      v.juiz,
-      n.identificacao?.valor ?? '',
-      n.identificacao?.comentario ?? '',
-      n.projeto?.valor ?? '',
-      n.projeto?.comentario ?? '',
-      n.criacao?.valor ?? '',
-      n.criacao?.comentario ?? '',
-      n.iteracao?.valor ?? '',
-      n.iteracao?.comentario ?? '',
-      n.comunicacao?.valor ?? '',
-      n.comunicacao?.comentario ?? '',
+      nomeEq, v.juiz,
+      n.identificacao?.valor ?? '', n.identificacao?.comentario ?? '',
+      n.projeto?.valor ?? '', n.projeto?.comentario ?? '',
+      n.criacao?.valor ?? '', n.criacao?.comentario ?? '',
+      n.iteracao?.valor ?? '', n.iteracao?.comentario ?? '',
+      n.comunicacao?.valor ?? '', n.comunicacao?.comentario ?? '',
       v.total ?? '',
       v.indicacao ? 'Sim' : 'Não',
       v.feedbackPositivo ?? '',
       v.feedbackMelhoria ?? '',
       ptsArena,
+      valoresArena,
       notaFinal
     ].map(cell => `"${String(cell).replace(/"/g, '""')}"`);
 
@@ -920,39 +956,32 @@ window.irAdmin = async function(sub) {
       if (v.indicacao) salaMap[v.equipeId].indicacoes++;
     });
 
-    // Pega pontos de arena por equipe (única rodada)
+    // Pega pontos de arena por equipe + valores
     const arenaMap = {};
     Object.values(arena).forEach(v => {
-      arenaMap[v.equipeA] = v.totalAlianca;
-      arenaMap[v.equipeB] = v.totalAlianca;
+      arenaMap[v.equipeA] = { pts: v.totalAlianca, valores: v.valoresA || false };
+      arenaMap[v.equipeB] = { pts: v.totalAlianca, valores: v.valoresB || false };
     });
 
-    // Calcula nota final de cada equipe
+    // Calcula nota final
     const ranking = equipes.map(e => {
       const sd = salaMap[e.id];
-      const mediaSala = sd && sd.notas.length > 0
-        ? sd.notas.reduce((a,b)=>a+b,0) / sd.notas.length
-        : null;
-      const ptsSala = mediaSala !== null ? (mediaSala / 20) * 100 : null;
-      const ptsArena = arenaMap[e.id] !== undefined ? arenaMap[e.id] : null;
-      const notaFinal = ptsSala !== null && ptsArena !== null
-        ? (ptsSala * 0.75) + (ptsArena * 0.25)
-        : ptsSala !== null ? ptsSala * 0.75
-        : ptsArena !== null ? ptsArena * 0.25
-        : null;
+      const ad = arenaMap[e.id];
+      const mediaSala = sd && sd.notas.length > 0 ? sd.notas.reduce((a,b)=>a+b,0)/sd.notas.length : null;
+      const ptsSala = mediaSala !== null ? (mediaSala/20)*100 : null;
+      const ptsArena = ad ? ad.pts : null;
+      const notaFinal = ptsSala !== null && ptsArena !== null ? (ptsSala*0.75)+(ptsArena*0.25)
+        : ptsSala !== null ? ptsSala*0.75
+        : ptsArena !== null ? ptsArena*0.25 : null;
       return {
-        nome: e.nome,
-        mediaSala: mediaSala,
-        avaliacoes: sd ? sd.notas.length : 0,
+        id: e.id, nome: e.nome,
+        mediaSala, avaliacoes: sd ? sd.notas.length : 0,
         indicacoes: sd ? sd.indicacoes : 0,
-        ptsArena: ptsArena,
-        notaFinal: notaFinal
+        ptsArena, valoresArena: ad ? ad.valores : false,
+        notaFinal
       };
     }).filter(e => e.notaFinal !== null)
-      .sort((a,b) => {
-        if (b.notaFinal !== a.notaFinal) return b.notaFinal - a.notaFinal;
-        return b.indicacoes - a.indicacoes; // desempate por indicações
-      });
+      .sort((a,b) => b.notaFinal !== a.notaFinal ? b.notaFinal - a.notaFinal : b.indicacoes - a.indicacoes);
 
     if (!ranking.length) { ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados suficientes ainda.</p>'; return; }
 
@@ -964,10 +993,9 @@ window.irAdmin = async function(sub) {
         <td style="text-align:center">${e.mediaSala !== null ? e.mediaSala.toFixed(1)+'/20' : '—'}<br><span style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</span></td>
         <td style="text-align:center">${e.ptsArena !== null ? e.ptsArena+'/100' : '—'}</td>
         <td style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green-dark)">${e.notaFinal.toFixed(1)}</td>
-        <td style="text-align:center">
-          ${ e.indicacoes > 0
-            ? `<span style="font-size:13px;font-weight:700;color:#1565c0">⭐ ${e.indicacoes}/3</span>`
-            : `<span style="color:#ccc;font-size:13px">—</span>`}
+        <td style="text-align:center;font-size:13px">
+          <div>${e.indicacoes > 0 ? `<span style="font-weight:700;color:#1565c0">⭐ Sala: ${e.indicacoes}/3</span>` : '<span style="color:#ccc">Sala: —</span>'}</div>
+          <div style="margin-top:4px">${e.valoresArena ? '<span style="font-weight:700;color:#00796b">🤝 Arena: Sim</span>' : '<span style="color:#ccc">Arena: —</span>'}</div>
         </td>
       </tr>`;
     }).join('');

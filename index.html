@@ -372,16 +372,42 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// FIREBASE — COMUNICAÇÃO COM O BANCO DE DADOS
+// Todas as funções abaixo fazem chamadas à API REST do Firebase.
+// O Firebase é o "caderno na nuvem" onde ficam guardados todos
+// os dados: equipes, juízes, avaliações e rodadas de arena.
+// ═══════════════════════════════════════════════════════════════
+
+// Endereço base do banco de dados no Firebase
 const DB = 'https://tpr-2026-innov-default-rtdb.firebaseio.com';
+// Lê dados de um caminho no Firebase (ex: 'equipes', 'config')
 const fbGet = async p => { try { return await (await fetch(`${DB}/${p}.json`)).json(); } catch { return null; } };
+// Grava (substitui completamente) dados num caminho do Firebase
 const fbSet = (p,v) => fetch(`${DB}/${p}.json`,{method:'PUT',body:JSON.stringify(v)});
+// Adiciona novo item numa lista — Firebase gera um ID único automático
 const fbPush = (p,v) => fetch(`${DB}/${p}.json`,{method:'POST',body:JSON.stringify(v)}).then(r=>r.json());
+// Atualiza campos específicos sem apagar os demais dados do item
 const fbPatch = (p,v) => fetch(`${DB}/${p}.json`,{method:'PATCH',body:JSON.stringify(v)});
+// Apaga permanentemente um item do Firebase
 const fbDel = p => fetch(`${DB}/${p}.json`,{method:'DELETE'});
 
-let me=null, perfil=null, equipes=[], timer=null;
+// ═══════════════════════════════════════════════════════════════
+// ESTADO GLOBAL DA APLICAÇÃO
+// Variáveis que guardam informações enquanto o sistema está aberto.
+// ═══════════════════════════════════════════════════════════════
+let me=null;      // Nome do usuário logado
+let perfil=null;  // Perfil: 'admin', 'sala' ou 'arena'
+let equipes=[];   // Lista de equipes carregadas do Firebase
+let timer=null;   // Referência ao timer de inatividade
+// Tempo máximo de inatividade antes do logout automático (30 minutos em ms)
 const INACT = 30*60*1000;
 
+// ═══════════════════════════════════════════════════════════════
+// CRITÉRIOS DE AVALIAÇÃO DO PROJETO DE INOVAÇÃO
+// Cada critério tem ID, nome e descrição exibidos na tela do juiz.
+// A escala vai de 1 (Iniciante) a 4 (Excede).
+// ═══════════════════════════════════════════════════════════════
 const CRIT = [
   {id:'identificacao',nome:'Identificação',desc:'A equipe definiu uma questão de problema clara e bem pesquisada.'},
   {id:'projeto',nome:'Projeto',desc:'A equipe trabalhou em conjunto na criação de um plano de projeto e no desenvolvimento de evidências de suas ideias.'},
@@ -389,7 +415,13 @@ const CRIT = [
   {id:'iteracao',nome:'Iteração',desc:'A equipe compartilhou suas ideias, buscou opiniões e incluiu melhorias em sua solução.'},
   {id:'comunicacao',nome:'Comunicação',desc:'A equipe fez uma apresentação eficaz de sua solução, seu impacto sobre outras pessoas e comemoraram o progresso.'}
 ];
+// Rótulos da escala 1-4 usados para exibir o nível de avaliação
 const LBL = ['','Iniciante','Em desenvolvimento','Cumprido','Excede'];
+// ═══════════════════════════════════════════════════════════════
+// MISSÕES DA ARENA
+// MA = missões do Robô A (lado vermelho) | MB = Robô B (azul)
+// Para alterar pontuações ou adicionar missões, edite aqui.
+// ═══════════════════════════════════════════════════════════════
 const MA = [
   {id:'limpeza_rio',nome:'Limpeza do Rio Jaguaribe',pts:15},
   {id:'salvar_animal',nome:'Salvar animal fora do habitat',pts:10},
@@ -403,10 +435,20 @@ const MB = [
   {id:'deposito_lixo',nome:'Colocar resíduos no depósito de lixo',pts:10}
 ];
 
+// ═══════════════════════════════════════════════════════════════
+// CONTROLE DE INATIVIDADE
+// Reinicia o contador a cada clique ou tecla pressionada.
+// Se o usuário ficar 30 min sem ação, é deslogado automaticamente.
+// ═══════════════════════════════════════════════════════════════
 function resetInact() { clearTimeout(timer); if(me) timer=setTimeout(logout,INACT); }
 document.addEventListener('click',resetInact);
 document.addEventListener('keydown',resetInact);
 
+// ═══════════════════════════════════════════════════════════════
+// NAVEGAÇÃO ENTRE TELAS
+// show() esconde todas as telas e exibe apenas a solicitada.
+// Cada tela é uma <div id='screen-...'> no HTML.
+// ═══════════════════════════════════════════════════════════════
 function show(id) {
   document.querySelectorAll('.screen,.telao-wrap,.login-wrap').forEach(el=>{
     el.classList.remove('active');
@@ -417,20 +459,31 @@ function show(id) {
   else if(el.classList.contains('login-wrap')) el.style.display='flex';
   else el.classList.add('active');
 }
-window.voltar = show;
+window.voltar = show; // Botão '← Voltar' chama esta função
 
+// Alterna a visibilidade da senha entre texto e pontos
 window.toggleSenha = function(id,btn) {
   const el=document.getElementById(id);
   el.type = el.type==='password'?'text':'password';
   btn.textContent = el.type==='password'?'👁':'🙈';
 };
 
+// ═══════════════════════════════════════════════════════════════
+// INICIALIZAÇÃO
+// Executado quando a página carrega. Exibe o login e garante
+// que as configurações de senha existam no Firebase.
+// ═══════════════════════════════════════════════════════════════
 async function init() {
   show('screen-login');
   const cfg = await fbGet('config');
   if(!cfg) await fbSet('config',{senha_evento:'tpr2026',senha_admin:'admin2026'});
 }
 
+// ═══════════════════════════════════════════════════════════════
+// LOGIN
+// Verifica nome e senha consultando o Firebase.
+// Admin tem senha separada dos juízes.
+// ═══════════════════════════════════════════════════════════════
 window.fazerLogin = async function() {
   const nome=document.getElementById('login-nome').value.trim();
   const senha=document.getElementById('login-senha').value;
@@ -452,6 +505,7 @@ window.fazerLogin = async function() {
   finally{btn.textContent='ENTRAR';btn.disabled=false;}
 };
 
+// Configura a interface após login bem-sucedido e redireciona para a tela correta
 function entrar() {
   document.getElementById('app-header').style.display='block';
   document.getElementById('header-nome').textContent=me;
@@ -467,6 +521,7 @@ function entrar() {
   resetInact();
 }
 
+// Desloga o usuário, limpa os campos e volta para a tela de login
 window.logout = function() {
   me=null;perfil=null;clearTimeout(timer);
   document.getElementById('app-header').style.display='none';
@@ -475,6 +530,11 @@ window.logout = function() {
   show('screen-login');
 };
 
+// ═══════════════════════════════════════════════════════════════
+// EQUIPES
+// loadEquipes() busca a lista no Firebase e ordena por nome.
+// fillSelect() preenche um <select> HTML com as equipes.
+// ═══════════════════════════════════════════════════════════════
 async function loadEquipes() {
   const d=await fbGet('equipes')||{};
   equipes=Object.entries(d).map(([k,v])=>({id:k,...v})).sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -485,6 +545,12 @@ function fillSelect(id,excl=null) {
   equipes.forEach(e=>{if(e.id!==excl) s.innerHTML+=`<option value="${e.id}">${e.nome}</option>`;});
 }
 
+// ═══════════════════════════════════════════════════════════════
+// JUIZ DE SALA — FLUXO DE AVALIAÇÃO
+// 1. irParaSala()     → tela de seleção de equipe
+// 2. irParaRubricas() → tela com os 5 critérios
+// 3. enviarRubricas() → salva avaliação no Firebase
+// ═══════════════════════════════════════════════════════════════
 window.irParaSala = async function() {
   await loadEquipes();
   fillSelect('sala-equipe-select');
@@ -494,6 +560,7 @@ window.irParaSala = async function() {
   show('screen-sala-equipe');
 };
 
+// Abre a tela de rubricas e limpa campos da avaliação anterior
 window.irParaRubricas = async function() {
   const id=document.getElementById('sala-equipe-select').value;
   if(!id){alert('Selecione uma equipe.');return;}
@@ -507,6 +574,7 @@ window.irParaRubricas = async function() {
   show('screen-rubricas');
 };
 
+// Renderiza os 5 blocos de critério com botões de nota 1 a 4
 function renderCrit() {
   document.getElementById('criterios-container').innerHTML=CRIT.map(c=>`
     <div class="criterio-block" id="blk-${c.id}">
@@ -526,6 +594,7 @@ function renderCrit() {
   updNota();
 }
 
+// Marca a nota escolhida e mostra campo de comentário se for Excede (4)
 window.selRub = function(cid,val) {
   [1,2,3,4].forEach(n=>document.getElementById(`opt-${cid}-${n}`).classList.toggle('active',n===val));
   const blk=document.getElementById(`blk-${cid}`);
@@ -534,11 +603,13 @@ window.selRub = function(cid,val) {
   updNota();
 };
 
+// Recalcula e exibe a soma das notas de todos os critérios
 function updNota() {
   let t=0;CRIT.forEach(c=>{t+=parseInt(document.getElementById(`blk-${c.id}`).dataset.val||0);});
   document.getElementById('nota-preview').textContent=t;
 }
 
+// Valida todos os campos e salva a avaliação completa no Firebase
 window.enviarRubricas = async function() {
   const eqId=document.getElementById('sala-equipe-select').value;
   const err=document.getElementById('rubrica-error');err.style.display='none';
@@ -563,10 +634,17 @@ window.enviarRubricas = async function() {
   alert(`✅ Avaliação enviada! Total: ${total}/20`);show('screen-menu');
 };
 
+// ═══════════════════════════════════════════════════════════════
+// JUIZ DE ARENA — FLUXO DE REGISTRO
+// 1. irParaArena()    → seleciona as duas equipes da aliança
+// 2. irParaMissoes()  → marca as missões cumpridas
+// 3. enviarArena()    → salva a rodada no Firebase
+// ═══════════════════════════════════════════════════════════════
 window.irParaArena = async function() {
   await loadEquipes();fillSelect('arena-equipe-a');fillSelect('arena-equipe-b');show('screen-arena-alianca');
 };
 
+// Prepara a tela de missões com os nomes das equipes e limpa dados anteriores
 window.irParaMissoes = function() {
   const a=document.getElementById('arena-equipe-a').value;
   const b=document.getElementById('arena-equipe-b').value;
@@ -585,6 +663,7 @@ window.irParaMissoes = function() {
   renderMiss();show('screen-missoes');
 };
 
+// Renderiza os botões de missão para Robô A e Robô B
 function renderMiss() {
   const r=(id,ms)=>{document.getElementById(id).innerHTML=ms.map(m=>`
     <div class="missao-item" id="ms-${m.id}" onclick="togMs('${m.id}',${m.pts})">
@@ -592,12 +671,15 @@ function renderMiss() {
       <div class="missao-check"></div></div>`).join('');};
   r('missoes-a',MA);r('missoes-b',MB);updPts();
 }
+// Marca ou desmarca uma missão ao tocar nela
 window.togMs = function(id) { document.getElementById(`ms-${id}`)?.classList.toggle('done');updPts(); };
+// Recalcula e exibe a soma dos pontos das missões concluídas
 function updPts() {
   let t=0;[...MA,...MB].forEach(m=>{if(document.getElementById(`ms-${m.id}`)?.classList.contains('done'))t+=m.pts;});
   document.getElementById('arena-total').textContent=t;
 }
 
+// Coleta missões marcadas, valores demonstrados e salva a rodada no Firebase
 window.enviarArena = async function() {
   const a=document.getElementById('arena-equipe-a').value;
   const b=document.getElementById('arena-equipe-b').value;
@@ -611,6 +693,11 @@ window.enviarArena = async function() {
 };
 
 // ── MINHAS AVALIAÇÕES (juiz de sala) ──
+// ═══════════════════════════════════════════════════════════════
+// HISTÓRICO DO JUIZ DE SALA
+// Mostra todas as avaliações feitas pelo juiz logado.
+// O juiz pode editar apenas os campos de feedback geral.
+// ═══════════════════════════════════════════════════════════════
 window.verMinhasAvaliacoes = async function() {
   show('screen-minhas-aval');
   const ct = document.getElementById('minhas-aval-content');
@@ -681,6 +768,11 @@ window.verMinhasAvaliacoes = async function() {
     }).join('') + '</div>';
 };
 
+// ═══════════════════════════════════════════════════════════════
+// HISTÓRICO DO JUIZ DE ARENA
+// Mostra todas as rodadas registradas pelo juiz logado.
+// Somente leitura — sem campos editáveis.
+// ═══════════════════════════════════════════════════════════════
 window.verMinhasRodadas = async function() {
   show('screen-minhas-rodadas');
   const ct = document.getElementById('minhas-rodadas-content');
@@ -742,6 +834,11 @@ window.verMinhasRodadas = async function() {
     }).join('') + '</div>';
 };
 
+// ═══════════════════════════════════════════════════════════════
+// EXPORTAR CSV
+// Gera um arquivo .csv com todas as avaliações detalhadas.
+// O arquivo abre corretamente no Excel e Google Planilhas.
+// ═══════════════════════════════════════════════════════════════
 window.exportarCSV = async function() {
   const btn = document.querySelector('[onclick="exportarCSV()"]');
   if(btn){ btn.textContent='⏳ Gerando...'; btn.disabled=true; }
@@ -827,6 +924,11 @@ window.exportarCSV = async function() {
   if(btn){ btn.textContent='📥 Exportar CSV completo'; btn.disabled=false; }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// FILTROS DE BUSCA
+// filtrarTabela() filtra linhas de uma <table> pelo texto digitado.
+// filtrarCards() filtra cards (divs) pelo texto digitado.
+// ═══════════════════════════════════════════════════════════════
 window.filtrarTabela = function(inputId, tabelaId) {
   const termo = document.getElementById(inputId).value.toLowerCase();
   const tabela = document.getElementById(tabelaId);
@@ -837,6 +939,7 @@ window.filtrarTabela = function(inputId, tabelaId) {
   });
 };
 
+// Filtra cards (divs filhas diretas) que contenham o texto buscado
 window.filtrarCards = function(inputId, containerId) {
   const termo = document.getElementById(inputId).value.toLowerCase();
   const container = document.getElementById(containerId);
@@ -846,6 +949,7 @@ window.filtrarCards = function(inputId, containerId) {
   });
 };
 
+// Salva apenas os campos de feedback (Muito bom / Pensem sobre) no Firebase
 window.salvarFeedbackJuiz = async function(id) {
   const pos = document.getElementById(`fbpos-${id}`).value.trim();
   const mel = document.getElementById(`fbmel-${id}`).value.trim();
@@ -857,6 +961,12 @@ window.salvarFeedbackJuiz = async function(id) {
 };
 
 // ── ADMIN ──
+// ═══════════════════════════════════════════════════════════════
+// PAINEL DO ADMIN
+// irAdmin(sub) carrega a sub-tela correspondente.
+// sub pode ser: 'juizes', 'equipes', 'notas-sala',
+//              'notas-arena', 'notas-gerais', 'senha'
+// ═══════════════════════════════════════════════════════════════
 window.irAdmin = async function(sub) {
   show('screen-admin-sub');
   const title=document.getElementById('admin-sub-title');
@@ -957,7 +1067,10 @@ window.irAdmin = async function(sub) {
         ${rows||'<tr><td colspan="6" style="text-align:center;color:#999">Nenhuma rodada</td></tr>'}
       </table></div>`;
   }
-  else if(sub==='notas-gerais') {
+  // ── NOTAS GERAIS: calcula o ranking final combinando sala e arena ──
+// Fórmula: (Média Sala / 20 × 100) × 0.75 + Pontos Arena × 0.25
+// Desempate: mais indicações de sala e/ou valores demonstrados na arena
+else if(sub==='notas-gerais') {
     title.textContent='Notas Gerais — Ranking Final';
     await loadEquipes();
     const sala = await fbGet('avaliacoes_sala') || {};
@@ -1043,6 +1156,7 @@ window.irAdmin = async function(sub) {
 };
 
 // CSV
+// Gera o HTML do componente de importação CSV (área de drop + mapeamento de colunas)
 function csvUI(tipo) {
   return `
     <div class="csv-drop" onclick="document.getElementById('csvf-${tipo}').click()">
@@ -1058,6 +1172,7 @@ function csvUI(tipo) {
     <div id="csvr-${tipo}"></div>`;
 }
 const csvData={};
+// Lê o arquivo CSV selecionado e exibe os campos para mapeamento de colunas
 window.lerCSV = function(tipo,inp) {
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();
@@ -1075,6 +1190,7 @@ window.lerCSV = function(tipo,inp) {
   };
   r.readAsText(f);
 };
+// Importa os dados do CSV para o Firebase após o mapeamento de colunas
 window.importCSV = async function(tipo) {
   const d=csvData[tipo];if(!d)return;
   const res=document.getElementById(`csvr-${tipo}`);
@@ -1095,19 +1211,24 @@ window.importCSV = async function(tipo) {
   document.getElementById(`csvm-${tipo}`).style.display='none';
 };
 
+// Cadastra um novo juiz no Firebase
 window.addJuiz = async function() {
   const n=document.getElementById('nj-nome').value.trim();
   const p=document.getElementById('nj-perfil').value;
   if(!n){alert('Digite o nome.');return;}
   await fbPush('juizes',{nome:n,perfil:p});alert('Juiz cadastrado!');irAdmin('juizes');
 };
+// Remove um juiz do Firebase pelo ID
 window.remJuiz = async function(id) { if(!confirm('Remover?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes'); };
+// Cadastra uma nova equipe no Firebase
 window.addEq = async function() {
   const n=document.getElementById('ne-nome').value.trim();
   if(!n){alert('Digite o nome.');return;}
   await fbPush('equipes',{nome:n});alert('Equipe cadastrada!');irAdmin('equipes');
 };
+// Remove uma equipe do Firebase pelo ID
 window.remEq = async function(id) { if(!confirm('Remover?'))return;await fbDel(`equipes/${id}`);irAdmin('equipes'); };
+// Atualiza a senha (do evento ou do admin) no Firebase
 window.chgSenha = async function(tipo) {
   const id=tipo==='evento'?'se-evento':'se-admin';
   const v=document.getElementById(id).value.trim();
@@ -1116,9 +1237,12 @@ window.chgSenha = async function(tipo) {
   const m=document.getElementById('senha-msg');m.textContent='✅ Senha alterada!';m.style.display='block';
   setTimeout(()=>m.style.display='none',3000);
 };
+// Apaga uma avaliação de sala do Firebase (somente admin)
 window.delSala = async function(id) { if(!confirm('Apagar avaliação?'))return;await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala'); };
+// Apaga uma rodada de arena do Firebase (somente admin)
 window.delArena = async function(id) { if(!confirm('Apagar rodada?'))return;await fbDel(`rodadas_arena/${id}`);irAdmin('notas-arena'); };
 
+// Abre a tela de edição de uma avaliação de sala específica
 window.editSala = async function(id) {
   const av=await fbGet(`avaliacoes_sala/${id}`);
   await loadEquipes();
@@ -1145,6 +1269,7 @@ window.editSala = async function(id) {
     </div>`;
 };
 
+// Salva as alterações feitas numa avaliação de sala no Firebase
 window.savSala = async function(id) {
   let notas={},total=0;
   CRIT.forEach(c=>{
@@ -1158,6 +1283,7 @@ window.savSala = async function(id) {
   const m=document.getElementById('ed-msg');m.textContent=`✅ Salvo! Total: ${total}/20`;m.style.display='block';
 };
 
+// Abre a tela de edição de uma rodada de arena específica
 window.editArena = async function(id) {
   const rod=await fbGet(`rodadas_arena/${id}`);
   await loadEquipes();
@@ -1179,7 +1305,9 @@ window.editArena = async function(id) {
       <button class="btn btn-secondary btn-sm" onclick="irAdmin('notas-arena')">Cancelar</button>
     </div>`;
 };
+// Marca/desmarca missão na tela de edição do admin
 window.togEdMs = id => document.getElementById(`edms-${id}`)?.classList.toggle('done');
+// Salva as alterações feitas numa rodada de arena no Firebase
 window.savArena = async function(id) {
   let mA={},mB={},pA=0,pB=0;
   MA.forEach(m=>{const d=document.getElementById(`edms-${m.id}`)?.classList.contains('done');mA[m.id]=d;if(d)pA+=m.pts;});
@@ -1191,12 +1319,20 @@ window.savArena = async function(id) {
 // ── TELÃO ──
 let tInt=null,sInt=null,vel=4000,tOff=0,tRows=0;
 
+// ═══════════════════════════════════════════════════════════════
+// PAINEL DO TELÃO
+// Exibe o placar de alianças em tempo real para o público.
+// Atualiza automaticamente a cada 10 segundos buscando dados no Firebase.
+// A rolagem automática passa por blocos de 5 linhas por vez.
+// ═══════════════════════════════════════════════════════════════
 window.irParaTelao = function() { show('screen-telao');startTelao(); };
+// Sai do telão e volta para a tela anterior conforme o perfil logado
 window.voltarDoTelao = function() {
   clearInterval(tInt);clearInterval(sInt);
   if(me) show(perfil==='admin'?'screen-admin':'screen-menu');
   else show('screen-login');
 };
+// Altera a velocidade de rolagem do telão (Lento/Normal/Rápido)
 window.setVel = function(ms,btn) {
   vel=ms;
   document.querySelectorAll('.telao-speed-btn').forEach(b=>b.classList.remove('ativo'));
@@ -1204,6 +1340,7 @@ window.setVel = function(ms,btn) {
   clearInterval(sInt);startScroll();
 };
 
+// Busca as rodadas no Firebase e monta o ranking de alianças
 async function updTelao() {
   const rod=await fbGet('rodadas_arena')||{};
   await loadEquipes();
@@ -1238,6 +1375,7 @@ async function updTelao() {
   :'<p style="color:rgba(255,255,255,0.4);text-align:center;padding:40px">Aguardando rodadas...</p>';
 }
 
+// Inicia a rolagem automática do telão em blocos de 5 linhas
 function startScroll() {
   const body=document.querySelector('.telao-body');if(!body)return;
   const rowH=66; // altura de cada linha da aliança (maior por ter 2 nomes)
@@ -1263,6 +1401,7 @@ function startScroll() {
   },vel);
 }
 
+// Inicializa o telão: busca dados, inicia rolagem e agenda atualização a cada 10s
 function startTelao() {
   tOff=0;clearInterval(tInt);clearInterval(sInt);
   const lista=document.getElementById('telao-lista');
@@ -1271,6 +1410,7 @@ function startTelao() {
   tInt=setInterval(updTelao,10000);
 }
 
+// Inicia o sistema — esta linha dispara tudo quando a página carrega
 init();
 </script>
 </body>

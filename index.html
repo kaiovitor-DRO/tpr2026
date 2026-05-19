@@ -3,34 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TPR 2026 — Sistema de Avaliação</title>
+<title>TPR Innov 2026 — Sistema de Avaliação</title>
 <link rel="icon" type="image/png" href="./logo-pequena-branca-favicom.png">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #4CAF50; --green-dark: #2e7d32; --green-light: #81c784; --green-bg: #e8f5e9;
-    --amber: #FF8F00; --teal: #00796B; --coral: #E64A19; --gray: #455a64;
-    --light: #f5f7f5; --text: #1a2e1a; --text-muted: #607d60; --border: #c8e6c9;
-    --shadow: 0 2px 12px rgba(0,0,0,0.08); --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --green: #E8650A;
+    --green-dark: #0D3B7A;
+    --green-light: #F5A05A;
+    --green-bg: #FFF0E6;
+    --amber: #E8650A;
+    --teal: #1A5FB5;
+    --coral: #C94A0A;
+    --gray: #374151;
+    --light: #F4F7FB;
+    --text: #0D1B2A;
+    --text-muted: #5B7BA0;
+    --border: #BDD1EE;
+    --shadow: 0 2px 12px rgba(13,59,122,0.08);
+    --shadow-lg: 0 8px 32px rgba(13,59,122,0.14);
     --radius: 12px; --radius-sm: 8px;
+    --blue: #1A5FB5;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Barlow', sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
-  .header { background: var(--green-dark); color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header { background: linear-gradient(90deg, #0D3B7A 0%, #1A5FB5 100%); color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
   .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
   .header-sub { font-size: 12px; opacity: 0.7; }
   .header-user { display: flex; align-items: center; gap: 10px; }
   .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-  .badge-admin { background: var(--amber); color: #1a1a1a; }
-  .badge-sala { background: var(--teal); color: white; }
-  .badge-arena { background: var(--coral); color: white; }
+  .badge-admin { background: #E8650A; color: white; }
+  .badge-sala { background: #1A5FB5; color: white; }
+  .badge-arena { background: #E8650A; color: white; }
   .btn-logout { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: 'Barlow', sans-serif; }
   .screen { display: none; padding: 24px 16px; max-width: 540px; margin: 0 auto; }
   .screen.active { display: block; }
   .screen-wide { max-width: 920px; }
   .card { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 20px; }
   .card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; text-transform: uppercase; color: var(--green-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--green-bg); }
-  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(160deg, #1b5e20 0%, #2e7d32 100%); flex-direction: column; gap: 14px; }
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(160deg, #0D3B7A 0%, #1A5FB5 60%, #0A2D6B 100%); flex-direction: column; gap: 14px; }
   .login-card { background: white; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
   .login-logo { text-align: center; margin-bottom: 28px; }
   .login-logo-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; color: var(--green-dark); text-transform: uppercase; letter-spacing: 2px; }
@@ -79,8 +90,8 @@
   .fb-mel .fb-label { color: var(--coral); }
   .missao-group { margin-bottom: 20px; }
   .missao-group-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; text-transform: uppercase; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; }
-  .robo-a .missao-group-title { background: #fce4ec; color: #880e4f; }
-  .robo-b .missao-group-title { background: #e3f2fd; color: #0d47a1; }
+  .robo-a .missao-group-title { background: #e8f0fc; color: #0D3B7A; }
+  .robo-b .missao-group-title { background: #fff0e6; color: #C94A0A; }
   .missao-item { display: flex; align-items: center; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: white; }
   .missao-item:hover { border-color: var(--green); }
   .missao-item.done { background: var(--green-bg); border-color: var(--green); }
@@ -96,7 +107,7 @@
   .total-pts .label { font-size: 13px; opacity: 0.8; text-transform: uppercase; }
   .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   .admin-tile { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); cursor: pointer; transition: all 0.2s; border: 2px solid transparent; text-align: center; }
-  .admin-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--green); }
+  .admin-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: #1A5FB5; }
   .admin-tile-icon { font-size: 32px; margin-bottom: 8px; }
   .admin-tile-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-transform: uppercase; color: var(--green-dark); }
   .admin-tile-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
@@ -112,9 +123,9 @@
   .csv-drop-text { font-size: 14px; color: var(--text-muted); }
   .csv-col-map { background: var(--green-bg); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; display: none; }
   .csv-col-map-title { font-weight: 600; font-size: 14px; margin-bottom: 12px; color: var(--green-dark); }
-  .telao-wrap { min-height: 100vh; background: #0a1a0a; color: white; display: none; overflow: hidden; }
+  .telao-wrap { min-height: 100vh; background: #050D1A; color: white; display: none; overflow: hidden; }
   .telao-wrap.active { display: block; }
-  .telao-header { background: var(--green-dark); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .telao-header { background: linear-gradient(90deg, #0D3B7A 0%, #1A5FB5 100%); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
   .telao-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
   .telao-subtitle { font-size: 12px; opacity: 0.7; }
   .telao-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -131,7 +142,7 @@
   .telao-equipe { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
   .telao-col-label { font-size: 10px; opacity: 0.5; text-transform: uppercase; }
   .telao-col-val { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
-  .telao-total { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--green-light); }
+  .telao-total { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: #F5A05A; }
   .divider { height: 1px; background: var(--border); margin: 20px 0; }
   .text-muted { color: var(--text-muted); font-size: 13px; }
   .mt-12 { margin-top: 12px; }
@@ -157,8 +168,8 @@
 <div id="screen-login" class="login-wrap">
   <div class="login-card">
     <div class="login-logo">
-      <img src="./logo-pequena-colorida.png" alt="TPR 2026" style="width:140px;height:auto;margin-bottom:8px">
-      <div class="login-logo-sub" style="color:var(--text-muted);font-size:13px">Sistema de Avaliação 2026</div>
+      <div style="width:220px;margin:0 auto 14px"><svg id="Camada_2" data-name="Camada 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2321.38 782.49"> <defs> <style> .cls-1 { fill: #0460d9; } .cls-2 { fill: #f25c05; } </style> </defs> <g id="Layer_2" data-name="Layer 2"> <g> <path class="cls-2" d="M1538.43,777.21c-151.87,0-275.42-123.55-275.42-275.42s123.55-275.64,275.42-275.64,275.64,123.65,275.64,275.64-123.65,275.42-275.64,275.42ZM1538.43,356.71c-79.28,0-143.78,64.6-143.78,144s64.5,144,143.78,144,144-64.6,144-144-64.6-144-144-144Z"/> <path class="cls-2" d="M1538.43,229.5c150.28,0,272.29,122.12,272.29,272.29s-122.01,272.07-272.29,272.07-272.07-122.12-272.07-272.07,122.12-272.29,272.07-272.29M1538.43,648.05c81.23,0,147.35-66.22,147.35-147.34s-66.12-147.34-147.35-147.34-147.13,66.11-147.13,147.34,66.01,147.34,147.13,147.34M1538.43,222.81c-153.71,0-278.76,125.15-278.76,278.98s125.05,278.76,278.76,278.76,278.98-125.05,278.98-278.76-125.15-278.98-278.98-278.98h0ZM1538.43,641.36c-77.44,0-140.44-63.1-140.44-140.65s63-140.65,140.44-140.65,140.66,63.1,140.66,140.65-63.1,140.65-140.66,140.65h0Z"/> </g> <g> <path class="cls-2" d="M69.65,777.43c-36.26,0-65.76-29.55-65.76-65.87v-419.53c0-36.32,29.5-65.87,65.76-65.87s65.87,29.55,65.87,65.87v419.53c0,36.32-29.55,65.87-65.87,65.87Z"/> <path class="cls-2" d="M69.65,229.5c34.47,0,62.53,28.06,62.53,62.53v419.53c0,34.47-28.06,62.53-62.53,62.53s-62.42-28.06-62.42-62.53v-419.53c0-34.47,27.95-62.53,62.42-62.53M69.65,222.81C31.55,222.81.54,253.86.54,292.03v419.53c0,38.17,31,69.22,69.11,69.22s69.22-31.05,69.22-69.22v-419.53c0-38.17-31.05-69.22-69.22-69.22h0Z"/> </g> <g> <path class="cls-2" d="M69.65,136.07c-36.56,0-66.31-29.79-66.31-66.42S33.09,3.35,69.65,3.35s66.42,29.75,66.42,66.31-29.79,66.42-66.42,66.42Z"/> <path class="cls-2" d="M69.65,6.69c34.8,0,63.07,28.27,63.07,62.96s-28.27,63.07-63.07,63.07S6.69,104.45,6.69,69.65,34.96,6.69,69.65,6.69M69.65,0C31.25,0,0,31.25,0,69.65s31.25,69.76,69.65,69.76,69.76-31.29,69.76-69.76S108.12,0,69.65,0h0Z"/> </g> <g> <path class="cls-2" d="M271.04,777.43c-36.32,0-65.87-29.55-65.87-65.87v-201.72c0-36.26,29.55-65.76,65.87-65.76s65.87,29.5,65.87,65.76v201.72c0,36.32-29.55,65.87-65.87,65.87Z"/> <path class="cls-2" d="M271.04,447.42c34.36,0,62.53,27.95,62.53,62.42v201.72c0,34.47-28.17,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-201.72c0-34.47,28.06-62.42,62.53-62.42M271.04,440.73c-38.17,0-69.22,31-69.22,69.11v201.72c0,38.17,31.05,69.22,69.22,69.22s69.22-31.05,69.22-69.22v-201.72c0-38.11-31.05-69.11-69.22-69.11h0Z"/> </g> <g> <path class="cls-2" d="M599.01,777.43c-36.32,0-65.87-29.55-65.87-65.87v-209.76c0-79.28-64.55-143.78-143.89-143.78h-118.2c-36.32,0-65.87-29.6-65.87-65.98s29.55-65.87,65.87-65.87h118.2c151.98,0,275.63,123.65,275.63,275.64v209.76c0,36.32-29.55,65.87-65.87,65.87Z"/> <path class="cls-2" d="M389.25,229.5c150.17,0,272.29,122.12,272.29,272.29v209.76c0,34.47-28.05,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-209.76c0-81.12-66-147.13-147.23-147.13h-118.2c-34.47,0-62.53-28.05-62.53-62.64s28.06-62.53,62.53-62.53h118.2M389.25,222.81h-118.2c-38.17,0-69.22,31.05-69.22,69.22s31.05,69.33,69.22,69.33h118.2c77.5,0,140.54,63,140.54,140.44v209.76c0,38.17,31.05,69.22,69.22,69.22s69.22-31.05,69.22-69.22v-209.76c0-153.83-125.15-278.98-278.98-278.98h0Z"/> </g> <g> <path class="cls-2" d="M1127.93,777.43c-36.32,0-65.87-29.55-65.87-65.87v-209.76c0-79.28-64.55-143.78-143.89-143.78h-118.31c-36.32,0-65.87-29.6-65.87-65.98s29.55-65.87,65.87-65.87h118.31c151.99,0,275.64,123.65,275.64,275.64v209.76c0,36.32-29.55,65.87-65.87,65.87Z"/> <path class="cls-2" d="M918.17,229.5c150.06,0,272.29,122.12,272.29,272.29v209.76c0,34.47-28.17,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-209.76c0-81.12-66.12-147.13-147.24-147.13h-118.31c-34.47,0-62.53-28.05-62.53-62.64s28.06-62.53,62.53-62.53h118.31M918.17,222.81h-118.31c-38.17,0-69.22,31.05-69.22,69.22s31.05,69.33,69.22,69.33h118.31c77.5,0,140.55,63,140.55,140.44v209.76c0,38.17,31.05,69.22,69.22,69.22s69.22-31.05,69.22-69.22v-209.76c0-153.83-125.15-278.98-278.98-278.98h0Z"/> </g> <g> <path class="cls-2" d="M799.85,777.43c-36.32,0-65.87-29.55-65.87-65.87v-201.72c0-36.26,29.55-65.76,65.87-65.76s65.87,29.5,65.87,65.76v201.72c0,36.32-29.55,65.87-65.87,65.87Z"/> <path class="cls-2" d="M799.85,447.42c34.47,0,62.53,27.95,62.53,62.42v201.72c0,34.47-28.05,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-201.72c0-34.47,28.06-62.42,62.53-62.42M799.85,440.73c-38.17,0-69.22,31-69.22,69.11v201.72c0,38.17,31.05,69.22,69.22,69.22s69.22-31.05,69.22-69.22v-201.72c0-38.11-31.05-69.11-69.22-69.11h0Z"/> </g> <g> <path class="cls-2" d="M2062.67,777.43c-27.6,0-52.47-17.41-61.87-43.31l-152.67-419.63c-7.46-20.43-4.58-42.39,7.9-60.26,12.55-17.84,32.21-28.07,53.96-28.07,27.49,0,52.35,17.4,61.86,43.3l152.67,419.54c7.45,20.51,4.57,42.51-7.9,60.37-12.55,17.84-32.21,28.07-53.96,28.07Z"/> <path class="cls-2" d="M1910,229.5c26.21,0,49.7,16.53,58.72,41.1l152.67,419.53c7.07,19.47,4.35,40.34-7.5,57.31-11.85,16.85-30.56,26.64-51.22,26.64-26.21,0-49.8-16.53-58.72-41.1l-152.67-419.63c-7.07-19.36-4.35-40.24,7.5-57.2,11.85-16.85,30.45-26.64,51.22-26.64M1910,222.81c-22.85,0-43.51,10.75-56.69,29.48-13.13,18.79-16.16,41.87-8.31,63.34l152.67,419.63c9.88,27.22,36,45.51,65.01,45.51,22.85,0,43.51-10.75,56.69-29.48,13.12-18.77,16.15-41.89,8.32-63.44l-152.67-419.53c-10-27.23-36.12-45.51-65.01-45.51h0Z"/> </g> <path class="cls-1" d="M2321.38,79c0,34.47-27.95,62.53-62.42,62.53H271.48c-34.47,0-62.42-28.05-62.42-62.53s27.95-62.53,62.42-62.53h1987.48c34.47,0,62.42,28.05,62.42,62.53Z"/> <g> <path class="cls-2" d="M2062.56,779.14c-17.44,0-33.91-6.86-46.37-19.32-19.52-19.52-24.79-49.41-13.12-74.37l188.77-404.68c9.17-19.72,26.74-33.21,48.2-37.02,3.89-.68,7.82-1.02,11.69-1.02,17.4,0,33.85,6.86,46.31,19.33,19.44,19.44,24.71,49.32,13.13,74.36l-188.7,404.61c-9.24,19.77-26.83,33.29-48.28,37.1-3.86.67-7.77,1.01-11.63,1.01Z"/> <path class="cls-2" d="M2251.73,246.08c16.37,0,31.95,6.35,43.95,18.34,18.53,18.53,23.45,46.83,12.46,70.59l-188.7,404.61c-8.76,18.76-25.45,31.6-45.83,35.22-3.7.64-7.4.96-11.05.96-16.41,0-32.06-6.39-44-18.34-18.53-18.53-23.53-46.91-12.46-70.59l188.77-404.68c8.69-18.69,25.37-31.53,45.75-35.14,3.72-.65,7.44-.97,11.11-.97M2251.73,239.39v6.69-6.69h0c-4.07,0-8.19.36-12.26,1.07-22.57,4-41.03,18.18-50.67,38.91l-188.77,404.67c-12.26,26.23-6.72,57.64,13.79,78.15,13.09,13.09,30.4,20.3,48.73,20.3,4.05,0,8.16-.36,12.2-1.06,22.55-4,41.04-18.2,50.74-38.98l188.7-404.61c12.18-26.32,6.64-57.72-13.79-78.15-13.09-13.09-30.38-20.3-48.67-20.3h0Z"/> </g> </g> </svg></div>
+      <div style="color:#5B7BA0;font-size:13px;margin-top:8px;font-family:Barlow,sans-serif">Sistema de Avaliação · 2026</div>
     </div>
     <div id="login-error" class="error-msg"></div>
     <div class="form-group">
@@ -177,14 +188,14 @@
   </div>
   <button class="btn-telao-direto" onclick="irParaTelao()">📺 Ver Telão — sem login</button>
   <p style="color:rgba(255,255,255,0.45);font-size:11px;text-align:center;margin-top:8px;line-height:1.6;max-width:400px;padding:0 16px">
-    Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
+    TPR Innov 2026 · Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
   </p>
 </div>
 
 <!-- HEADER -->
 <div id="app-header" style="display:none">
   <div class="header">
-    <div><img src="./logo-pequena-branca.png" alt="TPR 2026" style="height:36px;width:auto"></div>
+    <div><div style="height:32px;display:flex;align-items:center"><svg id="Camada_2" data-name="Camada 2" xmlns="http://www.w3.org/2000/svg" height="32" viewBox="0 0 2314.69 769.1"> <defs> <style> .cls-1 { fill: #fff; } </style> </defs> <g id="Layer_2" data-name="Layer 2"> <path class="cls-1" d="M1531.74,222.81c-149.96,0-272.07,122.12-272.07,272.29s122.12,272.07,272.07,272.07,272.29-122.12,272.29-272.07-122.01-272.29-272.29-272.29ZM1531.74,641.36c-81.12,0-147.13-66.22-147.13-147.34s66.01-147.34,147.13-147.34,147.35,66.11,147.35,147.34-66.12,147.34-147.35,147.34Z"/> <path class="cls-1" d="M125.49,285.34v419.53c0,34.47-28.06,62.53-62.53,62.53S.54,739.34.54,704.87v-419.53c0-34.47,27.95-62.53,62.42-62.53s62.53,28.06,62.53,62.53Z"/> <path class="cls-1" d="M126.03,62.96c0,34.8-28.27,63.07-63.07,63.07S0,97.76,0,62.96,28.27,0,62.96,0s63.07,28.27,63.07,62.96Z"/> <path class="cls-1" d="M326.88,503.15v201.72c0,34.47-28.17,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-201.72c0-34.47,28.06-62.42,62.53-62.42s62.53,27.95,62.53,62.42Z"/> <path class="cls-1" d="M654.84,495.1v209.76c0,34.47-28.05,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-209.76c0-81.12-66-147.13-147.23-147.13h-118.2c-34.47,0-62.53-28.05-62.53-62.64s28.06-62.53,62.53-62.53h118.2c150.17,0,272.29,122.12,272.29,272.29Z"/> <path class="cls-1" d="M1183.77,495.1v209.76c0,34.47-28.17,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-209.76c0-81.12-66.12-147.13-147.24-147.13h-118.31c-34.47,0-62.53-28.05-62.53-62.64s28.06-62.53,62.53-62.53h118.31c150.06,0,272.29,122.12,272.29,272.29Z"/> <path class="cls-1" d="M855.69,503.15v201.72c0,34.47-28.05,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-201.72c0-34.47,28.06-62.42,62.53-62.42s62.53,27.95,62.53,62.42Z"/> <path class="cls-1" d="M2107.2,740.75c-11.85,16.85-30.56,26.64-51.22,26.64-26.21,0-49.8-16.53-58.72-41.1l-152.67-419.63c-7.07-19.36-4.35-40.24,7.5-57.2,11.85-16.85,30.45-26.64,51.22-26.64,26.21,0,49.7,16.53,58.72,41.1l152.67,419.53c7.07,19.47,4.35,40.34-7.5,57.31Z"/> <path class="cls-1" d="M2314.69,72.31c0,34.47-27.95,62.53-62.42,62.53H264.79c-34.47,0-62.42-28.05-62.42-62.53s27.95-62.53,62.42-62.53h1987.48c34.47,0,62.42,28.05,62.42,62.53Z"/> <path class="cls-1" d="M2066.91,768.14c-20.3,3.54-40.45-2.77-55.05-17.38-18.53-18.53-23.53-46.9-12.46-70.59l188.77-404.68c8.69-18.69,25.37-31.53,45.75-35.14,20.3-3.54,40.37,2.69,55.06,17.38,18.53,18.53,23.45,46.83,12.46,70.59l-188.7,404.61c-8.76,18.76-25.45,31.6-45.83,35.22Z"/> </g> </svg></div></div>
     <div class="header-user">
       <span id="header-badge" class="badge"></span>
       <span id="header-nome" style="font-size:14px"></span>
@@ -353,8 +364,8 @@
 <div id="screen-telao" class="telao-wrap">
   <div class="telao-header">
     <div style="display:flex;align-items:center;gap:20px">
-      <img src="./logo-grande-branca.png" alt="TPR" style="height:44px;width:auto;mix-blend-mode:screen">
-      <div><div class="telao-title">🏆 Placar da Arena</div></div>
+      <div style="height:38px;display:flex;align-items:center"><svg id="Camada_2" data-name="Camada 2" xmlns="http://www.w3.org/2000/svg" height="38" viewBox="0 0 2314.69 769.1"> <defs> <style> .cls-1 { fill: #fff; } </style> </defs> <g id="Layer_2" data-name="Layer 2"> <path class="cls-1" d="M1531.74,222.81c-149.96,0-272.07,122.12-272.07,272.29s122.12,272.07,272.07,272.07,272.29-122.12,272.29-272.07-122.01-272.29-272.29-272.29ZM1531.74,641.36c-81.12,0-147.13-66.22-147.13-147.34s66.01-147.34,147.13-147.34,147.35,66.11,147.35,147.34-66.12,147.34-147.35,147.34Z"/> <path class="cls-1" d="M125.49,285.34v419.53c0,34.47-28.06,62.53-62.53,62.53S.54,739.34.54,704.87v-419.53c0-34.47,27.95-62.53,62.42-62.53s62.53,28.06,62.53,62.53Z"/> <path class="cls-1" d="M126.03,62.96c0,34.8-28.27,63.07-63.07,63.07S0,97.76,0,62.96,28.27,0,62.96,0s63.07,28.27,63.07,62.96Z"/> <path class="cls-1" d="M326.88,503.15v201.72c0,34.47-28.17,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-201.72c0-34.47,28.06-62.42,62.53-62.42s62.53,27.95,62.53,62.42Z"/> <path class="cls-1" d="M654.84,495.1v209.76c0,34.47-28.05,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-209.76c0-81.12-66-147.13-147.23-147.13h-118.2c-34.47,0-62.53-28.05-62.53-62.64s28.06-62.53,62.53-62.53h118.2c150.17,0,272.29,122.12,272.29,272.29Z"/> <path class="cls-1" d="M1183.77,495.1v209.76c0,34.47-28.17,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-209.76c0-81.12-66.12-147.13-147.24-147.13h-118.31c-34.47,0-62.53-28.05-62.53-62.64s28.06-62.53,62.53-62.53h118.31c150.06,0,272.29,122.12,272.29,272.29Z"/> <path class="cls-1" d="M855.69,503.15v201.72c0,34.47-28.05,62.53-62.53,62.53s-62.53-28.06-62.53-62.53v-201.72c0-34.47,28.06-62.42,62.53-62.42s62.53,27.95,62.53,62.42Z"/> <path class="cls-1" d="M2107.2,740.75c-11.85,16.85-30.56,26.64-51.22,26.64-26.21,0-49.8-16.53-58.72-41.1l-152.67-419.63c-7.07-19.36-4.35-40.24,7.5-57.2,11.85-16.85,30.45-26.64,51.22-26.64,26.21,0,49.7,16.53,58.72,41.1l152.67,419.53c7.07,19.47,4.35,40.34-7.5,57.31Z"/> <path class="cls-1" d="M2314.69,72.31c0,34.47-27.95,62.53-62.42,62.53H264.79c-34.47,0-62.42-28.05-62.42-62.53s27.95-62.53,62.42-62.53h1987.48c34.47,0,62.42,28.05,62.42,62.53Z"/> <path class="cls-1" d="M2066.91,768.14c-20.3,3.54-40.45-2.77-55.05-17.38-18.53-18.53-23.53-46.9-12.46-70.59l188.77-404.68c8.69-18.69,25.37-31.53,45.75-35.14,20.3-3.54,40.37,2.69,55.06,17.38,18.53,18.53,23.45,46.83,12.46,70.59l-188.7,404.61c-8.76,18.76-25.45,31.6-45.83,35.22Z"/> </g> </svg></div>
+      <div><div class="telao-title" style="color:#F5A05A">🏆 Placar da Arena — Innov</div></div>
     </div>
     <div class="telao-controls">
       <span class="telao-speed-label">Velocidade:</span>

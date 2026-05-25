@@ -639,7 +639,7 @@ window.irAdmin=async function(sub){
     const rows=Object.entries(d).sort((a,b)=>a[1].nome.localeCompare(b[1].nome))
       .map(([k,v])=>`<tr>
         <td style="font-weight:600">${v.nome}</td>
-        <td><span style="background:var(--bege-dark);color:var(--marrom);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">Juiz de Sala</span></td>
+        <td><span style="background:var(--bege-dark);color:var(--marrom);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${v.perfil==='extra'?'Juiz de Atividade Extra':'Juiz de Sala'}</span></td>
         <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
       </tr>`).join('');
     ct.innerHTML=`
@@ -650,6 +650,7 @@ window.irAdmin=async function(sub){
       <div class="divider"></div>
       <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo juiz</p>
       <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
+      <div class="form-group"><label>Perfil</label><select id="nj-perfil"><option value="sala">Juiz de Sala</option><option value="extra">Juiz de Atividade Extra</option></select></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
       <div class="divider"></div>
       <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
@@ -672,10 +673,7 @@ window.irAdmin=async function(sub){
       </table></div>
       <div class="divider"></div>
       <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar nova equipe</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="form-group" style="margin:0"><label>Nome da equipe</label><input id="ne-nome" placeholder="Ex: Robonautas"></div>
-        <div class="form-group" style="margin:0"><label>Número</label><input id="ne-num" placeholder="Ex: 12345"></div>
-      </div>
+      <div class="form-group"><label>Nome da equipe</label><input id="ne-nome" placeholder="Ex: Robonautas"></div>
       <div class="form-group"><label>Escola / Instituição</label><input id="ne-escola" placeholder="Ex: Escola Municipal X"></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addEq()">Cadastrar Equipe</button>
       <div class="divider"></div>
@@ -775,8 +773,9 @@ window.irAdmin=async function(sub){
 window.remJuiz=async function(id){if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
 window.addJuiz=async function(){
   const nome=document.getElementById('nj-nome').value.trim();
+  const perfil=document.getElementById('nj-perfil').value;
   if(!nome){alert('Nome obrigatório.');return;}
-  await fbPush('juizes',{nome,perfil:'sala'});
+  await fbPush('juizes',{nome,perfil});
   alert(`Juiz "${nome}" cadastrado!`);irAdmin('juizes');
 };
 window.remEq=async function(id){
@@ -786,10 +785,9 @@ window.remEq=async function(id){
 };
 window.addEq=async function(){
   const nome=document.getElementById('ne-nome').value.trim();
-  const num=document.getElementById('ne-num').value.trim();
   const escola=document.getElementById('ne-escola').value.trim();
   if(!nome){alert('Nome obrigatório.');return;}
-  await fbPush('equipes',{nome,numero:num,escola});
+  await fbPush('equipes',{nome,escola});
   alert(`Equipe "${nome}" cadastrada!`);irAdmin('equipes');
 };
 window.delSala=async function(id){

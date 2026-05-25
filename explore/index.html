@@ -44,7 +44,7 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--bege);color:var(--tex
 .login-stripes span:nth-child(4){background:var(--marrom);}
 .login-card{background:var(--bege);border-radius:20px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(83,71,65,0.28),0 4px 16px rgba(83,71,65,0.12);position:relative;z-index:1;border:1px solid rgba(255,255,255,0.6);}
 .login-logo-wrap{text-align:center;margin-bottom:28px;}
-.login-logo-wrap img{height:120px;width:auto;margin-bottom:0;}
+.login-logo-wrap img{height:96px;width:auto;margin-bottom:0;}
 .login-logo-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
 .login-evento-badge{display:inline-block;background:var(--caramelo);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
 .form-group{margin-bottom:18px;}
@@ -245,129 +245,43 @@ tr:hover td{background:var(--bege);}
 
 <!-- ADMIN -->
 <div id="screen-admin" class="screen screen-wide">
-  <div class="card" style="margin-top:24px">
-    <div class="card-title">Painel Administrativo</div>
+  <div style="margin-top:24px">
     <div class="admin-grid">
-      <div class="admin-tile" onclick="irAdminEquipes()">
-        <div class="admin-tile-icon">🏫</div>
-        <div class="admin-tile-title">Equipes</div>
-        <div class="admin-tile-desc">Cadastrar e importar equipes</div>
+      <div class="admin-tile" onclick="irAdmin('juizes')">
+        <div class="admin-tile-icon">👥</div>
+        <div class="admin-tile-title">Gerenciar Juízes</div>
+        <div class="admin-tile-desc">Cadastrar, importar CSV e remover</div>
       </div>
-      <div class="admin-tile" onclick="irAdminJuizes()">
-        <div class="admin-tile-icon">👤</div>
-        <div class="admin-tile-title">Juízes</div>
-        <div class="admin-tile-desc">Gerenciar juízes e senhas</div>
-      </div>
-      <div class="admin-tile" onclick="irAdminAvaliacoes()">
-        <div class="admin-tile-icon">📊</div>
-        <div class="admin-tile-title">Avaliações</div>
-        <div class="admin-tile-desc">Ver e editar todas as avaliações</div>
-      </div>
-      <div class="admin-tile" onclick="irAdminRanking()">
+      <div class="admin-tile" onclick="irAdmin('equipes')">
         <div class="admin-tile-icon">🏆</div>
-        <div class="admin-tile-title">Ranking</div>
-        <div class="admin-tile-desc">Ranking final e exportar CSV</div>
+        <div class="admin-tile-title">Gerenciar Equipes</div>
+        <div class="admin-tile-desc">Cadastrar, importar CSV e remover</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-sala')">
+        <div class="admin-tile-icon">📋</div>
+        <div class="admin-tile-title">Notas de Sala</div>
+        <div class="admin-tile-desc">Ver, editar e apagar avaliações</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('senha')">
+        <div class="admin-tile-icon">🔑</div>
+        <div class="admin-tile-title">Alterar Senhas</div>
+        <div class="admin-tile-desc">Senha do evento e do admin</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-gerais')" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+        <div class="admin-tile-icon">🏅</div>
+        <div class="admin-tile-title">Notas Gerais</div>
+        <div class="admin-tile-desc">Ranking final com desempate</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ADMIN: EQUIPES -->
-<div id="screen-admin-equipes" class="screen screen-wide">
-  <button class="back-btn" onclick="voltar('screen-admin')">← Voltar</button>
+<!-- ADMIN: SUB (tela única dinâmica) -->
+<div id="screen-admin-sub" class="screen screen-wide">
+  <button class="back-btn" onclick="voltar('screen-admin')">← Painel Admin</button>
   <div class="card">
-    <div class="card-title">Gerenciar Equipes</div>
-    <div id="admin-equipes-error" class="error-msg"></div>
-    <div id="admin-equipes-success" class="success-msg"></div>
-    <div style="margin-bottom:20px">
-      <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;color:var(--marrom);margin-bottom:10px">Adicionar equipe</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="form-group" style="margin:0"><label>Nome da equipe</label><input type="text" id="eq-nome" placeholder="Ex: Robonautas"></div>
-        <div class="form-group" style="margin:0"><label>Número</label><input type="text" id="eq-num" placeholder="Ex: 12345"></div>
-      </div>
-      <div class="form-group"><label>Escola / Instituição</label><input type="text" id="eq-escola" placeholder="Ex: Escola Municipal X"></div>
-      <button class="btn btn-caramelo btn-sm" onclick="adicionarEquipe()">+ Adicionar Equipe</button>
-    </div>
-    <div class="divider"></div>
-    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;color:var(--marrom);margin-bottom:10px">Importar via CSV</div>
-    <div class="csv-drop" onclick="document.getElementById('csv-input').click()">
-      <div class="csv-drop-icon">📂</div>
-      <div class="csv-drop-text">Clique para selecionar o arquivo CSV</div>
-      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Colunas esperadas: nome, numero, escola</div>
-    </div>
-    <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="importarCSV(this)">
-    <div id="csv-preview" style="display:none;margin-bottom:12px"></div>
-    <button id="csv-confirm-btn" class="btn btn-primary btn-sm" style="display:none" onclick="confirmarImportCSV()">Confirmar Importação</button>
-    <div class="divider"></div>
-    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;color:var(--marrom);margin-bottom:10px">Equipes cadastradas (<span id="eq-count">0</span>)</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Nome</th><th>Número</th><th>Escola</th><th></th></tr></thead>
-        <tbody id="eq-table-body"><tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px">Nenhuma equipe cadastrada</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN: JUÍZES -->
-<div id="screen-admin-juizes" class="screen">
-  <button class="back-btn" onclick="voltar('screen-admin')">← Voltar</button>
-  <div class="card">
-    <div class="card-title">Gerenciar Juízes</div>
-    <div id="admin-juizes-error" class="error-msg"></div>
-    <div id="admin-juizes-success" class="success-msg"></div>
-    <div style="margin-bottom:20px">
-      <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;color:var(--marrom);margin-bottom:10px">Adicionar juiz</div>
-      <div class="form-group"><label>Nome do juiz</label><input type="text" id="juiz-nome" placeholder="Nome completo"></div>
-      <button class="btn btn-caramelo btn-sm" onclick="adicionarJuiz()">+ Adicionar Juiz</button>
-    </div>
-    <div class="divider"></div>
-    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;color:var(--marrom);margin-bottom:10px">Alterar senhas</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="form-group" style="margin:0">
-        <label>Senha dos juízes</label>
-        <div class="pass-wrap"><input type="password" id="nova-senha-evento" placeholder="Nova senha"><button type="button" class="btn-ver-senha" onclick="toggleSenha('nova-senha-evento',this)">👁</button></div>
-      </div>
-      <div class="form-group" style="margin:0">
-        <label>Senha do admin</label>
-        <div class="pass-wrap"><input type="password" id="nova-senha-admin" placeholder="Nova senha"><button type="button" class="btn-ver-senha" onclick="toggleSenha('nova-senha-admin',this)">👁</button></div>
-      </div>
-    </div>
-    <button class="btn btn-secondary btn-sm" onclick="alterarSenhas()">Salvar Senhas</button>
-    <div class="divider"></div>
-    <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;color:var(--marrom);margin-bottom:10px">Juízes cadastrados</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Nome</th><th></th></tr></thead>
-        <tbody id="juiz-table-body"><tr><td colspan="2" class="text-muted" style="text-align:center;padding:20px">Nenhum juiz cadastrado</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN: AVALIAÇÕES -->
-<div id="screen-admin-aval" class="screen screen-wide">
-  <button class="back-btn" onclick="voltar('screen-admin')">← Voltar</button>
-  <div class="card">
-    <div class="card-title">Todas as Avaliações</div>
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-      <input type="text" id="filtro-aval-equipe" placeholder="🔍 Filtrar por equipe..." style="flex:1;min-width:160px;padding:10px 14px;font-size:14px" oninput="filtrarAval()">
-      <input type="text" id="filtro-aval-juiz" placeholder="🔍 Filtrar por juiz..." style="flex:1;min-width:160px;padding:10px 14px;font-size:14px" oninput="filtrarAval()">
-    </div>
-    <div id="admin-aval-content"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
-  </div>
-</div>
-
-<!-- ADMIN: RANKING -->
-<div id="screen-admin-ranking" class="screen screen-wide">
-  <button class="back-btn" onclick="voltar('screen-admin')">← Voltar</button>
-  <div class="card">
-    <div class="card-title">Ranking Final</div>
-    <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-secondary btn-sm" onclick="carregarRanking()">↺ Atualizar</button>
-      <button class="btn btn-caramelo btn-sm" onclick="exportarCSV()">⬇ Exportar CSV</button>
-    </div>
-    <div id="ranking-content"><div class="loading"><div class="spinner"></div>Calculando...</div></div>
+    <div class="card-title" id="admin-sub-title"></div>
+    <div id="admin-sub-content"></div>
   </div>
 </div>
 
@@ -479,7 +393,7 @@ function entrar(){
   document.getElementById('app-header').style.display='block';
   document.getElementById('header-nome').textContent=me;
   const b=document.getElementById('header-badge');
-  if(perfil==='admin'){b.textContent='Admin';b.className='badge badge-admin';show('screen-admin');carregarAdminEquipes();}
+  if(perfil==='admin'){b.textContent='Admin';b.className='badge badge-admin';show('screen-admin');}
   else{b.textContent='Juiz de Sala';b.className='badge badge-sala';show('screen-menu');}
   resetInact();
 }
@@ -650,47 +564,22 @@ window.verMinhasAvaliacoes=async function(){
 // ═══════════════════════════════════════════════════════════════
 // ADMIN: EQUIPES
 // ═══════════════════════════════════════════════════════════════
-async function carregarAdminEquipes(){
-  await loadEquipes();
-  document.getElementById('eq-count').textContent=equipes.length;
-  const tbody=document.getElementById('eq-table-body');
-  if(!equipes.length){tbody.innerHTML='<tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px">Nenhuma equipe cadastrada</td></tr>';return;}
-  tbody.innerHTML=equipes.map((e,i)=>`
-    <tr>
-      <td style="font-weight:700;color:var(--text-muted)">${i+1}</td>
-      <td style="font-weight:700">${e.nome}</td>
-      <td>${e.numero||'—'}</td>
-      <td>${e.escola||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deletarEquipe('${e.id}')">Excluir</button></td>
-    </tr>`).join('');
+// ═══════════════════════════════════════════════════════════════
+// ADMIN — tela única dinâmica (padrão Innov)
+// ═══════════════════════════════════════════════════════════════
+function csvUI(tipo) {
+  return `<div class="csv-drop" onclick="document.getElementById('csv-${tipo}-input').click()">
+    <div class="csv-drop-icon">📂</div>
+    <div class="csv-drop-text">Clique para selecionar arquivo CSV</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${tipo==='equipe'?'Colunas: nome, numero, escola':'Coluna: nome'}</div>
+  </div>
+  <input type="file" id="csv-${tipo}-input" accept=".csv" style="display:none" onchange="importCSV(this,'${tipo}')">
+  <div id="csv-${tipo}-preview" style="display:none;margin-bottom:12px"></div>
+  <button id="csv-${tipo}-btn" class="btn btn-primary btn-sm" style="display:none" onclick="confirmCSV('${tipo}')">Confirmar Importação</button>`;
 }
-window.irAdminEquipes=function(){carregarAdminEquipes();show('screen-admin-equipes');};
 
-window.adicionarEquipe=async function(){
-  const nome=document.getElementById('eq-nome').value.trim();
-  const num=document.getElementById('eq-num').value.trim();
-  const escola=document.getElementById('eq-escola').value.trim();
-  const err=document.getElementById('admin-equipes-error');
-  const suc=document.getElementById('admin-equipes-success');
-  err.style.display='none';suc.style.display='none';
-  if(!nome){err.textContent='Nome é obrigatório.';err.style.display='block';return;}
-  await fbPush('equipes',{nome,numero:num,escola});
-  document.getElementById('eq-nome').value='';
-  document.getElementById('eq-num').value='';
-  document.getElementById('eq-escola').value='';
-  suc.textContent=`Equipe "${nome}" adicionada!`;suc.style.display='block';
-  await carregarAdminEquipes();
-};
-
-window.deletarEquipe=async function(id){
-  const eq=equipes.find(e=>e.id===id);
-  if(!confirm(`Excluir equipe "${eq?.nome}"?`))return;
-  await fbDel(`equipes/${id}`);
-  await carregarAdminEquipes();
-};
-
-let csvPendente=[];
-window.importarCSV=function(input){
+let csvPendente={};
+window.importCSV=function(input,tipo){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
@@ -699,195 +588,225 @@ window.importarCSV=function(input){
     const iN=header.findIndex(h=>h.includes('nome'));
     const iU=header.findIndex(h=>h.includes('num'));
     const iE=header.findIndex(h=>h.includes('escola')||h.includes('inst'));
-    csvPendente=linhas.slice(1).map(l=>{
-      const c=l.split(/[,;]/);
-      return{nome:(c[iN]||'').trim(),numero:(c[iU]||'').trim(),escola:(c[iE]||'').trim()};
+    csvPendente[tipo]=linhas.slice(1).map(l=>{
+      const cols=l.split(/[,;]/);
+      return tipo==='equipe'
+        ?{nome:(cols[iN]||'').trim(),numero:(cols[iU]||'').trim(),escola:(cols[iE]||'').trim()}
+        :{nome:(cols[iN]||'').trim(),perfil:'sala'};
     }).filter(r=>r.nome);
-    const prev=document.getElementById('csv-preview');
+    const prev=document.getElementById(`csv-${tipo}-preview`);
     prev.style.display='block';
     prev.innerHTML=`<div style="background:var(--bege);border-radius:8px;padding:12px;font-size:13px">
-      <strong>${csvPendente.length} equipe(s) encontrada(s)</strong><br>
-      ${csvPendente.slice(0,5).map(r=>`• ${r.nome}${r.numero?' ('+r.numero+')':''}`).join('<br>')}
-      ${csvPendente.length>5?`<br>... e mais ${csvPendente.length-5}`:''}
+      <strong>${csvPendente[tipo].length} registro(s) encontrado(s)</strong><br>
+      ${csvPendente[tipo].slice(0,5).map(r=>`• ${r.nome}`).join('<br>')}
+      ${csvPendente[tipo].length>5?`<br>... e mais ${csvPendente[tipo].length-5}`:''}
     </div>`;
-    document.getElementById('csv-confirm-btn').style.display='inline-block';
+    document.getElementById(`csv-${tipo}-btn`).style.display='inline-block';
   };
   reader.readAsText(file,'utf-8');
 };
 
-window.confirmarImportCSV=async function(){
-  if(!csvPendente.length)return;
-  const btn=document.getElementById('csv-confirm-btn');
+window.confirmCSV=async function(tipo){
+  const lista=csvPendente[tipo]||[];if(!lista.length)return;
+  const btn=document.getElementById(`csv-${tipo}-btn`);
   btn.textContent='Importando...';btn.disabled=true;
-  for(const eq of csvPendente)await fbPush('equipes',eq);
-  document.getElementById('csv-preview').style.display='none';
-  btn.style.display='none';csvPendente=[];
-  document.getElementById('csv-input').value='';
-  const suc=document.getElementById('admin-equipes-success');
-  suc.textContent='Importação concluída!';suc.style.display='block';
-  await carregarAdminEquipes();
-  btn.textContent='Confirmar Importação';btn.disabled=false;
+  const path=tipo==='equipe'?'equipes':'juizes';
+  for(const item of lista)await fbPush(path,item);
+  document.getElementById(`csv-${tipo}-preview`).style.display='none';
+  btn.style.display='none';csvPendente[tipo]=[];
+  document.getElementById(`csv-${tipo}-input`).value='';
+  alert('Importação concluída!');
+  irAdmin(tipo==='equipe'?'equipes':'juizes');
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ADMIN: JUÍZES
-// ═══════════════════════════════════════════════════════════════
-window.irAdminJuizes=async function(){show('screen-admin-juizes');await carregarJuizes();};
-
-async function carregarJuizes(){
-  const data=await fbGet('juizes')||{};
-  const juizes=Object.entries(data).sort((a,b)=>a[1].nome.localeCompare(b[1].nome));
-  const tbody=document.getElementById('juiz-table-body');
-  if(!juizes.length){tbody.innerHTML='<tr><td colspan="2" class="text-muted" style="text-align:center;padding:20px">Nenhum juiz cadastrado</td></tr>';return;}
-  tbody.innerHTML=juizes.map(([k,v])=>`
-    <tr>
-      <td style="font-weight:700">${v.nome}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deletarJuiz('${k}','${v.nome}')">Excluir</button></td>
-    </tr>`).join('');
-}
-
-window.adicionarJuiz=async function(){
-  const nome=document.getElementById('juiz-nome').value.trim();
-  const err=document.getElementById('admin-juizes-error');
-  const suc=document.getElementById('admin-juizes-success');
-  err.style.display='none';suc.style.display='none';
-  if(!nome){err.textContent='Nome é obrigatório.';err.style.display='block';return;}
-  await fbPush('juizes',{nome,perfil:'sala'});
-  document.getElementById('juiz-nome').value='';
-  suc.textContent=`Juiz "${nome}" adicionado!`;suc.style.display='block';
-  await carregarJuizes();
-};
-
-window.deletarJuiz=async function(id,nome){
-  if(!confirm(`Excluir juiz "${nome}"?`))return;
-  await fbDel(`juizes/${id}`);
-  await carregarJuizes();
-};
-
-window.alterarSenhas=async function(){
-  const se=document.getElementById('nova-senha-evento').value.trim();
-  const sa=document.getElementById('nova-senha-admin').value.trim();
-  const suc=document.getElementById('admin-juizes-success');
-  suc.style.display='none';
-  const patch={};
-  if(se)patch.senha_evento=se;
-  if(sa)patch.senha_admin=sa;
-  if(!Object.keys(patch).length){alert('Preencha ao menos uma senha.');return;}
-  await fbPatch('config',patch);
-  document.getElementById('nova-senha-evento').value='';
-  document.getElementById('nova-senha-admin').value='';
-  suc.textContent='Senhas atualizadas!';suc.style.display='block';
-};
-
-// ═══════════════════════════════════════════════════════════════
-// ADMIN: AVALIAÇÕES
-// ═══════════════════════════════════════════════════════════════
-let todasAval=[],todasAvalEq=[];
-
-window.irAdminAvaliacoes=async function(){
-  show('screen-admin-aval');
-  document.getElementById('admin-aval-content').innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
-  await loadEquipes();todasAvalEq=[...equipes];
-  const data=await fbGet('avaliacoes_sala')||{};
-  todasAval=Object.entries(data).sort((a,b)=>b[1].timestamp-a[1].timestamp);
-  renderAval(todasAval);
-};
-
-function renderAval(lista){
-  const ct=document.getElementById('admin-aval-content');
-  if(!lista.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma avaliação encontrada.</p>';return;}
-  ct.innerHTML=lista.map(([k,v])=>{
-    const eq=todasAvalEq.find(e=>e.id===v.equipeId);
-    const nomeEq=eq?eq.nome:v.equipeId;
-    const hora=new Date(v.timestamp).toLocaleString('pt-BR');
-    return `
-    <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px;background:white">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div>
-          <div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--marrom)">${nomeEq}</div>
-          <div style="font-size:12px;color:var(--text-muted)">Juiz: <strong>${v.juiz}</strong> · ${hora}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="text-align:right">
-            <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:var(--marrom);line-height:1">${v.total}</div>
-            <div style="font-size:11px;color:var(--text-muted)">de 40 pts</div>
-          </div>
-          <button class="btn btn-danger btn-sm" onclick="deletarAval('${k}')">Excluir</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-        ${TODOS_CRIT.map(c=>{const n=v.notas?.[c.id];return n?`<span style="background:${n.valor===4?'var(--caramelo)':'var(--bege-dark)'};color:${n.valor===4?'white':'var(--marrom)'};padding:3px 8px;border-radius:20px;font-size:12px;font-weight:700">${n.valor}</span>`:'';}).join('')}
-        ${v.indicacao?'<span style="background:#fef6e4;color:#7a4a00;padding:3px 8px;border-radius:20px;font-size:12px;font-weight:700">⭐ Indicada</span>':''}
-      </div>
-      ${v.feedbackPositivo?`<div class="feedback-pos-box">✅ ${v.feedbackPositivo}</div>`:''}
-      ${v.feedbackMelhoria?`<div class="feedback-mel-box">💡 ${v.feedbackMelhoria}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-window.filtrarAval=function(){
-  const fe=document.getElementById('filtro-aval-equipe').value.toLowerCase();
-  const fj=document.getElementById('filtro-aval-juiz').value.toLowerCase();
-  renderAval(todasAval.filter(([k,v])=>{
-    const eq=todasAvalEq.find(e=>e.id===v.equipeId);
-    return(eq?eq.nome:v.equipeId).toLowerCase().includes(fe)&&v.juiz.toLowerCase().includes(fj);
-  }));
-};
-
-window.deletarAval=async function(id){
-  if(!confirm('Excluir esta avaliação?'))return;
-  await fbDel(`avaliacoes_sala/${id}`);
-  todasAval=todasAval.filter(([k])=>k!==id);
-  renderAval(todasAval);
-};
-
-// ═══════════════════════════════════════════════════════════════
-// ADMIN: RANKING
-// ═══════════════════════════════════════════════════════════════
-window.irAdminRanking=async function(){show('screen-admin-ranking');await carregarRanking();};
-
-window.carregarRanking=async function(){
-  document.getElementById('ranking-content').innerHTML='<div class="loading"><div class="spinner"></div>Calculando...</div>';
-  await loadEquipes();
-  const data=await fbGet('avaliacoes_sala')||{};
-  const avals=Object.values(data);
-  const porEq={};
-  avals.forEach(v=>{
-    if(!porEq[v.equipeId])porEq[v.equipeId]={total:0,count:0,indicacoes:0};
-    porEq[v.equipeId].total+=v.total;
-    porEq[v.equipeId].count++;
-    if(v.indicacao)porEq[v.equipeId].indicacoes++;
+window.filtrarTabela=function(inputId,tabelaId){
+  const termo=document.getElementById(inputId).value.toLowerCase();
+  const tabela=document.getElementById(tabelaId);if(!tabela)return;
+  tabela.querySelectorAll('tr:not(:first-child)').forEach(tr=>{
+    tr.style.display=tr.textContent.toLowerCase().includes(termo)?'':'none';
   });
-  const ranking=equipes
-    .map(eq=>{const d=porEq[eq.id];if(!d)return null;return{...eq,media:d.total/d.count,count:d.count,indicacoes:d.indicacoes};})
-    .filter(Boolean)
-    .sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
-  const semAval=equipes.filter(e=>!porEq[e.id]);
-  if(!ranking.length){document.getElementById('ranking-content').innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma avaliação registrada ainda.</p>';return;}
-  document.getElementById('ranking-content').innerHTML=`
-    <p class="text-muted" style="margin-bottom:16px;font-size:13px">${ranking.length} equipe(s) avaliada(s)${semAval.length?' · '+semAval.length+' sem avaliação':''}</p>
-    <div class="table-wrap" style="margin-bottom:16px">
-      <table>
-        <thead><tr><th>#</th><th>Equipe</th><th>Escola</th><th>Avaliações</th><th>Média</th><th>Indicações</th></tr></thead>
-        <tbody>
-          ${ranking.map((e,i)=>`
-            <tr>
-              <td style="font-family:'Nunito',sans-serif;font-weight:900;font-size:18px;color:${i<3?'var(--caramelo)':'var(--text-muted)'}">${i+1}</td>
-              <td style="font-weight:700">${e.nome}</td>
-              <td style="font-size:12px;color:var(--text-muted)">${e.escola||'—'}</td>
-              <td style="color:var(--text-muted)">${e.count}x</td>
-              <td><span style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:var(--marrom)">${e.media.toFixed(1)}</span><span style="font-size:11px;color:var(--text-muted)">/40</span></td>
-              <td>${e.indicacoes>0?`<span style="color:#a06010;font-weight:700">⭐ ${e.indicacoes}</span>`:'—'}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-    ${semAval.length?`<p class="text-muted" style="font-size:12px"><strong>Sem avaliação:</strong> ${semAval.map(e=>e.nome).join(', ')}</p>`:''}`;
 };
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORTAR CSV
-// ═══════════════════════════════════════════════════════════════
+window.irAdmin=async function(sub){
+  show('screen-admin-sub');
+  const title=document.getElementById('admin-sub-title');
+  const ct=document.getElementById('admin-sub-content');
+  ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
+
+  if(sub==='juizes'){
+    title.textContent='Gerenciar Juízes';
+    const d=await fbGet('juizes')||{};
+    const rows=Object.entries(d).sort((a,b)=>a[1].nome.localeCompare(b[1].nome))
+      .map(([k,v])=>`<tr>
+        <td style="font-weight:600">${v.nome}</td>
+        <td><span style="background:var(--bege-dark);color:var(--marrom);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">Juiz de Sala</span></td>
+        <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
+      </tr>`).join('');
+    ct.innerHTML=`
+      <div class="table-wrap" style="margin-bottom:20px"><table>
+        <tr><th>Nome</th><th>Perfil</th><th>Ação</th></tr>
+        ${rows||'<tr><td colspan="3" style="text-align:center;color:#999;padding:20px">Nenhum juiz cadastrado</td></tr>'}
+      </table></div>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo juiz</p>
+      <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
+      <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
+      ${csvUI('juiz')}`;
+  }
+  else if(sub==='equipes'){
+    title.textContent='Gerenciar Equipes';
+    await loadEquipes();
+    const rows=equipes.map((e,i)=>`<tr>
+      <td style="font-weight:700;color:var(--text-muted)">${i+1}</td>
+      <td style="font-weight:600">${e.nome}</td>
+      <td>${e.numero||'—'}</td>
+      <td>${e.escola||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="remEq('${e.id}')">Remover</button></td>
+    </tr>`).join('');
+    ct.innerHTML=`
+      <div class="table-wrap" style="margin-bottom:20px"><table>
+        <tr><th>#</th><th>Nome</th><th>Número</th><th>Escola</th><th>Ação</th></tr>
+        ${rows||'<tr><td colspan="5" style="text-align:center;color:#999;padding:20px">Nenhuma equipe cadastrada</td></tr>'}
+      </table></div>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar nova equipe</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div class="form-group" style="margin:0"><label>Nome da equipe</label><input id="ne-nome" placeholder="Ex: Robonautas"></div>
+        <div class="form-group" style="margin:0"><label>Número</label><input id="ne-num" placeholder="Ex: 12345"></div>
+      </div>
+      <div class="form-group"><label>Escola / Instituição</label><input id="ne-escola" placeholder="Ex: Escola Municipal X"></div>
+      <button class="btn btn-primary" style="margin-bottom:20px" onclick="addEq()">Cadastrar Equipe</button>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
+      ${csvUI('equipe')}`;
+  }
+  else if(sub==='notas-sala'){
+    title.textContent='Notas de Sala';
+    await loadEquipes();
+    const d=await fbGet('avaliacoes_sala')||{};
+    const rows=Object.entries(d).sort((a,b)=>b[1].timestamp-a[1].timestamp).map(([k,v])=>{
+      const eq=equipes.find(e=>e.id===v.equipeId);
+      const coms=TODOS_CRIT.map(c=>{
+        const n=v.notas?.[c.id]||{};
+        return n.comentario?`<div class="comment-box">⚠️ <strong>${c.label}:</strong> ${n.comentario}</div>`:'';
+      }).join('');
+      const fbGeral=[
+        v.feedbackPositivo?`<div class="feedback-pos-box">✅ <strong>Muito bom:</strong> ${v.feedbackPositivo}</div>`:'',
+        v.feedbackMelhoria?`<div class="feedback-mel-box">💡 <strong>Pensem sobre:</strong> ${v.feedbackMelhoria}</div>`:''
+      ].join('');
+      return `<tr>
+        <td style="font-weight:600">${eq?eq.nome:v.equipeId}</td>
+        <td>${v.juiz}</td>
+        <td style="font-weight:700;color:var(--marrom);font-family:'Nunito',sans-serif;font-size:16px">${v.total}/40</td>
+        <td style="text-align:center">${v.indicacao?'⭐':'—'}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
+        <td>${coms||''} ${fbGeral||(!coms&&!fbGeral?'<span style="color:#999;font-size:12px">—</span>':'')}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button></td>
+      </tr>`;
+    }).join('');
+    ct.innerHTML=`
+      <div style="margin-bottom:12px">
+        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="padding:10px 14px;font-size:14px">
+      </div>
+      <div class="table-wrap"><table id="tabela-sala">
+        <tr><th>Equipe</th><th>Juiz</th><th>Nota</th><th>Indicação</th><th>Horário</th><th>Feedbacks</th><th>Ação</th></tr>
+        ${rows||'<tr><td colspan="7" style="text-align:center;color:#999;padding:20px">Nenhuma avaliação registrada</td></tr>'}
+      </table></div>`;
+  }
+  else if(sub==='senha'){
+    title.textContent='Alterar Senhas';
+    ct.innerHTML=`
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--marrom)">Senha do evento (juízes)</p>
+      <div class="form-group"><label>Nova senha do evento</label>
+        <div class="pass-wrap"><input type="password" id="s-evento" placeholder="Nova senha"><button type="button" class="btn-ver-senha" onclick="toggleSenha('s-evento',this)">👁</button></div>
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:24px" onclick="salvarSenha('evento')">Salvar senha do evento</button>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--marrom)">Senha do admin</p>
+      <div class="form-group"><label>Nova senha do admin</label>
+        <div class="pass-wrap"><input type="password" id="s-admin" placeholder="Nova senha admin"><button type="button" class="btn-ver-senha" onclick="toggleSenha('s-admin',this)">👁</button></div>
+      </div>
+      <button class="btn btn-primary" onclick="salvarSenha('admin')">Salvar senha do admin</button>
+      <div id="senha-msg" class="success-msg" style="margin-top:12px"></div>`;
+  }
+  else if(sub==='notas-gerais'){
+    title.textContent='Notas Gerais — Ranking Final';
+    await loadEquipes();
+    const sala=await fbGet('avaliacoes_sala')||{};
+    const salaMap={};
+    Object.values(sala).forEach(v=>{
+      if(!salaMap[v.equipeId])salaMap[v.equipeId]={notas:[],indicacoes:0};
+      salaMap[v.equipeId].notas.push(v.total);
+      if(v.indicacao)salaMap[v.equipeId].indicacoes++;
+    });
+    const ranking=equipes.map(e=>{
+      const sd=salaMap[e.id];if(!sd)return null;
+      const media=sd.notas.reduce((a,b)=>a+b,0)/sd.notas.length;
+      return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes};
+    }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
+    const semAval=equipes.filter(e=>!salaMap[e.id]);
+    if(!ranking.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados ainda.</p>';return;}
+    const rows=ranking.map((e,i)=>{
+      const empate=i>0&&ranking[i-1].media===e.media;
+      return `<tr>
+        <td style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--marrom)">${i+1}º</td>
+        <td style="font-weight:600">${e.nome}${empate?' <span style="font-size:11px;background:#fef6e4;color:#a06010;padding:2px 6px;border-radius:4px;font-weight:700">EMPATE</span>':''}</td>
+        <td style="text-align:center">${e.media.toFixed(1)}/40<br><span style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</span></td>
+        <td style="text-align:center;font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--caramelo)">${e.media.toFixed(1)}</td>
+        <td style="text-align:center">${e.indicacoes>0?`<span style="font-weight:700;color:var(--marrom)">⭐ ${e.indicacoes}</span>`:'<span style="color:#ccc">—</span>'}</td>
+      </tr>`;
+    }).join('');
+    ct.innerHTML=`
+      <p class="text-muted" style="margin-bottom:12px;font-size:13px">Fórmula: <strong>Média das avaliações de sala (0–40)</strong>. Empate: mais indicações = melhor colocação.</p>
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="filtro-gerais" placeholder="🔍 Buscar por equipe..." oninput="filtrarTabela('filtro-gerais','tabela-gerais')" style="flex:1;padding:10px 14px;font-size:14px">
+        <button class="btn btn-caramelo btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tabela-gerais">
+        <tr><th>#</th><th>Equipe</th><th>Nota Sala</th><th>Total</th><th>Indicações</th></tr>
+        ${rows}
+      </table></div>
+      ${semAval.length?`<p class="text-muted" style="font-size:12px;margin-top:12px"><strong>Sem avaliação:</strong> ${semAval.map(e=>e.nome).join(', ')}</p>`:''}`;
+  }
+};
+
+window.remJuiz=async function(id){if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
+window.addJuiz=async function(){
+  const nome=document.getElementById('nj-nome').value.trim();
+  if(!nome){alert('Nome obrigatório.');return;}
+  await fbPush('juizes',{nome,perfil:'sala'});
+  alert(`Juiz "${nome}" cadastrado!`);irAdmin('juizes');
+};
+window.remEq=async function(id){
+  const eq=equipes.find(e=>e.id===id);
+  if(!confirm(`Remover equipe "${eq?.nome}"?`))return;
+  await fbDel(`equipes/${id}`);irAdmin('equipes');
+};
+window.addEq=async function(){
+  const nome=document.getElementById('ne-nome').value.trim();
+  const num=document.getElementById('ne-num').value.trim();
+  const escola=document.getElementById('ne-escola').value.trim();
+  if(!nome){alert('Nome obrigatório.');return;}
+  await fbPush('equipes',{nome,numero:num,escola});
+  alert(`Equipe "${nome}" cadastrada!`);irAdmin('equipes');
+};
+window.delSala=async function(id){
+  if(!confirm('Apagar esta avaliação permanentemente?'))return;
+  await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala');
+};
+window.salvarSenha=async function(tipo){
+  const val=document.getElementById(`s-${tipo}`).value.trim();
+  if(!val){alert('Digite a nova senha.');return;}
+  await fbPatch('config',tipo==='evento'?{senha_evento:val}:{senha_admin:val});
+  document.getElementById(`s-${tipo}`).value='';
+  const msg=document.getElementById('senha-msg');
+  msg.textContent=`✅ Senha ${tipo==='evento'?'do evento':'do admin'} atualizada!`;
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3000);
+};
+
 window.exportarCSV=async function(){
   const btn=document.querySelector('[onclick="exportarCSV()"]');
   if(btn){btn.textContent='⏳ Gerando...';btn.disabled=true;}

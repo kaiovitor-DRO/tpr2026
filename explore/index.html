@@ -639,7 +639,7 @@ window.irAdmin=async function(sub){
     const rows=Object.entries(d).sort((a,b)=>a[1].nome.localeCompare(b[1].nome))
       .map(([k,v])=>`<tr>
         <td style="font-weight:600">${v.nome}</td>
-        <td><span style="background:var(--bege-dark);color:var(--marrom);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${v.perfil==='extra'?'Juiz de Atividade Extra':'Juiz de Sala'}</span></td>
+        <td><span style="background:var(--bege-dark);color:var(--marrom);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${v.perfil==='extra'?'Juiz de Arena':'Juiz de Sala'}</span></td>
         <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
       </tr>`).join('');
     ct.innerHTML=`
@@ -650,7 +650,7 @@ window.irAdmin=async function(sub){
       <div class="divider"></div>
       <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo juiz</p>
       <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
-      <div class="form-group"><label>Perfil</label><select id="nj-perfil"><option value="sala">Juiz de Sala</option><option value="extra">Juiz de Atividade Extra</option></select></div>
+      <div class="form-group"><label>Perfil</label><select id="nj-perfil"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option></select></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
       <div class="divider"></div>
       <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
@@ -662,14 +662,13 @@ window.irAdmin=async function(sub){
     const rows=equipes.map((e,i)=>`<tr>
       <td style="font-weight:700;color:var(--text-muted)">${i+1}</td>
       <td style="font-weight:600">${e.nome}</td>
-      <td>${e.numero||'—'}</td>
       <td>${e.escola||'—'}</td>
       <td><button class="btn btn-danger btn-sm" onclick="remEq('${e.id}')">Remover</button></td>
     </tr>`).join('');
     ct.innerHTML=`
       <div class="table-wrap" style="margin-bottom:20px"><table>
-        <tr><th>#</th><th>Nome</th><th>Número</th><th>Escola</th><th>Ação</th></tr>
-        ${rows||'<tr><td colspan="5" style="text-align:center;color:#999;padding:20px">Nenhuma equipe cadastrada</td></tr>'}
+        <tr><th>#</th><th>Nome</th><th>Escola</th><th>Ação</th></tr>
+        ${rows||'<tr><td colspan="4" style="text-align:center;color:#999;padding:20px">Nenhuma equipe cadastrada</td></tr>'}
       </table></div>
       <div class="divider"></div>
       <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar nova equipe</p>

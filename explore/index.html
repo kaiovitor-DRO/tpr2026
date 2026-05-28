@@ -971,23 +971,89 @@ window.exportarCSV=async function(){
   if(btn){btn.textContent='⏳ Gerando...';btn.disabled=true;}
   await loadEquipes();
   const data=await fbGet('avaliacoes_sala')||{};
-  const cab=[
-    'Equipe','Número','Escola','Juiz','Data/Hora',
-    ...TODOS_CRIT.flatMap(c=>[`${c.label} (nota)`,`${c.label} (comentário)`]),
+
+  const CATS_EXP={
+    challenge:'Challenge Solution',
+    corevalues:'Core Values',
+    teammodel:'Team Model',
+    coding:'Coding',
+    poster:'Team Poster'
+  };
+  const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
+
+  // Calcular médias por equipe para o CSV de ranking
+  const salaMap={};
+  Object.values(data).forEach(v=>{
+    if(!salaMap[v.equipeId])salaMap[v.equipeId]={notas:[],indicacoes:0,cats:{challenge:[],corevalues:[],teammodel:[],coding:[],poster:[]}};
+    salaMap[v.equipeId].notas.push(v.total);
+    if(v.indicacao)salaMap[v.equipeId].indicacoes++;
+    const n=v.notas||{};
+    salaMap[v.equipeId].cats.challenge.push((n.ch_aprendeu?.valor||0)+(n.ch_impacto?.valor||0));
+    salaMap[v.equipeId].cats.corevalues.push((n.cv_usou?.valor||0)+(n.cv_habilidades?.valor||0));
+    salaMap[v.equipeId].cats.teammodel.push((n.tm_descricao?.valor||0)+(n.tm_exploreset?.valor||0));
+    salaMap[v.equipeId].cats.coding.push((n.co_motorizado?.valor||0)+(n.co_programou?.valor||0));
+    salaMap[v.equipeId].cats.poster.push((n.po_incluiu?.valor||0)+(n.po_jornada?.valor||0));
+  });
+
+  // ── ABA 1: Avaliações detalhadas ──
+  const cab1=[
+    'Equipe','Escola','Juiz','Data/Hora',
+    ...TODOS_CRIT.flatMap(cr=>[`${cr.label} (nota)`,`${cr.label} (comentário)`]),
     'Total (0-40)','Indicação próxima fase','Feedback positivo','Feedback melhoria'
   ];
-  const linhas=[cab];
-  Object.values(data).forEach(v=>{
+  const linhas=[cab1];
+  Object.values(data).sort((a,b)=>a.equipeId.localeCompare(b.equipeId)).forEach(v=>{
     const eq=equipes.find(e=>e.id===v.equipeId);
     const n=v.notas||{};
     linhas.push([
-      eq?eq.nome:v.equipeId,eq?.numero||'',eq?.escola||'',
-      v.juiz,new Date(v.timestamp).toLocaleString('pt-BR'),
-      ...TODOS_CRIT.flatMap(c=>[n[c.id]?.valor??'',n[c.id]?.comentario??'']),
-      v.total??'',v.indicacao?'Sim':'Não',
-      v.feedbackPositivo||'',v.feedbackMelhoria||''
+      eq?eq.nome:v.equipeId, eq?.escola||'',
+      v.juiz, new Date(v.timestamp).toLocaleString('pt-BR'),
+      ...TODOS_CRIT.flatMap(cr=>[n[cr.id]?.valor??'', n[cr.id]?.comentario??'']),
+      v.total??'', v.indicacao?'Sim':'Não',
+      v.feedbackPositivo||'', v.feedbackMelhoria||''
     ]);
   });
+
+  // Linha em branco + separador
+  linhas.push([]);
+  linhas.push(['=== RANKING FINAL ===']);
+  linhas.push([]);
+
+  // ── ABA 2: Ranking com categorias ──
+  const cab2=['#','Equipe','Escola','Nº Avaliações','Média Total (0-40)',
+    'Challenge Solution (0-8)','Core Values (0-8)','Team Model (0-8)',
+    'Coding (0-8)','Team Poster (0-8)',
+    'Prêmio de Categoria','Indicações'];
+  linhas.push(cab2);
+
+  const ranking=equipes.map(e=>{
+    const sd=salaMap[e.id];if(!sd)return null;
+    const media=avg(sd.notas);
+    const cats={
+      challenge:avg(sd.cats.challenge),
+      corevalues:avg(sd.cats.corevalues),
+      teammodel:avg(sd.cats.teammodel),
+      coding:avg(sd.cats.coding),
+      poster:avg(sd.cats.poster)
+    };
+    const premioCat=Object.keys(CATS_EXP).sort((a,b)=>cats[b]-cats[a])[0];
+    return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes,cats,premioCat};
+  }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
+
+  ranking.forEach((e,i)=>{
+    linhas.push([
+      i+1, e.nome, e.escola||'', e.avaliacoes,
+      e.media.toFixed(2),
+      e.cats.challenge.toFixed(2),
+      e.cats.corevalues.toFixed(2),
+      e.cats.teammodel.toFixed(2),
+      e.cats.coding.toFixed(2),
+      e.cats.poster.toFixed(2),
+      CATS_EXP[e.premioCat]||'',
+      e.indicacoes
+    ]);
+  });
+
   const bom='\uFEFF';
   const csv=bom+linhas.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');

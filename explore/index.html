@@ -735,37 +735,90 @@ window.irAdmin=async function(sub){
     title.textContent='Notas Gerais — Ranking Final';
     await loadEquipes();
     const sala=await fbGet('avaliacoes_sala')||{};
+
+    // Agrupa por equipe calculando média total e médias por categoria
     const salaMap={};
     Object.values(sala).forEach(v=>{
-      if(!salaMap[v.equipeId])salaMap[v.equipeId]={notas:[],indicacoes:0};
+      if(!salaMap[v.equipeId])salaMap[v.equipeId]={notas:[],indicacoes:0,cats:{challenge:[],corevalues:[],teammodel:[],coding:[],poster:[]}};
       salaMap[v.equipeId].notas.push(v.total);
       if(v.indicacao)salaMap[v.equipeId].indicacoes++;
+      const n=v.notas||{};
+      salaMap[v.equipeId].cats.challenge.push((n.ch_aprendeu?.valor||0)+(n.ch_impacto?.valor||0));
+      salaMap[v.equipeId].cats.corevalues.push((n.cv_usou?.valor||0)+(n.cv_habilidades?.valor||0));
+      salaMap[v.equipeId].cats.teammodel.push((n.tm_descricao?.valor||0)+(n.tm_exploreset?.valor||0));
+      salaMap[v.equipeId].cats.coding.push((n.co_motorizado?.valor||0)+(n.co_programou?.valor||0));
+      salaMap[v.equipeId].cats.poster.push((n.po_incluiu?.valor||0)+(n.po_jornada?.valor||0));
     });
+
+    const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
+
+    const CATS_INFO={
+      challenge:{label:'Challenge Solution',emoji:'🔬',cls:'cat-challenge'},
+      corevalues:{label:'Core Values',emoji:'🤝',cls:'cat-corevalues'},
+      teammodel:{label:'Team Model',emoji:'🤖',cls:'cat-teammodel'},
+      coding:{label:'Coding',emoji:'💻',cls:'cat-coding'},
+      poster:{label:'Team Poster',emoji:'🎨',cls:'cat-poster'}
+    };
+
     const ranking=equipes.map(e=>{
       const sd=salaMap[e.id];if(!sd)return null;
-      const media=sd.notas.reduce((a,b)=>a+b,0)/sd.notas.length;
-      return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes};
+      const media=avg(sd.notas);
+      const cats={
+        challenge:avg(sd.cats.challenge),
+        corevalues:avg(sd.cats.corevalues),
+        teammodel:avg(sd.cats.teammodel),
+        coding:avg(sd.cats.coding),
+        poster:avg(sd.cats.poster)
+      };
+      const melhorCat=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0];
+      return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes,cats,melhorCat};
     }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
+
     const semAval=equipes.filter(e=>!salaMap[e.id]);
     if(!ranking.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados ainda.</p>';return;}
+
+    // Vencedor de cada categoria
+    const vencCat={};
+    Object.keys(CATS_INFO).forEach(cat=>{
+      const melhor=[...ranking].sort((a,b)=>b.cats[cat]-a.cats[cat])[0];
+      if(melhor&&melhor.cats[cat]>0)vencCat[cat]=melhor.id;
+    });
+
     const rows=ranking.map((e,i)=>{
       const empate=i>0&&ranking[i-1].media===e.media;
+      const premio=e.melhorCat&&vencCat[e.melhorCat]===e.id?e.melhorCat:null;
       return `<tr>
-        <td style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--marrom)">${i+1}º</td>
-        <td style="font-weight:600">${e.nome}${empate?' <span style="font-size:11px;background:#fef6e4;color:#a06010;padding:2px 6px;border-radius:4px;font-weight:700">EMPATE</span>':''}</td>
-        <td style="text-align:center">${e.media.toFixed(1)}/40<br><span style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</span></td>
-        <td style="text-align:center;font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--caramelo)">${e.media.toFixed(1)}</td>
-        <td style="text-align:center">${e.indicacoes>0?`<span style="font-weight:700;color:var(--marrom)">⭐ ${e.indicacoes}</span>`:'<span style="color:#ccc">—</span>'}</td>
+        <td style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:${i<3?'var(--caramelo)':'var(--text-muted)'}">${i+1}º</td>
+        <td>
+          <div style="font-weight:700">${e.nome}${empate?' <span style="font-size:11px;background:#fef6e4;color:#a06010;padding:2px 6px;border-radius:4px;font-weight:700">EMPATE</span>':''}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${e.escola||''}</div>
+        </td>
+        <td style="text-align:center">
+          <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--marrom)">${e.media.toFixed(1)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</div>
+        </td>
+        <td style="font-size:12px;min-width:200px">
+          ${Object.entries(CATS_INFO).map(([cat,info])=>`
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;margin-bottom:2px;background:${vencCat[cat]===e.id?'var(--bege-dark)':'transparent'}">
+              <span style="color:var(--text-muted)">${info.emoji} ${info.label}</span>
+              <span style="font-weight:700;color:${vencCat[cat]===e.id?'var(--caramelo-dark)':'var(--text)'};margin-left:8px">${e.cats[cat].toFixed(1)}/8${vencCat[cat]===e.id?' 🏅':''}</span>
+            </div>`).join('')}
+        </td>
+        <td style="text-align:center;vertical-align:middle">
+          ${premio?`<div style="background:var(--bege-dark);color:var(--marrom);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px">${CATS_INFO[premio].emoji} ${CATS_INFO[premio].label}</div>`:''}
+          ${e.indicacoes>0?`<div style="font-size:12px;font-weight:700;color:var(--marrom)">⭐ ${e.indicacoes} ind.</div>`:''}
+        </td>
       </tr>`;
     }).join('');
+
     ct.innerHTML=`
-      <p class="text-muted" style="margin-bottom:12px;font-size:13px">Fórmula: <strong>Média das avaliações de sala (0–40)</strong>. Empate: mais indicações = melhor colocação.</p>
+      <p class="text-muted" style="margin-bottom:12px;font-size:13px">Ranking por <strong>média das avaliações (0–40)</strong>. Cada equipe recebe o prêmio da categoria em que mais se destacou. 🏅 = vencedor da categoria.</p>
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <input type="text" id="filtro-gerais" placeholder="🔍 Buscar por equipe..." oninput="filtrarTabela('filtro-gerais','tabela-gerais')" style="flex:1;padding:10px 14px;font-size:14px">
         <button class="btn btn-caramelo btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
       </div>
       <div class="table-wrap"><table id="tabela-gerais">
-        <tr><th>#</th><th>Equipe</th><th>Média</th><th>Por Categoria</th><th>Prêmio / Indicação</th></tr>
+        <tr><th>#</th><th>Equipe</th><th>Média</th><th>Por Categoria (máx. 8 cada)</th><th>Prêmio / Indicação</th></tr>
         ${rows}
       </table></div>
       ${semAval.length?`<p class="text-muted" style="font-size:12px;margin-top:12px"><strong>Sem avaliação:</strong> ${semAval.map(e=>e.nome).join(', ')}</p>`:''}`;

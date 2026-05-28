@@ -777,16 +777,16 @@ window.irAdmin=async function(sub){
     const semAval=equipes.filter(e=>!salaMap[e.id]);
     if(!ranking.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados ainda.</p>';return;}
 
-    // Vencedor de cada categoria
-    const vencCat={};
-    Object.keys(CATS_INFO).forEach(cat=>{
-      const melhor=[...ranking].sort((a,b)=>b.cats[cat]-a.cats[cat])[0];
-      if(melhor&&melhor.cats[cat]>0)vencCat[cat]=melhor.id;
-    });
+    // ── Prêmio de cada equipe = categoria em que ela teve maior média ──
+    // Simples: cada equipe recebe o prêmio da sua melhor categoria.
+    // Várias equipes podem ganhar a mesma categoria.
+    // O ranking absoluto (1º/2º/3º) é pela média total — independente.
 
     const rows=ranking.map((e,i)=>{
       const empate=i>0&&ranking[i-1].media===e.media;
-      const premio=e.melhorCat&&vencCat[e.melhorCat]===e.id?e.melhorCat:null;
+      // Melhor categoria desta equipe (maior nota, desempate pela ordem)
+      const premioCat=Object.keys(CATS_INFO)
+        .sort((a,b)=>e.cats[b]-e.cats[a])[0];
       return `<tr>
         <td style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:${i<3?'var(--caramelo)':'var(--text-muted)'}">${i+1}º</td>
         <td>
@@ -798,15 +798,16 @@ window.irAdmin=async function(sub){
           <div style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</div>
         </td>
         <td style="font-size:12px;min-width:200px">
-          ${Object.entries(CATS_INFO).map(([cat,info])=>`
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;margin-bottom:2px;background:${vencCat[cat]===e.id?'var(--bege-dark)':'transparent'}">
-              <span style="color:var(--text-muted)">${info.emoji} ${info.label}</span>
-              <span style="font-weight:700;color:${vencCat[cat]===e.id?'var(--caramelo-dark)':'var(--text)'};margin-left:8px">${e.cats[cat].toFixed(1)}/8${vencCat[cat]===e.id?' 🏅':''}</span>
-            </div>`).join('')}
+          ${Object.entries(CATS_INFO).map(([cat,info])=>{
+            const isWinner=premioCat===cat;
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;margin-bottom:2px;background:${isWinner?'var(--bege-dark)':'transparent'}">
+              <span style="color:${isWinner?'var(--marrom)':'var(--text-muted)'};font-weight:${isWinner?'700':'400'}">${info.emoji} ${info.label}</span>
+              <span style="font-weight:700;color:${isWinner?'var(--caramelo-dark)':'var(--text)'};margin-left:8px">${e.cats[cat].toFixed(1)}/8${isWinner?' 🏅':''}</span>
+            </div>`;}).join('')}
         </td>
         <td style="text-align:center;vertical-align:middle">
-          ${premio?`<div style="background:var(--bege-dark);color:var(--marrom);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px">${CATS_INFO[premio].emoji} ${CATS_INFO[premio].label}</div>`:''}
-          ${e.indicacoes>0?`<div style="font-size:12px;font-weight:700;color:var(--marrom)">⭐ ${e.indicacoes} ind.</div>`:''}
+          ${premioCat?`<div style="background:var(--bege-dark);color:var(--marrom);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px">${CATS_INFO[premioCat].emoji} ${CATS_INFO[premioCat].label}</div>`:'<div style="font-size:11px;color:#ccc">—</div>'}
+          ${e.indicacoes>0?`<div style="font-size:12px;font-weight:700;color:var(--marrom);margin-top:4px">⭐ ${e.indicacoes} ind.</div>`:''}
         </td>
       </tr>`;
     }).join('');

@@ -760,7 +760,7 @@ window.irAdmin=async function(sub){
         <button class="btn btn-caramelo btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
       </div>
       <div class="table-wrap"><table id="tabela-gerais">
-        <tr><th>#</th><th>Equipe</th><th>Nota Sala</th><th>Total</th><th>Indicações</th></tr>
+        <tr><th>#</th><th>Equipe</th><th>Média</th><th>Por Categoria</th><th>Prêmio / Indicação</th></tr>
         ${rows}
       </table></div>
       ${semAval.length?`<p class="text-muted" style="font-size:12px;margin-top:12px"><strong>Sem avaliação:</strong> ${semAval.map(e=>e.nome).join(', ')}</p>`:''}`;
@@ -790,6 +790,111 @@ window.addEq=async function(){
 window.delSala=async function(id){
   if(!confirm('Apagar esta avaliação permanentemente?'))return;
   await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala');
+};
+
+window.editarSala=async function(id){
+  const title=document.getElementById('admin-sub-title');
+  const ct=document.getElementById('admin-sub-content');
+  ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
+  await loadEquipes();
+  const d=await fbGet('avaliacoes_sala')||{};
+  const v=d[id];if(!v){alert('Avaliação não encontrada.');return;}
+  const eq=equipes.find(e=>e.id===v.equipeId);
+  const nomeEq=eq?eq.nome:v.equipeId;
+  title.textContent='Editar Avaliação';
+
+  const camposCrit=CATEGORIAS.map(cat=>`
+    <div style="margin-bottom:16px">
+      <div class="categoria-header ${cat.cls}" style="margin-top:8px">${cat.emoji} ${cat.label}</div>
+      ${cat.criterios.map(cr=>{
+        const n=v.notas?.[cr.id]||{valor:1,comentario:''};
+        return `
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;background:white">
+          <div style="font-weight:700;font-size:13px;color:var(--marrom);margin-bottom:8px">${cr.label}</div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label>Nota (1–4)</label>
+            <select id="edit-${cr.id}-val" onchange="updEditTotal()">
+              ${[1,2,3,4].map(n=>`<option value="${n}" ${n===n?'selected':''}>
+                ${n} — ${LBL[n]}
+              </option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Comentário Excede</label>
+            <textarea id="edit-${cr.id}-com" placeholder="Obrigatório se nota = 4" style="min-height:50px;font-size:13px">${n.comentario||''}</textarea>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+
+  ct.innerHTML=`
+    <p style="font-size:14px;margin-bottom:16px"><strong>Equipe:</strong> ${nomeEq} &nbsp;|&nbsp; <strong>Juiz:</strong> ${v.juiz}</p>
+    ${camposCrit}
+    <div class="divider"></div>
+    <p style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text);font-family:'Nunito',sans-serif">Feedback Geral</p>
+    <div class="form-group">
+      <label>✅ Muito bom</label>
+      <textarea id="edit-fb-pos" style="min-height:70px;font-size:14px">${v.feedbackPositivo||''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>💡 Pensem sobre</label>
+      <textarea id="edit-fb-mel" style="min-height:70px;font-size:14px">${v.feedbackMelhoria||''}</textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <input type="checkbox" id="edit-indicacao" ${v.indicacao?'checked':''} style="width:20px;height:20px;accent-color:var(--caramelo)">
+      <label for="edit-indicacao" style="font-size:14px;font-weight:600;color:var(--marrom);text-transform:none;letter-spacing:0">⭐ Indicar para próxima fase</label>
+    </div>
+    <div style="text-align:center;padding:12px 0 20px">
+      <div style="font-family:'Nunito',sans-serif;font-size:42px;font-weight:900;color:var(--marrom);line-height:1" id="edit-total-preview">0</div>
+      <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-top:4px">Pontos totais (máx. 40)</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="irAdmin('notas-sala')">← Cancelar</button>
+      <button class="btn btn-primary" style="flex:2" onclick="salvarEdicaoSala('${id}')">Salvar Alterações</button>
+    </div>`;
+
+  // Preencher selects com valores atuais
+  TODOS_CRIT.forEach(cr=>{
+    const sel=document.getElementById(`edit-${cr.id}-val`);
+    if(sel)sel.value=v.notas?.[cr.id]?.valor||1;
+  });
+  updEditTotal();
+};
+
+window.updEditTotal=function(){
+  let t=0;
+  TODOS_CRIT.forEach(cr=>{
+    const sel=document.getElementById(`edit-${cr.id}-val`);
+    if(sel)t+=parseInt(sel.value||1);
+  });
+  const el=document.getElementById('edit-total-preview');
+  if(el)el.textContent=t;
+};
+
+window.salvarEdicaoSala=async function(id){
+  let notas={},ok=true;
+  TODOS_CRIT.forEach(cr=>{
+    if(!ok)return;
+    const val=parseInt(document.getElementById(`edit-${cr.id}-val`)?.value||1);
+    const comentario=document.getElementById(`edit-${cr.id}-com`)?.value.trim()||'';;
+    if(val===4&&!comentario){alert(`Comentário obrigatório para "${cr.label}" (Excede).`);ok=false;return;}
+    notas[cr.id]={valor:val,comentario};
+  });
+  if(!ok)return;
+  const feedbackPositivo=document.getElementById('edit-fb-pos').value.trim();
+  const feedbackMelhoria=document.getElementById('edit-fb-mel').value.trim();
+  if(!feedbackPositivo){alert('Preencha o campo "✅ Muito bom".');return;}
+  if(!feedbackMelhoria){alert('Preencha o campo "💡 Pensem sobre".');return;}
+  const indicacao=document.getElementById('edit-indicacao').checked;
+  const total=TODOS_CRIT.reduce((s,cr)=>s+notas[cr.id].valor,0);
+  const btn=document.querySelector('#admin-sub-content .btn-primary');
+  if(btn){btn.textContent='Salvando...';btn.disabled=true;}
+  try{
+    await fbPatch(`avaliacoes_sala/${id}`,{notas,total,feedbackPositivo,feedbackMelhoria,indicacao});
+    alert('✅ Avaliação atualizada com sucesso!');
+    irAdmin('notas-sala');
+  }catch(e){alert('Erro ao salvar. Tente novamente.');}
+  finally{if(btn){btn.textContent='Salvar Alterações';btn.disabled=false;}}
 };
 window.salvarSenha=async function(tipo){
   const val=document.getElementById(`s-${tipo}`).value.trim();

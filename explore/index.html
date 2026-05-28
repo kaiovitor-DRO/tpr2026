@@ -698,7 +698,12 @@ window.irAdmin=async function(sub){
         <td style="text-align:center">${v.indicacao?'⭐':'—'}</td>
         <td style="font-size:12px;color:var(--text-muted)">${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
         <td>${coms||''} ${fbGeral||(!coms&&!fbGeral?'<span style="color:#999;font-size:12px">—</span>':'')}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button></td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="btn btn-caramelo btn-sm" onclick="editarSala('${k}')">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button>
+          </div>
+        </td>
       </tr>`;
     }).join('');
     ct.innerHTML=`

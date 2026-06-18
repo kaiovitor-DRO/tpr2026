@@ -168,7 +168,7 @@
   <div class="login-card">
     <div class="login-logo">
       <!-- Logo TPR preta pequena acima -->
-      <div style="height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;margin-top:-8px">
+      <div style="height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;margin-top:-8px">
         <img src="./logo-tpr-preta.png" alt="TPR" style="height:20px;width:auto">
       </div>
       <!-- Logo Innov colorida maior -->
@@ -192,16 +192,23 @@
     <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
     <p class="text-muted mt-12" style="text-align:center;font-size:12px">Sessão expira após 30 min de inatividade</p>
   </div>
-  <button class="btn-telao-direto" onclick="irParaTelao()">📺 Ver Telão</button>
+  <button class="btn-telao-direto" onclick="irParaTelao()">📺 Ver Telão — sem login</button>
   <p style="color:rgba(255,255,255,0.45);font-size:11px;text-align:center;margin-top:8px;line-height:1.6;max-width:400px;padding:0 16px">
-    TPR Innov 2026 · Criado por Divisão de Robótica e Cultura Maker — DRO<br>© Todos os direitos reservados
+    TPR Innov 2026 · Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
   </p>
 </div>
 
 <!-- HEADER -->
 <div id="app-header" style="display:none">
   <div class="header">
-    <div><div style="height:32px;display:flex;align-items:center"><img src="./logo-tpr-branco.png" alt="TPR" style="height:32px;width:auto"></div></div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="height:32px;display:flex;align-items:center;flex-shrink:0"><img src="./logo-tpr-branco.png" alt="TPR" style="height:32px;width:auto"></div>
+      <div style="width:1.5px;height:28px;background:rgba(255,255,255,0.3)"></div>
+      <div>
+        <div class="header-title" style="color:#F5A05A">INNOV 2026</div>
+        <div class="header-sub">Sistema de Avaliação</div>
+      </div>
+    </div>
     <div class="header-user">
       <span id="header-badge" class="badge"></span>
       <span id="header-nome" style="font-size:14px"></span>
@@ -320,20 +327,32 @@
     <div style="margin-top:20px">
       <p style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text)">Valores durante a rodada <span style="font-weight:400;color:var(--text-muted);font-size:12px">(critério de desempate individual)</span></p>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <label id="label-valores-a" style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
-          <input type="checkbox" id="valores-a" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
-          <div>
-            <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-a-nome">🔴 Equipe A — demonstrou valores durante a rodada</div>
-            <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
+        <div id="box-valores-a" style="background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px">
+          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
+            <input type="checkbox" id="valores-a" onchange="toggleJustificativa('a')" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
+            <div>
+              <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-a-nome">🔴 Equipe A — demonstrou valores durante a rodada</div>
+              <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
+            </div>
+          </label>
+          <div id="justif-wrap-a" style="display:none;margin-top:10px">
+            <div style="font-size:11px;font-weight:600;color:#1565c0;text-transform:uppercase;margin-bottom:4px">Justifique brevemente</div>
+            <textarea id="justif-a" placeholder="Ex: ajudou a equipe adversária a reposicionar o robô após uma falha..." style="min-height:54px;resize:vertical;font-size:13px;padding:8px 10px"></textarea>
           </div>
-        </label>
-        <label id="label-valores-b" style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
-          <input type="checkbox" id="valores-b" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
-          <div>
-            <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-b-nome">🔵 Equipe B — demonstrou valores durante a rodada</div>
-            <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
+        </div>
+        <div id="box-valores-b" style="background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px">
+          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
+            <input type="checkbox" id="valores-b" onchange="toggleJustificativa('b')" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
+            <div>
+              <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-b-nome">🔵 Equipe B — demonstrou valores durante a rodada</div>
+              <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
+            </div>
+          </label>
+          <div id="justif-wrap-b" style="display:none;margin-top:10px">
+            <div style="font-size:11px;font-weight:600;color:#1565c0;text-transform:uppercase;margin-bottom:4px">Justifique brevemente</div>
+            <textarea id="justif-b" placeholder="Ex: cedeu espaço na trilha para o robô adversário passar..." style="min-height:54px;resize:vertical;font-size:13px;padding:8px 10px"></textarea>
           </div>
-        </label>
+        </div>
       </div>
     </div>
 
@@ -433,23 +452,21 @@ const CRIT = [
   {id:'comunicacao',nome:'Comunicação',desc:'A equipe fez uma apresentação eficaz de sua solução, seu impacto sobre outras pessoas e comemoraram o progresso.'}
 ];
 // Rótulos da escala 1-4 usados para exibir o nível de avaliação
-const LBL = ['','Iniciante','Em desenvolvimento','Cumprido','Excede'];
+const LBL = ['','Iniciante','Em desenv.','Cumprido','Excede'];
 // ═══════════════════════════════════════════════════════════════
 // MISSÕES DA ARENA
 // MA = missões do Robô A (lado vermelho) | MB = Robô B (azul)
 // Para alterar pontuações ou adicionar missões, edite aqui.
 // ═══════════════════════════════════════════════════════════════
 const MA = [
-  {id:'limpeza_rio',nome:'Limpeza do Rio Jaguaribe',pts:15},
-  {id:'salvar_animal',nome:'Salvar animal fora do habitat',pts:10},
-  {id:'levar_lixo_b',nome:'Levar lixo para área de lançamento B',pts:10},
-  {id:'devolver_animal_mata',nome:'Devolver animal para mata nativa',pts:15}
+  {id:'limpeza_rio',nome:'M01 — Recolher lixo do rio Jaguaribe',pts:15},
+  {id:'salvar_animal',nome:'M02 — Resgatar e devolver animal ao habitat',pts:15},
+  {id:'devolver_animal_mata',nome:'M03 — Devolver animal do centro urbano ao habitat',pts:20}
 ];
 const MB = [
-  {id:'desobstruir_trilha',nome:'Desobstruir trilha do jardim botânico',pts:15},
-  {id:'recolher_animal',nome:'Recolher animal perdido na cidade',pts:10},
-  {id:'levar_animal_a',nome:'Levar animal para área de lançamento A',pts:15},
-  {id:'deposito_lixo',nome:'Colocar resíduos no depósito de lixo',pts:10}
+  {id:'recolher_animal',nome:'M04 — Resgatar animal do centro urbano e entregar na Área Vermelha',pts:20},
+  {id:'desobstruir_trilha',nome:'M05 — Desobstruir trilha do jardim botânico',pts:15},
+  {id:'deposito_lixo',nome:'M06 — Depositar resíduos no local correto',pts:15}
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -662,6 +679,13 @@ window.irParaArena = async function() {
 };
 
 // Prepara a tela de missões com os nomes das equipes e limpa dados anteriores
+// Mostra/oculta o campo de justificativa ao marcar/desmarcar valores na rodada
+window.toggleJustificativa = function(lado) {
+  const checked = document.getElementById(`valores-${lado}`).checked;
+  document.getElementById(`justif-wrap-${lado}`).style.display = checked ? 'block' : 'none';
+  if (!checked) document.getElementById(`justif-${lado}`).value = '';
+};
+
 window.irParaMissoes = function() {
   const a=document.getElementById('arena-equipe-a').value;
   const b=document.getElementById('arena-equipe-b').value;
@@ -677,6 +701,10 @@ window.irParaMissoes = function() {
   // Limpa checkboxes
   document.getElementById('valores-a').checked=false;
   document.getElementById('valores-b').checked=false;
+  document.getElementById('justif-wrap-a').style.display='none';
+  document.getElementById('justif-wrap-b').style.display='none';
+  document.getElementById('justif-a').value='';
+  document.getElementById('justif-b').value='';
   renderMiss();show('screen-missoes');
 };
 
@@ -705,7 +733,12 @@ window.enviarArena = async function() {
   MB.forEach(m=>{const d=document.getElementById(`ms-${m.id}`)?.classList.contains('done');mB[m.id]=d;if(d)pB+=m.pts;});
   const valoresA=document.getElementById('valores-a').checked;
   const valoresB=document.getElementById('valores-b').checked;
-  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,valoresA,valoresB,juiz:me,timestamp:Date.now()});
+  const justifA=document.getElementById('justif-a').value.trim();
+  const justifB=document.getElementById('justif-b').value.trim();
+  // Se marcou valores, a justificativa é obrigatória
+  if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
+  if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
+  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',juiz:me,timestamp:Date.now()});
   alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');
 };
 
@@ -839,12 +872,14 @@ window.verMinhasRodadas = async function() {
           </div>
           ${renderMissoesLeitura(MA, v.missoesA, {bg:'#fce4ec',text:'#880e4f'}, '🔴 Robô A — ' + nA)}
           ${renderMissoesLeitura(MB, v.missoesB, {bg:'#e3f2fd',text:'#0d47a1'}, '🔵 Robô B — ' + nB)}
-          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
             <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresA ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
               🤝 ${nA}: ${v.valoresA ? 'Demonstrou valores' : 'Sem registro de valores'}
+              ${v.valoresA && v.justifA ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifA}"</div>` : ''}
             </div>
             <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresB ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
               🤝 ${nB}: ${v.valoresB ? 'Demonstrou valores' : 'Sem registro de valores'}
+              ${v.valoresB && v.justifB ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifB}"</div>` : ''}
             </div>
           </div>
         </div>`;
@@ -867,8 +902,8 @@ window.exportarCSV = async function() {
   // Monta mapa de arena por equipe
   const arenaMap = {};
   Object.values(arena).forEach(r => {
-    arenaMap[r.equipeA] = { pts: r.totalAlianca, valores: r.valoresA || false };
-    arenaMap[r.equipeB] = { pts: r.totalAlianca, valores: r.valoresB || false };
+    arenaMap[r.equipeA] = { pts: r.totalAlianca, valores: r.valoresA || false, justif: r.justifA || '' };
+    arenaMap[r.equipeB] = { pts: r.totalAlianca, valores: r.valoresB || false, justif: r.justifB || '' };
   });
 
   // Cabeçalho do CSV
@@ -891,6 +926,7 @@ window.exportarCSV = async function() {
     'Pensem sobre (feedback geral)',
     'Nota Arena (0-100)',
     'Valores na Arena',
+    'Justificativa Valores na Arena',
     'Nota Final (0-100)'
   ];
 
@@ -902,6 +938,7 @@ window.exportarCSV = async function() {
     const ad = arenaMap[v.equipeId];
     const ptsArena = ad ? ad.pts : '';
     const valoresArena = ad ? (ad.valores ? 'Sim' : 'Não') : '';
+    const justifArena = ad ? ad.justif : '';
     const mediaSala = v.total;
     const ptsSala = (mediaSala / 20) * 100;
     const notaFinal = ptsArena !== '' ? (ptsSala * 0.75 + ptsArena * 0.25).toFixed(1) : (ptsSala * 0.75).toFixed(1);
@@ -920,6 +957,7 @@ window.exportarCSV = async function() {
       v.feedbackMelhoria ?? '',
       ptsArena,
       valoresArena,
+      justifArena,
       notaFinal
     ].map(cell => `"${String(cell).replace(/"/g, '""')}"`);
 
@@ -1305,18 +1343,32 @@ window.editArena = async function(id) {
   const rod=await fbGet(`rodadas_arena/${id}`);
   await loadEquipes();
   const eA=equipes.find(e=>e.id===rod.equipeA),eB=equipes.find(e=>e.id===rod.equipeB);
+  const nA=eA?eA.nome:rod.equipeA, nB=eB?eB.nome:rod.equipeB;
   const rM=(ms,dados)=>ms.map(m=>`
     <div class="missao-item ${dados?.[m.id]?'done':''}" id="edms-${m.id}" onclick="togEdMs('${m.id}')">
       <span class="missao-name">${m.nome}</span><span class="missao-pts">${m.pts} pts</span>
       <div class="missao-check"></div></div>`).join('');
   document.getElementById('admin-sub-content').innerHTML=`
     <p style="margin-bottom:16px">
-      <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${eA?eA.nome:rod.equipeA}</span>
-      <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 ${eB?eB.nome:rod.equipeB}</span>
+      <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${nA}</span>
+      <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 ${nB}</span>
     </p>
     <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div>${rM(MA,rod.missoesA)}</div>
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${rM(MB,rod.missoesB)}</div>
-    <div id="ed-arena-msg" class="success-msg"></div>
+    <div style="margin-top:16px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm)">
+      <div style="font-weight:600;margin-bottom:10px;font-size:14px">Valores durante a rodada</div>
+      <label style="display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;text-transform:none;font-weight:400;font-size:14px">
+        <input type="checkbox" id="ed-valores-a" ${rod.valoresA?'checked':''} style="width:18px;height:18px;cursor:pointer;accent-color:#1565c0">
+        🔴 ${nA} demonstrou valores
+      </label>
+      <textarea id="ed-justif-a" placeholder="Justificativa..." style="min-height:46px;font-size:13px;margin-bottom:14px">${rod.justifA||''}</textarea>
+      <label style="display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;text-transform:none;font-weight:400;font-size:14px">
+        <input type="checkbox" id="ed-valores-b" ${rod.valoresB?'checked':''} style="width:18px;height:18px;cursor:pointer;accent-color:#1565c0">
+        🔵 ${nB} demonstrou valores
+      </label>
+      <textarea id="ed-justif-b" placeholder="Justificativa..." style="min-height:46px;font-size:13px">${rod.justifB||''}</textarea>
+    </div>
+    <div id="ed-arena-msg" class="success-msg" style="margin-top:12px"></div>
     <div class="inline-flex" style="margin-top:16px">
       <button class="btn btn-primary btn-sm" onclick="savArena('${id}')">Salvar</button>
       <button class="btn btn-secondary btn-sm" onclick="irAdmin('notas-arena')">Cancelar</button>
@@ -1329,7 +1381,11 @@ window.savArena = async function(id) {
   let mA={},mB={},pA=0,pB=0;
   MA.forEach(m=>{const d=document.getElementById(`edms-${m.id}`)?.classList.contains('done');mA[m.id]=d;if(d)pA+=m.pts;});
   MB.forEach(m=>{const d=document.getElementById(`edms-${m.id}`)?.classList.contains('done');mB[m.id]=d;if(d)pB+=m.pts;});
-  await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,editadoPor:me,editadoEm:Date.now()});
+  const valoresA=document.getElementById('ed-valores-a').checked;
+  const valoresB=document.getElementById('ed-valores-b').checked;
+  const justifA=document.getElementById('ed-justif-a').value.trim();
+  const justifB=document.getElementById('ed-justif-b').value.trim();
+  await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
   const m=document.getElementById('ed-arena-msg');m.textContent=`✅ Salvo! Total: ${pA+pB}/100`;m.style.display='block';
 };
 

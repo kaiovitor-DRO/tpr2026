@@ -1153,8 +1153,9 @@ window.irAdmin = async function(sub) {
         </div></td></tr>`;
     }).join('');
     ct.innerHTML=`
-      <div style="margin-bottom:12px">
-        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="padding:10px 14px;font-size:14px">
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="padding:10px 14px;font-size:14px;flex:1;min-width:200px">
+        <button class="btn btn-danger btn-sm" onclick="apagarTodasSala()" style="white-space:nowrap">🗑️ Apagar todas as notas de Sala</button>
       </div>
       <div class="table-wrap"><table id="tabela-sala">
         <tr><th>Equipe</th><th>Juiz</th><th>Nota</th><th>Indicação</th><th>Horário</th><th>Feedbacks</th><th>Ação</th></tr>
@@ -1178,8 +1179,9 @@ window.irAdmin = async function(sub) {
         </div></td></tr>`;
     }).join('');
     ct.innerHTML=`
-      <div style="margin-bottom:12px">
-        <input type="text" id="filtro-arena" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-arena','tabela-arena')" style="padding:10px 14px;font-size:14px">
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <input type="text" id="filtro-arena" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-arena','tabela-arena')" style="padding:10px 14px;font-size:14px;flex:1;min-width:200px">
+        <button class="btn btn-danger btn-sm" onclick="apagarTodasArena()" style="white-space:nowrap">🗑️ Apagar todas as notas de Arena</button>
       </div>
       <div class="table-wrap"><table id="tabela-arena">
         <tr><th>Equipe A</th><th>Equipe B</th><th>Total</th><th>Tempo</th><th>Juiz</th><th>Horário</th><th>Ação</th></tr>
@@ -1362,6 +1364,33 @@ window.chgSenha = async function(tipo) {
 window.delSala = async function(id) { if(!confirm('Apagar avaliação?'))return;await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala'); };
 // Apaga uma rodada de arena do Firebase (somente admin)
 window.delArena = async function(id) { if(!confirm('Apagar rodada?'))return;await fbDel(`rodadas_arena/${id}`);irAdmin('notas-arena'); };
+
+// Apaga TODAS as avaliações de Sala de uma vez (uso: limpar rodadas de teste antes do torneio oficial).
+// Confirmação dupla: alerta de contagem + digitação da palavra "APAGAR" para evitar clique acidental.
+window.apagarTodasSala = async function() {
+  const d = await fbGet('avaliacoes_sala') || {};
+  const qtd = Object.keys(d).length;
+  if (qtd === 0) { alert('Não há avaliações de Sala para apagar.'); return; }
+  if (!confirm(`Isso vai apagar TODAS as ${qtd} avaliação(ões) de Sala registradas.\n\nEssa ação NÃO pode ser desfeita. Deseja continuar?`)) return;
+  const digitado = prompt('Para confirmar, digite APAGAR (em maiúsculas):');
+  if (digitado !== 'APAGAR') { alert('Confirmação incorreta. Nenhuma avaliação foi apagada.'); return; }
+  await fbDel('avaliacoes_sala');
+  alert('Todas as avaliações de Sala foram apagadas.');
+  irAdmin('notas-sala');
+};
+
+// Apaga TODAS as rodadas de Arena de uma vez (uso: limpar rodadas de teste antes do torneio oficial).
+window.apagarTodasArena = async function() {
+  const d = await fbGet('rodadas_arena') || {};
+  const qtd = Object.keys(d).length;
+  if (qtd === 0) { alert('Não há rodadas de Arena para apagar.'); return; }
+  if (!confirm(`Isso vai apagar TODAS as ${qtd} rodada(s) de Arena registradas.\n\nEssa ação NÃO pode ser desfeita. Deseja continuar?`)) return;
+  const digitado = prompt('Para confirmar, digite APAGAR (em maiúsculas):');
+  if (digitado !== 'APAGAR') { alert('Confirmação incorreta. Nenhuma rodada foi apagada.'); return; }
+  await fbDel('rodadas_arena');
+  alert('Todas as rodadas de Arena foram apagadas.');
+  irAdmin('notas-arena');
+};
 
 // Abre a tela de edição de uma avaliação de sala específica
 window.editSala = async function(id) {

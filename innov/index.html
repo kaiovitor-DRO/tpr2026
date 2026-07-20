@@ -323,6 +323,15 @@
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div><div id="missoes-b"></div></div>
     <div class="total-pts"><div class="num" id="arena-total">0</div><div class="label">pontos da aliança (máx. 100)</div></div>
 
+    <!-- TEMPO DA RODADA -->
+    <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
+      <p style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--text)">⏱️ Tempo gasto na rodada <span style="font-weight:400;color:var(--text-muted);font-size:12px">(critério de desempate — menor tempo = melhor)</span></p>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="text" id="tempo-rodada" placeholder="Ex: 1:45" maxlength="5" style="width:120px;font-size:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;letter-spacing:2px;padding:10px 14px">
+        <span style="font-size:13px;color:var(--text-muted)">formato MM:SS — tempo que a aliança levou para completar as missões</span>
+      </div>
+    </div>
+
     <!-- VALORES NA RODADA -->
     <div style="margin-top:20px">
       <p style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text)">Valores durante a rodada <span style="font-weight:400;color:var(--text-muted);font-size:12px">(critério de desempate individual)</span></p>
@@ -705,6 +714,7 @@ window.irParaMissoes = function() {
   document.getElementById('justif-wrap-b').style.display='none';
   document.getElementById('justif-a').value='';
   document.getElementById('justif-b').value='';
+  document.getElementById('tempo-rodada').value='';
   renderMiss();show('screen-missoes');
 };
 
@@ -735,10 +745,14 @@ window.enviarArena = async function() {
   const valoresB=document.getElementById('valores-b').checked;
   const justifA=document.getElementById('justif-a').value.trim();
   const justifB=document.getElementById('justif-b').value.trim();
+  const tempoRodada=document.getElementById('tempo-rodada').value.trim();
+  // Valida tempo — obrigatório no formato MM:SS ou M:SS
+  if(!tempoRodada){ alert('Informe o tempo gasto na rodada (ex: 1:45).'); return; }
+  if(!/^\d{1,2}:\d{2}$/.test(tempoRodada)){ alert('Formato de tempo inválido. Use MM:SS (ex: 2:10 ou 1:45).'); return; }
   // Se marcou valores, a justificativa é obrigatória
   if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
   if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
-  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',juiz:me,timestamp:Date.now()});
+  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',juiz:me,timestamp:Date.now()});
   alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');
 };
 
@@ -859,27 +873,37 @@ window.verMinhasRodadas = async function() {
         </div>`;
 
       return `
-        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden" data-search="${nA} ${nB}">
+          <!-- CABEÇALHO CLICÁVEL -->
+          <div onclick="toggleCard('rod-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
             <div>
               <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green-dark)">${nA} + ${nB}</div>
-              <div style="font-size:12px;color:var(--text-muted)">Registrado às ${hora}</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">🕐 ${hora} ${v.tempoRodada ? '· ⏱️ '+v.tempoRodada : ''}</div>
             </div>
-            <div style="text-align:right">
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.totalAlianca}</div>
-              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 100 pts</div>
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="text-align:right">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.totalAlianca}</div>
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 100 pts</div>
+              </div>
+              <div id="arrow-rod-${k}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
             </div>
           </div>
-          ${renderMissoesLeitura(MA, v.missoesA, {bg:'#fce4ec',text:'#880e4f'}, '🔴 Robô A — ' + nA)}
-          ${renderMissoesLeitura(MB, v.missoesB, {bg:'#e3f2fd',text:'#0d47a1'}, '🔵 Robô B — ' + nB)}
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
-            <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresA ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
-              🤝 ${nA}: ${v.valoresA ? 'Demonstrou valores' : 'Sem registro de valores'}
-              ${v.valoresA && v.justifA ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifA}"</div>` : ''}
-            </div>
-            <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresB ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
-              🤝 ${nB}: ${v.valoresB ? 'Demonstrou valores' : 'Sem registro de valores'}
-              ${v.valoresB && v.justifB ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifB}"</div>` : ''}
+          <!-- DETALHES COLAPSÁVEIS -->
+          <div id="rod-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
+            <div style="margin-top:12px">
+              ${renderMissoesLeitura(MA, v.missoesA, {bg:'#fce4ec',text:'#880e4f'}, '🔴 Robô A — ' + nA)}
+              ${renderMissoesLeitura(MB, v.missoesB, {bg:'#e3f2fd',text:'#0d47a1'}, '🔵 Robô B — ' + nB)}
+              ${v.tempoRodada ? `<div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;background:#f0f7ff;color:#0D3B7A;margin-bottom:8px">⏱️ Tempo da aliança: <strong>${v.tempoRodada}</strong></div>` : ''}
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+                <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresA ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
+                  🤝 ${nA}: ${v.valoresA ? 'Demonstrou valores' : 'Sem registro de valores'}
+                  ${v.valoresA && v.justifA ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifA}"</div>` : ''}
+                </div>
+                <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresB ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
+                  🤝 ${nB}: ${v.valoresB ? 'Demonstrou valores' : 'Sem registro de valores'}
+                  ${v.valoresB && v.justifB ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifB}"</div>` : ''}
+                </div>
+              </div>
             </div>
           </div>
         </div>`;
@@ -902,8 +926,8 @@ window.exportarCSV = async function() {
   // Monta mapa de arena por equipe
   const arenaMap = {};
   Object.values(arena).forEach(r => {
-    arenaMap[r.equipeA] = { pts: r.totalAlianca, valores: r.valoresA || false, justif: r.justifA || '' };
-    arenaMap[r.equipeB] = { pts: r.totalAlianca, valores: r.valoresB || false, justif: r.justifB || '' };
+    arenaMap[r.equipeA] = { pts: r.totalAlianca, valores: r.valoresA || false, justif: r.justifA || '', tempo: r.tempoRodada || '' };
+    arenaMap[r.equipeB] = { pts: r.totalAlianca, valores: r.valoresB || false, justif: r.justifB || '', tempo: r.tempoRodada || '' };
   });
 
   // Cabeçalho do CSV
@@ -925,6 +949,7 @@ window.exportarCSV = async function() {
     'Muito bom (feedback geral)',
     'Pensem sobre (feedback geral)',
     'Nota Arena (0-100)',
+    'Tempo na Rodada',
     'Valores na Arena',
     'Justificativa Valores na Arena',
     'Nota Final (0-100)'
@@ -939,6 +964,7 @@ window.exportarCSV = async function() {
     const ptsArena = ad ? ad.pts : '';
     const valoresArena = ad ? (ad.valores ? 'Sim' : 'Não') : '';
     const justifArena = ad ? ad.justif : '';
+    const tempoArena = ad ? ad.tempo : '';
     const mediaSala = v.total;
     const ptsSala = (mediaSala / 20) * 100;
     const notaFinal = ptsArena !== '' ? (ptsSala * 0.75 + ptsArena * 0.25).toFixed(1) : (ptsSala * 0.75).toFixed(1);
@@ -956,6 +982,7 @@ window.exportarCSV = async function() {
       v.feedbackPositivo ?? '',
       v.feedbackMelhoria ?? '',
       ptsArena,
+      tempoArena,
       valoresArena,
       justifArena,
       notaFinal
@@ -1005,6 +1032,16 @@ window.filtrarCards = function(inputId, containerId) {
 };
 
 // Salva apenas os campos de feedback (Muito bom / Pensem sobre) no Firebase
+// Abre/fecha o detalhamento de um card colapsável
+window.toggleCard = function(id) {
+  const el = document.getElementById(id);
+  const arrow = document.getElementById('arrow-' + id);
+  if (!el) return;
+  const aberto = el.style.display !== 'none';
+  el.style.display = aberto ? 'none' : 'block';
+  if (arrow) arrow.style.transform = aberto ? '' : 'rotate(180deg)';
+};
+
 window.salvarFeedbackJuiz = async function(id) {
   const pos = document.getElementById(`fbpos-${id}`).value.trim();
   const mel = document.getElementById(`fbmel-${id}`).value.trim();
@@ -1107,6 +1144,7 @@ window.irAdmin = async function(sub) {
       return `<tr>
         <td>${eA?eA.nome:v.equipeA}</td><td>${eB?eB.nome:v.equipeB}</td>
         <td style="font-weight:700;color:var(--green-dark)">${v.totalAlianca}/100</td>
+        <td style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700">${v.tempoRodada||'—'}</td>
         <td>${v.juiz}</td><td>${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
         <td><div class="inline-flex">
           <button class="btn btn-amber btn-sm" onclick="editArena('${k}')">Editar</button>
@@ -1118,8 +1156,8 @@ window.irAdmin = async function(sub) {
         <input type="text" id="filtro-arena" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-arena','tabela-arena')" style="padding:10px 14px;font-size:14px">
       </div>
       <div class="table-wrap"><table id="tabela-arena">
-        <tr><th>Equipe A</th><th>Equipe B</th><th>Total</th><th>Juiz</th><th>Horário</th><th>Ação</th></tr>
-        ${rows||'<tr><td colspan="6" style="text-align:center;color:#999">Nenhuma rodada</td></tr>'}
+        <tr><th>Equipe A</th><th>Equipe B</th><th>Total</th><th>Tempo</th><th>Juiz</th><th>Horário</th><th>Ação</th></tr>
+        ${rows||'<tr><td colspan="7" style="text-align:center;color:#999">Nenhuma rodada</td></tr>'}
       </table></div>`;
   }
   // ── NOTAS GERAIS: calcula o ranking final combinando sala e arena ──
@@ -1161,6 +1199,7 @@ else if(sub==='notas-gerais') {
         mediaSala, avaliacoes: sd ? sd.notas.length : 0,
         indicacoes: sd ? sd.indicacoes : 0,
         ptsArena, valoresArena: ad ? ad.valores : false,
+        tempoArena: ad ? ad.tempo : null,
         notaFinal
       };
     }).filter(e => e.notaFinal !== null)
@@ -1179,6 +1218,7 @@ else if(sub==='notas-gerais') {
         <td style="text-align:center;font-size:13px">
           <div>${e.indicacoes > 0 ? `<span style="font-weight:700;color:#1565c0">⭐ Sala: ${e.indicacoes}/3</span>` : '<span style="color:#ccc">Sala: —</span>'}</div>
           <div style="margin-top:4px">${e.valoresArena ? '<span style="font-weight:700;color:#00796b">🤝 Arena: Sim</span>' : '<span style="color:#ccc">Arena: —</span>'}</div>
+          <div style="margin-top:4px">${e.tempoArena ? `<span style="font-weight:700;color:#0D3B7A">⏱️ ${e.tempoArena}</span>` : '<span style="color:#ccc">Tempo: —</span>'}</div>
         </td>
       </tr>`;
     }).join('');
@@ -1355,6 +1395,10 @@ window.editArena = async function(id) {
     </p>
     <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div>${rM(MA,rod.missoesA)}</div>
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${rM(MB,rod.missoesB)}</div>
+    <div style="margin-top:14px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
+      <div style="font-weight:600;margin-bottom:8px;font-size:14px">⏱️ Tempo gasto na rodada</div>
+      <input type="text" id="ed-tempo" value="${rod.tempoRodada||''}" placeholder="Ex: 1:45" maxlength="5" style="width:120px;font-size:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;letter-spacing:2px;padding:10px 14px">
+    </div>
     <div style="margin-top:16px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm)">
       <div style="font-weight:600;margin-bottom:10px;font-size:14px">Valores durante a rodada</div>
       <label style="display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;text-transform:none;font-weight:400;font-size:14px">
@@ -1385,7 +1429,8 @@ window.savArena = async function(id) {
   const valoresB=document.getElementById('ed-valores-b').checked;
   const justifA=document.getElementById('ed-justif-a').value.trim();
   const justifB=document.getElementById('ed-justif-b').value.trim();
-  await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
+  const tempoRodada=document.getElementById('ed-tempo').value.trim();
+  await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
   const m=document.getElementById('ed-arena-msg');m.textContent=`✅ Salvo! Total: ${pA+pB}/100`;m.style.display='block';
 };
 

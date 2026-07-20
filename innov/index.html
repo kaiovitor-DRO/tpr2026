@@ -831,20 +831,29 @@ window.verMinhasAvaliacoes = async function() {
         </div>`;
 
       return `
-        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:16px;overflow:hidden" data-search="${nomeEq}">
+          <!-- CABEÇALHO CLICÁVEL -->
+          <div onclick="toggleCard('sala-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
             <div>
               <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green-dark)">${nomeEq}</div>
               <div style="font-size:12px;color:var(--text-muted)">Avaliado às ${hora}</div>
             </div>
-            <div style="text-align:right">
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.total}</div>
-              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 20 pts</div>
-              ${v.indicacao ? `<div style="margin-top:4px;font-size:12px;font-weight:700;color:#1565c0">⭐ Indicada</div>` : ''}
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="text-align:right">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.total}</div>
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 20 pts</div>
+                ${v.indicacao ? `<div style="margin-top:4px;font-size:12px;font-weight:700;color:#1565c0">⭐ Indicada</div>` : ''}
+              </div>
+              <div id="arrow-sala-${k}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
             </div>
           </div>
-          ${criteriosHtml}
-          ${feedbacks}
+          <!-- DETALHES COLAPSÁVEIS -->
+          <div id="sala-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
+            <div style="margin-top:12px">
+              ${criteriosHtml}
+              ${feedbacks}
+            </div>
+          </div>
         </div>`;
     }).join('') + '</div>';
 };

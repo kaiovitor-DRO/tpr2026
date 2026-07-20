@@ -326,7 +326,7 @@
     <!-- TEMPO DA RODADA -->
     <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
       <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">⏱️ Tempo gasto na rodada</p>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <div style="text-align:center">
           <input type="number" id="tempo-min" min="0" max="2" placeholder="0" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarSegundos(this)">
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
@@ -1414,7 +1414,7 @@ window.editArena = async function(id) {
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${rM(MB,rod.missoesB)}</div>
     <div style="margin-top:14px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
       <div style="font-weight:600;margin-bottom:10px;font-size:14px">⏱️ Tempo gasto na rodada</div>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <div style="text-align:center">
           <input type="number" id="ed-tempo-min" min="0" max="2" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[0] : ''}" placeholder="0" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
           <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>

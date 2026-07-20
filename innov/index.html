@@ -325,10 +325,17 @@
 
     <!-- TEMPO DA RODADA -->
     <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
-      <p style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--text)">⏱️ Tempo gasto na rodada <span style="font-weight:400;color:var(--text-muted);font-size:12px">(critério de desempate — menor tempo = melhor)</span></p>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="text" id="tempo-rodada" placeholder="Ex: 1:45" maxlength="5" style="width:120px;font-size:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;letter-spacing:2px;padding:10px 14px">
-        <span style="font-size:13px;color:var(--text-muted)">formato MM:SS — tempo que a aliança levou para completar as missões</span>
+      <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">⏱️ Tempo gasto na rodada</p>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="text-align:center">
+          <input type="number" id="tempo-min" min="0" max="2" placeholder="0" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarSegundos(this)">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
+        <div style="text-align:center">
+          <input type="number" id="tempo-seg" min="0" max="59" placeholder="00" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+        </div>
       </div>
     </div>
 
@@ -688,6 +695,13 @@ window.irParaArena = async function() {
 };
 
 // Prepara a tela de missões com os nomes das equipes e limpa dados anteriores
+// Avança automaticamente para o campo de segundos ao digitar 2 dígitos nos minutos
+window.autoAvancarSegundos = function(el) {
+  if (el.value.length >= 1 && parseInt(el.value) >= 0) {
+    document.getElementById('tempo-seg').focus();
+  }
+};
+
 // Mostra/oculta o campo de justificativa ao marcar/desmarcar valores na rodada
 window.toggleJustificativa = function(lado) {
   const checked = document.getElementById(`valores-${lado}`).checked;
@@ -714,7 +728,8 @@ window.irParaMissoes = function() {
   document.getElementById('justif-wrap-b').style.display='none';
   document.getElementById('justif-a').value='';
   document.getElementById('justif-b').value='';
-  document.getElementById('tempo-rodada').value='';
+  document.getElementById('tempo-min').value='';
+  document.getElementById('tempo-seg').value='';
   renderMiss();show('screen-missoes');
 };
 
@@ -745,10 +760,12 @@ window.enviarArena = async function() {
   const valoresB=document.getElementById('valores-b').checked;
   const justifA=document.getElementById('justif-a').value.trim();
   const justifB=document.getElementById('justif-b').value.trim();
-  const tempoRodada=document.getElementById('tempo-rodada').value.trim();
-  // Valida tempo — obrigatório no formato MM:SS ou M:SS
-  if(!tempoRodada){ alert('Informe o tempo gasto na rodada (ex: 1:45).'); return; }
-  if(!/^\d{1,2}:\d{2}$/.test(tempoRodada)){ alert('Formato de tempo inválido. Use MM:SS (ex: 2:10 ou 1:45).'); return; }
+  const tMin = document.getElementById('tempo-min').value.trim();
+  const tSeg = document.getElementById('tempo-seg').value.trim();
+  if(tMin===''||tSeg===''){ alert('Informe o tempo gasto na rodada (minutos e segundos).'); return; }
+  const minVal=parseInt(tMin), segVal=parseInt(tSeg);
+  if(isNaN(minVal)||isNaN(segVal)||minVal<0||minVal>2||segVal<0||segVal>59){ alert('Tempo inválido. Minutos: 0-2, Segundos: 0-59.'); return; }
+  const tempoRodada = `${minVal}:${String(segVal).padStart(2,'0')}`;
   // Se marcou valores, a justificativa é obrigatória
   if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
   if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
@@ -1396,8 +1413,18 @@ window.editArena = async function(id) {
     <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div>${rM(MA,rod.missoesA)}</div>
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${rM(MB,rod.missoesB)}</div>
     <div style="margin-top:14px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
-      <div style="font-weight:600;margin-bottom:8px;font-size:14px">⏱️ Tempo gasto na rodada</div>
-      <input type="text" id="ed-tempo" value="${rod.tempoRodada||''}" placeholder="Ex: 1:45" maxlength="5" style="width:120px;font-size:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;letter-spacing:2px;padding:10px 14px">
+      <div style="font-weight:600;margin-bottom:10px;font-size:14px">⏱️ Tempo gasto na rodada</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="text-align:center">
+          <input type="number" id="ed-tempo-min" min="0" max="2" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[0] : ''}" placeholder="0" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
+        <div style="text-align:center">
+          <input type="number" id="ed-tempo-seg" min="0" max="59" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[1] : ''}" placeholder="00" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+        </div>
+      </div>
     </div>
     <div style="margin-top:16px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm)">
       <div style="font-weight:600;margin-bottom:10px;font-size:14px">Valores durante a rodada</div>
@@ -1429,7 +1456,9 @@ window.savArena = async function(id) {
   const valoresB=document.getElementById('ed-valores-b').checked;
   const justifA=document.getElementById('ed-justif-a').value.trim();
   const justifB=document.getElementById('ed-justif-b').value.trim();
-  const tempoRodada=document.getElementById('ed-tempo').value.trim();
+  const edMin=parseInt(document.getElementById('ed-tempo-min').value||0);
+  const edSeg=parseInt(document.getElementById('ed-tempo-seg').value||0);
+  const tempoRodada=`${edMin}:${String(edSeg).padStart(2,'0')}`;
   await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
   const m=document.getElementById('ed-arena-msg');m.textContent=`✅ Salvo! Total: ${pA+pB}/100`;m.style.display='block';
 };

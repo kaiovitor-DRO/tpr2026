@@ -180,12 +180,12 @@
     <div id="login-error" class="error-msg"></div>
     <div class="form-group">
       <label>Nome / Login</label>
-      <input type="text" id="login-nome" placeholder="Seu nome de juiz" autocomplete="off">
+      <input type="text" id="login-nome" placeholder="Seu nome de juiz" autocomplete="off" onkeydown="if(event.key==='Enter')fazerLogin()">
     </div>
     <div class="form-group">
       <label>Senha</label>
       <div class="pass-wrap">
-        <input type="password" id="login-senha" placeholder="••••••••">
+        <input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
         <button type="button" class="btn-ver-senha" onclick="toggleSenha('login-senha',this)">👁</button>
       </div>
     </div>
@@ -1205,11 +1205,11 @@ else if(sub==='notas-gerais') {
       if (v.indicacao) salaMap[v.equipeId].indicacoes++;
     });
 
-    // Pega pontos de arena por equipe + valores
+    // Pega pontos de arena por equipe + valores + tempo da rodada
     const arenaMap = {};
     Object.values(arena).forEach(v => {
-      arenaMap[v.equipeA] = { pts: v.totalAlianca, valores: v.valoresA || false };
-      arenaMap[v.equipeB] = { pts: v.totalAlianca, valores: v.valoresB || false };
+      arenaMap[v.equipeA] = { pts: v.totalAlianca, valores: v.valoresA || false, tempo: v.tempoRodada || null };
+      arenaMap[v.equipeB] = { pts: v.totalAlianca, valores: v.valoresB || false, tempo: v.tempoRodada || null };
     });
 
     // Calcula nota final

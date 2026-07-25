@@ -796,11 +796,20 @@ window.irAdmin=async function(sub){
     title.textContent='Gerenciar Juízes';
     const d=await fbGet('juizes')||{};
     const rows=Object.entries(d).sort((a,b)=>a[1].nome.localeCompare(b[1].nome))
-      .map(([k,v])=>`<tr>
-        <td style="font-weight:600">${v.nome}</td>
-        <td><span style="background:var(--bege-dark);color:var(--marrom);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">${v.perfil==='extra'?'Juiz de Arena':'Juiz de Sala'}</span></td>
-        <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
-      </tr>`).join('');
+      .map(([k,v])=>{
+        const isArena=v.perfil==='arena';
+        const arInfo=isArena&&v.arena?ARENAS[v.arena-1]:null;
+        const perfilLabel=isArena
+          ?`🏟️ Juiz de Arena${arInfo?' — Arena '+v.arena+' '+arInfo.emoji+' '+arInfo.cor:''}`
+          :'📋 Juiz de Sala';
+        const perfilBg=isArena?'#fdf2ee':'var(--bege-dark)';
+        const perfilClr=isArena?'#b94a10':'var(--marrom)';
+        return `<tr>
+          <td style="font-weight:600">${v.nome}</td>
+          <td><span style="background:${perfilBg};color:${perfilClr};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700">${perfilLabel}</span></td>
+          <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
+        </tr>`;
+      }).join('');
     ct.innerHTML=`
       <div class="table-wrap" style="margin-bottom:20px"><table>
         <tr><th>Nome</th><th>Perfil</th><th>Ação</th></tr>
@@ -1021,14 +1030,23 @@ window.irAdmin=async function(sub){
 
 window.remJuiz=async function(id){if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
 window.addJuiz=async function(){
-  const nome=document.getElementById('nj-nome').value.trim();
-  const perfilVal=document.getElementById('nj-perfil').value;
+  const nomeEl=document.getElementById('nj-nome');
+  const perfilEl=document.getElementById('nj-perfil');
+  const arenaEl=document.getElementById('nj-arena');
+  if(!nomeEl||!perfilEl){alert('Erro: formulário não encontrado.');return;}
+  const nome=nomeEl.value.trim();
+  const perfilVal=perfilEl.value;
   if(!nome){alert('Nome obrigatório.');return;}
-  const arena=perfilVal==='arena'?parseInt(document.getElementById('nj-arena').value):null;
+  const arenaNum=perfilVal==='arena'&&arenaEl?parseInt(arenaEl.value):null;
   const dados={nome,perfil:perfilVal};
-  if(arena)dados.arena=arena;
-  await fbPush('juizes',dados);
-  await irAdmin('juizes');
+  if(arenaNum)dados.arena=arenaNum;
+  const btn=document.querySelector('[onclick="addJuiz()"]');
+  if(btn){btn.textContent='Cadastrando...';btn.disabled=true;}
+  try{
+    await fbPush('juizes',dados);
+  }finally{
+    await irAdmin('juizes');
+  }
 };
 window.remEq=async function(id){
   const eq=equipes.find(e=>e.id===id);

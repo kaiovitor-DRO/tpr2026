@@ -737,12 +737,12 @@ window.cronPlay = function() {
   document.getElementById('btn-cron-pause').style.display = 'inline-block';
   cronIntervalo = setInterval(() => {
     cronSegundos++;
-    // Limite igual ao da validação de enviarArena: máx. 2min59seg
-    if (cronSegundos >= 179) {
-      cronSegundos = 179;
+    // Limite igual ao da validação de enviarArena: máx. 2min30seg
+    if (cronSegundos >= 150) {
+      cronSegundos = 150;
       cronAtualizarDisplay();
       cronPause();
-      alert('Tempo máximo do cronômetro (2:59) atingido. Pare o robô e confira o tempo registrado.');
+      alert('Tempo máximo do cronômetro (2:30) atingido. Pare o robô e confira o tempo registrado.');
       return;
     }
     cronAtualizarDisplay();
@@ -826,6 +826,7 @@ window.enviarArena = async function() {
   if(tMin===''||tSeg===''){ alert('Informe o tempo gasto na rodada (minutos e segundos).'); return; }
   const minVal=parseInt(tMin), segVal=parseInt(tSeg);
   if(isNaN(minVal)||isNaN(segVal)||minVal<0||minVal>2||segVal<0||segVal>59){ alert('Tempo inválido. Minutos: 0-2, Segundos: 0-59.'); return; }
+  if((minVal*60+segVal) > 150){ alert('Tempo máximo permitido é 2:30. Confira o tempo informado.'); return; }
   const tempoRodada = `${minVal}:${String(segVal).padStart(2,'0')}`;
   // Se marcou valores, a justificativa é obrigatória
   if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
@@ -1558,6 +1559,7 @@ window.savArena = async function(id) {
   const justifB=document.getElementById('ed-justif-b').value.trim();
   const edMin=parseInt(document.getElementById('ed-tempo-min').value||0);
   const edSeg=parseInt(document.getElementById('ed-tempo-seg').value||0);
+  if((edMin*60+edSeg) > 150){ alert('Tempo máximo permitido é 2:30. Confira o tempo informado.'); return; }
   const tempoRodada=`${edMin}:${String(edSeg).padStart(2,'0')}`;
   await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
   const m=document.getElementById('ed-arena-msg');m.textContent=`✅ Salvo! Total: ${pA+pB}/100`;m.style.display='block';

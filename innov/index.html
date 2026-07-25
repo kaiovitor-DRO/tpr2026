@@ -314,7 +314,7 @@
 
 <!-- ARENA: MISSÕES -->
 <div id="screen-missoes" class="screen">
-  <button class="back-btn" onclick="voltar('screen-arena-alianca')">← Voltar</button>
+  <button class="back-btn" onclick="cronPause();voltar('screen-arena-alianca')">← Voltar</button>
   <div class="card">
     <div class="card-title">Registro de Missões</div>
     <div class="chips" id="arena-chips"></div>
@@ -326,6 +326,18 @@
     <!-- TEMPO DA RODADA -->
     <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
       <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">⏱️ Tempo gasto na rodada</p>
+
+      <!-- CRONÔMETRO: play/pause/zerar. Preenche automaticamente os campos de min/seg abaixo. -->
+      <div style="text-align:center;margin-bottom:16px">
+        <div id="cronometro-display" style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--green-dark);letter-spacing:1px">0:00</div>
+        <div style="display:flex;justify-content:center;gap:10px;margin-top:10px">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-cron-play" onclick="cronPlay()">▶ Iniciar</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-cron-pause" onclick="cronPause()" style="display:none">⏸ Pausar</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="cronZerar()">⏹ Zerar</button>
+        </div>
+      </div>
+
+      <p class="text-muted" style="font-size:11px;text-align:center;margin-bottom:10px">Ou preencha manualmente, se preferir:</p>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <div style="text-align:center">
           <input type="number" id="tempo-min" min="0" max="2" placeholder="0" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarSegundos(this)">
@@ -702,6 +714,54 @@ window.autoAvancarSegundos = function(el) {
   }
 };
 
+// ── CRONÔMETRO DA RODADA DE ARENA ──
+// Play/Pause/Zerar. Enquanto conta, preenche automaticamente os campos
+// tempo-min e tempo-seg (as mesmas variáveis lidas por enviarArena),
+// sem alterar em nada como o tempo é salvo, exportado ou exibido depois.
+let cronSegundos = 0;
+let cronIntervalo = null;
+let cronRodando = false;
+
+function cronAtualizarDisplay() {
+  const min = Math.floor(cronSegundos / 60);
+  const seg = cronSegundos % 60;
+  document.getElementById('cronometro-display').textContent = `${min}:${String(seg).padStart(2,'0')}`;
+  document.getElementById('tempo-min').value = min;
+  document.getElementById('tempo-seg').value = seg;
+}
+
+window.cronPlay = function() {
+  if (cronRodando) return;
+  cronRodando = true;
+  document.getElementById('btn-cron-play').style.display = 'none';
+  document.getElementById('btn-cron-pause').style.display = 'inline-block';
+  cronIntervalo = setInterval(() => {
+    cronSegundos++;
+    // Limite igual ao da validação de enviarArena: máx. 2min59seg
+    if (cronSegundos >= 179) {
+      cronSegundos = 179;
+      cronAtualizarDisplay();
+      cronPause();
+      alert('Tempo máximo do cronômetro (2:59) atingido. Pare o robô e confira o tempo registrado.');
+      return;
+    }
+    cronAtualizarDisplay();
+  }, 1000);
+};
+
+window.cronPause = function() {
+  cronRodando = false;
+  clearInterval(cronIntervalo);
+  document.getElementById('btn-cron-play').style.display = 'inline-block';
+  document.getElementById('btn-cron-pause').style.display = 'none';
+};
+
+window.cronZerar = function() {
+  cronPause();
+  cronSegundos = 0;
+  cronAtualizarDisplay();
+};
+
 // Mostra/oculta o campo de justificativa ao marcar/desmarcar valores na rodada
 window.toggleJustificativa = function(lado) {
   const checked = document.getElementById(`valores-${lado}`).checked;
@@ -730,6 +790,7 @@ window.irParaMissoes = function() {
   document.getElementById('justif-b').value='';
   document.getElementById('tempo-min').value='';
   document.getElementById('tempo-seg').value='';
+  cronZerar();
   renderMiss();show('screen-missoes');
 };
 
@@ -770,6 +831,7 @@ window.enviarArena = async function() {
   if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
   if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
   await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',juiz:me,timestamp:Date.now()});
+  cronZerar();
   alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');
 };
 

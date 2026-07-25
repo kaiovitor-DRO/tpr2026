@@ -148,12 +148,12 @@ tr:hover td{background:var(--bege);}
     <div id="login-error" class="error-msg"></div>
     <div class="form-group">
       <label>Nome / Login</label>
-      <input type="text" id="login-nome" placeholder="Seu nome de juiz" autocomplete="off">
+      <input type="text" id="login-nome" placeholder="Seu nome de juiz" autocomplete="off" onkeydown="if(event.key==='Enter')fazerLogin()">
     </div>
     <div class="form-group">
       <label>Senha</label>
       <div class="pass-wrap">
-        <input type="password" id="login-senha" placeholder="••••••••">
+        <input type="password" id="login-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
         <button type="button" class="btn-ver-senha" onclick="toggleSenha('login-senha',this)">👁</button>
       </div>
     </div>
@@ -649,39 +649,47 @@ window.verMinhasAvaliacoes=async function(){
   const data=await fbGet('avaliacoes_sala')||{};
   const minhas=Object.entries(data).filter(([k,v])=>v.juiz===me).sort((a,b)=>b[1].timestamp-a[1].timestamp);
   if(!minhas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Você ainda não fez nenhuma avaliação.</p>';return;}
-  ct.innerHTML=`<p class="text-muted" style="margin-bottom:16px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões).</p>`+
+  ct.innerHTML=`<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Toque para expandir.</p>
+    <div style="margin-bottom:12px"><input type="text" id="filtro-minhas-aval" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-aval','cards-aval')" style="padding:10px 14px;font-size:14px"></div>
+    <div id="cards-aval">`+
   minhas.map(([k,v])=>{
     const eq=equipes.find(e=>e.id===v.equipeId);
     const nomeEq=eq?eq.nome:v.equipeId;
-    const hora=new Date(v.timestamp).toLocaleString('pt-BR');
+    const hora=new Date(v.timestamp).toLocaleTimeString('pt-BR');
+    const detalhes=CATEGORIAS.map(cat=>`
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">${cat.emoji} ${cat.label}</div>
+        ${cat.criterios.map(cr=>{const n=v.notas?.[cr.id];return n?`
+          <div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:6px;margin-bottom:3px;background:var(--bege);font-size:13px">
+            <span>${cr.label}</span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:700;color:${n.valor===4?'var(--caramelo-dark)':'var(--marrom)'}">${n.valor} — ${LBL[n.valor]}</span>
+          </div>
+          ${n.comentario?`<div class="comment-box">${n.comentario}</div>`:''}
+        `:'';}).join('')}
+      </div>`).join('')+
+      (v.feedbackPositivo?`<div class="feedback-pos-box">✅ ${v.feedbackPositivo}</div>`:'')+
+      (v.feedbackMelhoria?`<div class="feedback-mel-box">💡 ${v.feedbackMelhoria}</div>`:'');
     return `
-    <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:14px;background:white">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden" data-search="${nomeEq}">
+      <div onclick="toggleCard('aval-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
         <div>
           <div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--marrom)">${nomeEq}</div>
-          <div style="font-size:12px;color:var(--text-muted)">${hora}</div>
+          <div style="font-size:12px;color:var(--text-muted)">Avaliado às ${hora}</div>
         </div>
-        <div style="text-align:right">
-          <div style="font-family:'Nunito',sans-serif;font-size:36px;font-weight:900;color:var(--marrom);line-height:1">${v.total}</div>
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 40 pts</div>
-          ${v.indicacao?'<div style="font-size:11px;font-weight:700;color:#a06010;margin-top:2px">⭐ Indicada</div>':''}
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="text-align:right">
+            <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:var(--marrom);line-height:1">${v.total}</div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 40 pts</div>
+            ${v.indicacao?'<div style="font-size:11px;font-weight:700;color:#a06010">⭐ Indicada</div>':''}
+          </div>
+          <div id="arrow-aval-${k}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
         </div>
       </div>
-      ${CATEGORIAS.map(cat=>`
-        <div style="margin-bottom:8px">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">${cat.emoji} ${cat.label}</div>
-          ${cat.criterios.map(c=>{const n=v.notas?.[c.id];return n?`
-            <div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:6px;margin-bottom:3px;background:var(--bege);font-size:13px">
-              <span>${c.label}</span>
-              <span style="font-family:'Nunito',sans-serif;font-weight:700;color:${n.valor===4?'var(--caramelo-dark)':'var(--marrom)'}">${n.valor} — ${LBL[n.valor]}</span>
-            </div>
-            ${n.comentario?`<div class="comment-box">${n.comentario}</div>`:''}
-          `:'';}).join('')}
-        </div>`).join('')}
-      ${v.feedbackPositivo?`<div class="feedback-pos-box">✅ ${v.feedbackPositivo}</div>`:''}
-      ${v.feedbackMelhoria?`<div class="feedback-mel-box">💡 ${v.feedbackMelhoria}</div>`:''}
+      <div id="aval-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
+        <div style="margin-top:12px">${detalhes}</div>
+      </div>
     </div>`;
-  }).join('');
+  }).join('')+'</div>';
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -740,6 +748,24 @@ window.confirmCSV=async function(tipo){
   document.getElementById(`csv-${tipo}-input`).value='';
   alert('Importação concluída!');
   irAdmin(tipo==='equipe'?'equipes':'juizes');
+};
+
+window.filtrarCards=function(inputId,containerId){
+  const termo=document.getElementById(inputId).value.toLowerCase();
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  container.querySelectorAll(':scope > div').forEach(card=>{
+    card.style.display=card.textContent.toLowerCase().includes(termo)?'':'none';
+  });
+};
+
+window.toggleCard=function(id){
+  const el=document.getElementById(id);
+  const arrow=document.getElementById('arrow-'+id);
+  if(!el)return;
+  const aberto=el.style.display!=='none';
+  el.style.display=aberto?'none':'block';
+  if(arrow)arrow.style.transform=aberto?'':'rotate(180deg)';
 };
 
 window.filtrarTabela=function(inputId,tabelaId){
@@ -833,8 +859,9 @@ window.irAdmin=async function(sub){
       </tr>`;
     }).join('');
     ct.innerHTML=`
-      <div style="margin-bottom:12px">
-        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="padding:10px 14px;font-size:14px">
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="flex:1;padding:10px 14px;font-size:14px">
+        <button class="btn btn-danger btn-sm" onclick="apagarTodasSala()">🗑️ Apagar todas</button>
       </div>
       <div class="table-wrap"><table id="tabela-sala">
         <tr><th>Equipe</th><th>Juiz</th><th>Nota</th><th>Indicação</th><th>Horário</th><th>Feedbacks</th><th>Ação</th></tr>
@@ -849,6 +876,7 @@ window.irAdmin=async function(sub){
       Object.entries(arenas).forEach(([arKey,v])=>{todas.push(v);});
     });
     todas.sort((a,b)=>a.rodada-a.arena-(b.rodada-b.arena)||b.timestamp-a.timestamp);
+    const btnApagar=`<div style="margin-bottom:12px;text-align:right"><button class="btn btn-danger btn-sm" onclick="apagarTodasArena()">🗑️ Apagar todas as rodadas</button></div>`;
     if(!todas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma rodada registrada.</p>';return;}
     const rows=todas.map(v=>{
       const ar=ARENAS[v.arena-1];
@@ -865,7 +893,7 @@ window.irAdmin=async function(sub){
         <td><button class="btn btn-danger btn-sm" onclick="delArena(${v.rodada},${v.arena})">Apagar</button></td>
       </tr>`;
     }).join('');
-    ct.innerHTML=`<div class="table-wrap"><table>
+    ct.innerHTML=btnApagar+`<div class="table-wrap"><table>
       <tr><th>Rodada</th><th>Arena</th><th>Equipes e Peças</th><th>Vencedor</th><th>Juiz</th><th>Ação</th></tr>
       ${rows}
     </table></div>`;
@@ -1111,6 +1139,18 @@ window.salvarEdicaoSala=async function(id){
   }catch(e){alert('Erro ao salvar. Tente novamente.');}
   finally{if(btn){btn.textContent='Salvar Alterações';btn.disabled=false;}}
 };
+window.apagarTodasSala=async function(){
+  if(!confirm('Apagar TODAS as avaliações de sala? Esta ação não pode ser desfeita!'))return;
+  await fbDel('avaliacoes_sala');
+  irAdmin('notas-sala');
+};
+
+window.apagarTodasArena=async function(){
+  if(!confirm('Apagar TODAS as rodadas de arena? Esta ação não pode ser desfeita!'))return;
+  await fbDel('arena');
+  irAdmin('notas-arena');
+};
+
 window.delArena=async function(rodada,arena){
   if(!confirm(`Apagar resultado da Arena ${arena}, Rodada ${rodada}?`))return;
   await fbDel(`arena/rodada_${rodada}/arena_${arena}`);
@@ -1233,35 +1273,44 @@ window.verMinhasRodadas=async function(){
   const data=await fbGet('arena')||{};
   const minhas=[];
   Object.entries(data).forEach(([rodKey,arenas])=>{
-    Object.entries(arenas).forEach(([arKey,v])=>{
+    Object.entries(arenas||{}).forEach(([arKey,v])=>{
       if(v.juiz===me)minhas.push(v);
     });
   });
   minhas.sort((a,b)=>b.timestamp-a.timestamp);
   if(!minhas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma rodada registrada.</p>';return;}
-  ct.innerHTML=minhas.map(v=>{
+  ct.innerHTML=`<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> rodada(s). Toque para expandir.</p>
+    <div id="cards-rodadas">`+
+  minhas.map((v,i)=>{
     const arInfo=ARENAS[v.arena-1];
     const venc=v.vencedor==='empate'?'🤝 Empate':v.vencedor==='vermelho'?'🔴 Vermelho venceu':'🟡 Amarelo venceu';
-    return `<div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;background:white">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    const uid=`rod-${v.arena}-${v.rodada}-${i}`;
+    return `
+    <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden" data-search="Arena ${v.arena} Rodada ${v.rodada}">
+      <div onclick="toggleCard('${uid}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
         <div>
-          <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px">${arInfo.emoji} Arena ${v.arena} — ${arInfo.cor} · Rodada ${v.rodada}</div>
-          <div style="font-size:12px;color:var(--text-muted)">${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</div>
+          <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px">${arInfo.emoji} Arena ${v.arena} — ${arInfo.cor}</div>
+          <div style="font-size:12px;color:var(--text-muted)">Rodada ${v.rodada} · ${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</div>
         </div>
-        <div style="font-weight:700;font-size:14px">${venc}</div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-weight:700;font-size:14px;text-align:right">${venc}</div>
+          <div id="arrow-${uid}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
-        <div style="background:#fdf5f5;border-radius:8px;padding:10px">
-          <div style="font-weight:700;color:#b94040;margin-bottom:4px">🔴 Vermelho — ${v.pecas_vermelho} peças</div>
-          <div style="color:var(--text-muted)">${(v.equipes_vermelho||[]).map(e=>e.nome).join(', ')}</div>
-        </div>
-        <div style="background:#fdf9ee;border-radius:8px;padding:10px">
-          <div style="font-weight:700;color:#b8860b;margin-bottom:4px">🟡 Amarelo — ${v.pecas_amarelo} peças</div>
-          <div style="color:var(--text-muted)">${(v.equipes_amarelo||[]).map(e=>e.nome).join(', ')}</div>
+      <div id="${uid}" style="display:none;padding:0 14px 14px;border-top:1px solid var(--border);background:#fafafa">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-top:12px">
+          <div style="background:#fdf5f5;border-radius:8px;padding:10px">
+            <div style="font-weight:700;color:#b94040;margin-bottom:4px">🔴 Vermelho — ${v.pecas_vermelho} peças</div>
+            <div style="color:var(--text-muted);font-size:12px">${(v.equipes_vermelho||[]).map(e=>e.nome).join(', ')}</div>
+          </div>
+          <div style="background:#fdf9ee;border-radius:8px;padding:10px">
+            <div style="font-weight:700;color:#b8860b;margin-bottom:4px">🟡 Amarelo — ${v.pecas_amarelo} peças</div>
+            <div style="color:var(--text-muted);font-size:12px">${(v.equipes_amarelo||[]).map(e=>e.nome).join(', ')}</div>
+          </div>
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('')+'</div>';
 };
 
 // ═══════════════════════════════════════════════════════════════

@@ -371,10 +371,20 @@ tr:hover td{background:var(--bege);}
         <div class="admin-tile-title">Alterar Senhas</div>
         <div class="admin-tile-desc">Senha do evento e do admin</div>
       </div>
-      <div class="admin-tile" onclick="irAdmin('notas-gerais')" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+      <div class="admin-tile" onclick="irAdmin('notas-arena')">
+        <div class="admin-tile-icon">🏟️</div>
+        <div class="admin-tile-title">Notas de Arena</div>
+        <div class="admin-tile-desc">Ver e apagar rodadas</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-gerais')">
         <div class="admin-tile-icon">🏅</div>
         <div class="admin-tile-title">Notas Gerais</div>
         <div class="admin-tile-desc">Ranking final com desempate</div>
+      </div>
+      <div class="admin-tile" onclick="abrirTelao()" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+        <div class="admin-tile-icon">📺</div>
+        <div class="admin-tile-title">Painel Telão</div>
+        <div class="admin-tile-desc">Placar da arena ao vivo</div>
       </div>
     </div>
   </div>
@@ -1012,11 +1022,13 @@ window.irAdmin=async function(sub){
 window.remJuiz=async function(id){if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
 window.addJuiz=async function(){
   const nome=document.getElementById('nj-nome').value.trim();
-  const perfil=document.getElementById('nj-perfil').value;
+  const perfilVal=document.getElementById('nj-perfil').value;
   if(!nome){alert('Nome obrigatório.');return;}
-  const arena=perfil==='arena'?parseInt(document.getElementById('nj-arena').value):null;
-  await fbPush('juizes',{nome,perfil,...(arena?{arena}:{})});
-  alert(`Juiz "${nome}" cadastrado!`);irAdmin('juizes');
+  const arena=perfilVal==='arena'?parseInt(document.getElementById('nj-arena').value):null;
+  const dados={nome,perfil:perfilVal};
+  if(arena)dados.arena=arena;
+  await fbPush('juizes',dados);
+  await irAdmin('juizes');
 };
 window.remEq=async function(id){
   const eq=equipes.find(e=>e.id===id);

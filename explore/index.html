@@ -510,7 +510,9 @@ window.fazerLogin=async function(){
     const juizes=await fbGet('juizes')||{};
     const found=Object.entries(juizes).find(([k,v])=>v.nome.toLowerCase()===nome.toLowerCase());
     if(!found){err.textContent='Juiz não encontrado. Contate o admin.';err.style.display='block';return;}
-    me=found[1].nome;perfil='sala';entrar();
+    me=found[1].nome;
+    perfil=found[1].perfil||'sala'; // lê o perfil real do Firebase
+    entrar();
   }catch(e){err.textContent='Erro de conexão.';err.style.display='block';}
   finally{btn.textContent='ENTRAR';btn.disabled=false;}
 };

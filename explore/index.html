@@ -358,7 +358,7 @@ tr:hover td{background:var(--bege);}
 </div>
 
 <!-- TELÃO DA ARENA -->
-<div id="screen-telao-arena" class="telao-arena">
+<div id="screen-telao-arena" class="telao-arena" style="display:none">
   <div class="telao-arena-header">
     <div style="display:flex;align-items:center;gap:16px">
       <img src="./03-TPR.png" alt="TPR" style="height:34px">
@@ -369,6 +369,16 @@ tr:hover td{background:var(--bege);}
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span><span class="live-dot"></span><span style="font-size:12px;opacity:0.7">AO VIVO</span></span>
+      <select id="telao-rodada-sel" onchange="telaoRodadaSel=parseInt(this.value)||null;carregarTelao()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 10px;border-radius:6px;font-size:13px;cursor:pointer">
+        <option value="">Rodada atual</option>
+        <option value="1">Rodada 1</option>
+        <option value="2">Rodada 2</option>
+        <option value="3">Rodada 3</option>
+        <option value="4">Rodada 4</option>
+        <option value="5">Rodada 5</option>
+        <option value="6">Rodada 6</option>
+        <option value="7">Rodada 7</option>
+      </select>
       <button onclick="fecharTelao()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px">✕ Fechar</button>
     </div>
   </div>
@@ -1458,9 +1468,23 @@ window.verMinhasRodadas=async function(){
 // TELÃO DA ARENA
 // ═══════════════════════════════════════════════════════════════
 let telaoTimer=null;
+let telaoRodadaSel=null; // null = automático (rodada mais recente)
 
-window.abrirTelao=function(){show('screen-telao-arena');carregarTelao();telaoTimer=setInterval(carregarTelao,5000);};
-window.fecharTelao=function(){clearInterval(telaoTimer);show('screen-admin');};
+window.abrirTelao=function(){
+  // Esconde tudo e mostra só o telão
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById('app-header').style.display='none';
+  const tel=document.getElementById('screen-telao-arena');
+  tel.style.display='block';
+  carregarTelao();
+  telaoTimer=setInterval(carregarTelao,5000);
+};
+window.fecharTelao=function(){
+  clearInterval(telaoTimer);
+  document.getElementById('screen-telao-arena').style.display='none';
+  document.getElementById('app-header').style.display='block';
+  show('screen-admin');
+};
 
 async function carregarTelao(){
   const data=await fbGet('arena')||{};
@@ -1468,8 +1492,9 @@ async function carregarTelao(){
   const rodadas=Object.keys(data).map(k=>parseInt(k.replace('rodada_',''))).sort((a,b)=>b-a);
   if(!rodadas.length){document.getElementById('telao-arena-body').innerHTML='<p style="text-align:center;opacity:0.4;padding:60px 0">Nenhuma rodada registrada ainda.</p>';return;}
 
-  const rodAtual=rodadas[0];
-  document.getElementById('telao-rodada-label').textContent=`Rodada ${rodAtual} — ao vivo`;
+  const rodAtual=telaoRodadaSel||rodadas[0];
+  const modoAuto=!telaoRodadaSel;
+  document.getElementById('telao-rodada-label').textContent=`Rodada ${rodAtual}${modoAuto?' — ao vivo':' — histórico'}`;
   const arenas=data[`rodada_${rodAtual}`]||{};
 
   const html=ARENAS.map(ar=>{

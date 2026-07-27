@@ -327,9 +327,9 @@
     <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
       <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">⏱️ Tempo gasto na rodada</p>
 
-      <!-- CRONÔMETRO: play/pause/zerar. Preenche automaticamente os campos de min/seg abaixo. -->
+      <!-- CRONÔMETRO: play/pause/zerar. Preenche automaticamente os campos min/seg/ms abaixo. -->
       <div style="text-align:center;margin-bottom:16px">
-        <div id="cronometro-display" style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--green-dark);letter-spacing:1px">0:00</div>
+        <div id="cronometro-display" style="font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:900;color:var(--green-dark);letter-spacing:1px">0:00.000</div>
         <div style="display:flex;justify-content:center;gap:10px;margin-top:10px">
           <button type="button" class="btn btn-primary btn-sm" id="btn-cron-play" onclick="cronPlay()">▶ Iniciar</button>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-cron-pause" onclick="cronPause()" style="display:none">⏸ Pausar</button>
@@ -338,15 +338,20 @@
       </div>
 
       <p class="text-muted" style="font-size:11px;text-align:center;margin-bottom:10px">Ou preencha manualmente, se preferir:</p>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px">
         <div style="text-align:center">
-          <input type="number" id="tempo-min" min="0" max="2" placeholder="0" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarSegundos(this)">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
+          <input type="number" id="tempo-min" min="0" max="2" placeholder="0" style="width:60px;font-size:26px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarSegundos(this)">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
         </div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
         <div style="text-align:center">
-          <input type="number" id="tempo-seg" min="0" max="59" placeholder="00" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+          <input type="number" id="tempo-seg" min="0" max="59" placeholder="00" style="width:60px;font-size:26px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarMs(this)">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green-dark);margin-bottom:14px">.</div>
+        <div style="text-align:center">
+          <input type="number" id="tempo-ms" min="0" max="999" placeholder="000" style="width:70px;font-size:26px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">ms</div>
         </div>
       </div>
     </div>
@@ -707,49 +712,68 @@ window.irParaArena = async function() {
 };
 
 // Prepara a tela de missões com os nomes das equipes e limpa dados anteriores
-// Avança automaticamente para o campo de segundos ao digitar 2 dígitos nos minutos
+// Avança automaticamente para o campo de segundos ao digitar os minutos
 window.autoAvancarSegundos = function(el) {
   if (el.value.length >= 1 && parseInt(el.value) >= 0) {
     document.getElementById('tempo-seg').focus();
   }
 };
+// Avança automaticamente para o campo de milissegundos ao digitar os segundos
+window.autoAvancarMs = function(el) {
+  if (el.value.length >= 2 && parseInt(el.value) >= 0) {
+    document.getElementById('tempo-ms').focus();
+  }
+};
 
 // ── CRONÔMETRO DA RODADA DE ARENA ──
-// Play/Pause/Zerar. Enquanto conta, preenche automaticamente os campos
-// tempo-min e tempo-seg (as mesmas variáveis lidas por enviarArena),
-// sem alterar em nada como o tempo é salvo, exportado ou exibido depois.
-let cronSegundos = 0;
+// Play/Pause/Zerar, com precisão de milissegundos.
+// Usa timestamp real (Date.now()) em vez de contar "tick a tick", para não
+// perder precisão por atraso do setInterval. Preenche automaticamente os
+// campos tempo-min, tempo-seg e tempo-ms (as mesmas variáveis lidas por
+// enviarArena), sem alterar como o tempo é salvo, exportado ou exibido depois.
+const CRON_LIMITE_MS = 150000; // 2:30.000 — mesmo limite validado em enviarArena
+let cronMsAcumulado = 0;   // tempo já decorrido antes da pausa atual
+let cronInicioTs = null;   // timestamp de quando o cronômetro foi (re)iniciado
 let cronIntervalo = null;
 let cronRodando = false;
 
+function cronMsAtual() {
+  if (!cronRodando) return cronMsAcumulado;
+  return cronMsAcumulado + (Date.now() - cronInicioTs);
+}
+
 function cronAtualizarDisplay() {
-  const min = Math.floor(cronSegundos / 60);
-  const seg = cronSegundos % 60;
-  document.getElementById('cronometro-display').textContent = `${min}:${String(seg).padStart(2,'0')}`;
+  let totalMs = cronMsAtual();
+  if (totalMs > CRON_LIMITE_MS) totalMs = CRON_LIMITE_MS;
+  const min = Math.floor(totalMs / 60000);
+  const seg = Math.floor((totalMs % 60000) / 1000);
+  const ms = totalMs % 1000;
+  document.getElementById('cronometro-display').textContent = `${min}:${String(seg).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
   document.getElementById('tempo-min').value = min;
-  document.getElementById('tempo-seg').value = seg;
+  document.getElementById('tempo-seg').value = String(seg).padStart(2,'0');
+  document.getElementById('tempo-ms').value = String(ms).padStart(3,'0');
 }
 
 window.cronPlay = function() {
   if (cronRodando) return;
   cronRodando = true;
+  cronInicioTs = Date.now();
   document.getElementById('btn-cron-play').style.display = 'none';
   document.getElementById('btn-cron-pause').style.display = 'inline-block';
   cronIntervalo = setInterval(() => {
-    cronSegundos++;
-    // Limite igual ao da validação de enviarArena: máx. 2min30seg
-    if (cronSegundos >= 150) {
-      cronSegundos = 150;
+    if (cronMsAtual() >= CRON_LIMITE_MS) {
+      cronMsAcumulado = CRON_LIMITE_MS;
       cronAtualizarDisplay();
       cronPause();
-      alert('Tempo máximo do cronômetro (2:30) atingido. Pare o robô e confira o tempo registrado.');
+      alert('Tempo máximo do cronômetro (2:30.000) atingido. Pare o robô e confira o tempo registrado.');
       return;
     }
     cronAtualizarDisplay();
-  }, 1000);
+  }, 47); // intervalo curto e "não redondo" para exibir os ms fluindo suavemente
 };
 
 window.cronPause = function() {
+  if (cronRodando) cronMsAcumulado = cronMsAtual();
   cronRodando = false;
   clearInterval(cronIntervalo);
   document.getElementById('btn-cron-play').style.display = 'inline-block';
@@ -758,7 +782,7 @@ window.cronPause = function() {
 
 window.cronZerar = function() {
   cronPause();
-  cronSegundos = 0;
+  cronMsAcumulado = 0;
   cronAtualizarDisplay();
 };
 
@@ -790,6 +814,7 @@ window.irParaMissoes = function() {
   document.getElementById('justif-b').value='';
   document.getElementById('tempo-min').value='';
   document.getElementById('tempo-seg').value='';
+  document.getElementById('tempo-ms').value='';
   cronZerar();
   renderMiss();show('screen-missoes');
 };
@@ -823,11 +848,14 @@ window.enviarArena = async function() {
   const justifB=document.getElementById('justif-b').value.trim();
   const tMin = document.getElementById('tempo-min').value.trim();
   const tSeg = document.getElementById('tempo-seg').value.trim();
+  const tMs = document.getElementById('tempo-ms').value.trim();
   if(tMin===''||tSeg===''){ alert('Informe o tempo gasto na rodada (minutos e segundos).'); return; }
-  const minVal=parseInt(tMin), segVal=parseInt(tSeg);
+  const minVal=parseInt(tMin), segVal=parseInt(tSeg), msVal=tMs===''?0:parseInt(tMs);
   if(isNaN(minVal)||isNaN(segVal)||minVal<0||minVal>2||segVal<0||segVal>59){ alert('Tempo inválido. Minutos: 0-2, Segundos: 0-59.'); return; }
-  if((minVal*60+segVal) > 150){ alert('Tempo máximo permitido é 2:30. Confira o tempo informado.'); return; }
-  const tempoRodada = `${minVal}:${String(segVal).padStart(2,'0')}`;
+  if(isNaN(msVal)||msVal<0||msVal>999){ alert('Milissegundos inválidos. Use um valor entre 0 e 999.'); return; }
+  const totalMs = (minVal*60000)+(segVal*1000)+msVal;
+  if(totalMs > 150000){ alert('Tempo máximo permitido é 2:30.000. Confira o tempo informado.'); return; }
+  const tempoRodada = `${minVal}:${String(segVal).padStart(2,'0')}.${String(msVal).padStart(3,'0')}`;
   // Se marcou valores, a justificativa é obrigatória
   if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
   if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
@@ -1275,12 +1303,15 @@ else if(sub==='notas-gerais') {
       arenaMap[v.equipeB] = { pts: v.totalAlianca, valores: v.valoresB || false, tempo: v.tempoRodada || null };
     });
 
-    // Converte "M:SS" em segundos totais, para comparar tempos no desempate.
+    // Converte "M:SS" ou "M:SS.mmm" em milissegundos totais, para comparar tempos no desempate com máxima precisão.
+    // Compatível com rodadas antigas que não têm milissegundos registrados (assume .000 nesse caso).
     // Equipe sem tempo registrado fica em desvantagem (Infinity = "pior tempo possível").
-    function tempoParaSegundos(t) {
+    function tempoParaMs(t) {
       if (!t) return Infinity;
-      const [m, s] = t.split(':').map(Number);
-      return (m * 60) + s;
+      const [minParte, resto] = t.split(':');
+      const [segParte, msParte] = resto.split('.');
+      const m = Number(minParte), s = Number(segParte), ms = msParte ? Number(msParte) : 0;
+      return (m * 60000) + (s * 1000) + ms;
     }
 
     // Calcula nota final
@@ -1306,7 +1337,7 @@ else if(sub==='notas-gerais') {
         if (b.notaFinal !== a.notaFinal) return b.notaFinal - a.notaFinal;               // 1º: nota final
         if (b.indicacoes !== a.indicacoes) return b.indicacoes - a.indicacoes;            // 2º: indicações de sala
         if (b.valoresArena !== a.valoresArena) return (b.valoresArena?1:0) - (a.valoresArena?1:0); // 3º: valores na arena
-        return tempoParaSegundos(a.tempoArena) - tempoParaSegundos(b.tempoArena);         // 4º: menor tempo na rodada (com segundos)
+        return tempoParaMs(a.tempoArena) - tempoParaMs(b.tempoArena);                     // 4º: menor tempo na rodada (com milissegundos)
       });
 
     if (!ranking.length) { ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados suficientes ainda.</p>'; return; }
@@ -1528,15 +1559,20 @@ window.editArena = async function(id) {
     <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${rM(MB,rod.missoesB)}</div>
     <div style="margin-top:14px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
       <div style="font-weight:600;margin-bottom:10px;font-size:14px">⏱️ Tempo gasto na rodada</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px">
         <div style="text-align:center">
-          <input type="number" id="ed-tempo-min" min="0" max="2" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[0] : ''}" placeholder="0" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
+          <input type="number" id="ed-tempo-min" min="0" max="2" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[0] : ''}" placeholder="0" style="width:60px;font-size:22px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
         </div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
         <div style="text-align:center">
-          <input type="number" id="ed-tempo-seg" min="0" max="59" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[1] : ''}" placeholder="00" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+          <input type="number" id="ed-tempo-seg" min="0" max="59" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[1]?.split('.')[0] : ''}" placeholder="00" style="width:60px;font-size:22px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--green-dark);margin-bottom:14px">.</div>
+        <div style="text-align:center">
+          <input type="number" id="ed-tempo-ms" min="0" max="999" value="${rod.tempoRodada && rod.tempoRodada.split(':')[1]?.split('.')[1] ? rod.tempoRodada.split(':')[1].split('.')[1] : '0'}" placeholder="000" style="width:70px;font-size:22px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">ms</div>
         </div>
       </div>
     </div>
@@ -1572,8 +1608,10 @@ window.savArena = async function(id) {
   const justifB=document.getElementById('ed-justif-b').value.trim();
   const edMin=parseInt(document.getElementById('ed-tempo-min').value||0);
   const edSeg=parseInt(document.getElementById('ed-tempo-seg').value||0);
-  if((edMin*60+edSeg) > 150){ alert('Tempo máximo permitido é 2:30. Confira o tempo informado.'); return; }
-  const tempoRodada=`${edMin}:${String(edSeg).padStart(2,'0')}`;
+  const edMs=parseInt(document.getElementById('ed-tempo-ms').value||0);
+  if(isNaN(edMs)||edMs<0||edMs>999){ alert('Milissegundos inválidos. Use um valor entre 0 e 999.'); return; }
+  if(((edMin*60000)+(edSeg*1000)+edMs) > 150000){ alert('Tempo máximo permitido é 2:30.000. Confira o tempo informado.'); return; }
+  const tempoRodada=`${edMin}:${String(edSeg).padStart(2,'0')}.${String(edMs).padStart(3,'0')}`;
   await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
   const m=document.getElementById('ed-arena-msg');m.textContent=`✅ Salvo! Total: ${pA+pB}/100`;m.style.display='block';
 };

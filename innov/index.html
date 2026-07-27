@@ -512,6 +512,48 @@ document.addEventListener('click',resetInact);
 document.addEventListener('keydown',resetInact);
 
 // ═══════════════════════════════════════════════════════════════
+// CONTROLE DE SESSÃO ATIVA (aviso de login duplicado)
+// Ao logar, grava um "carimbo" (sessoes/{nome}) com timestamp no Firebase.
+// Se outro login para o mesmo nome acontecer enquanto esse carimbo ainda
+// estiver "fresco" (< 90s), avisa o usuário antes de continuar — não bloqueia
+// de forma definitiva (o sistema não tem conexão em tempo real para forçar
+// logout do outro dispositivo), mas evita o erro por descuido.
+// ═══════════════════════════════════════════════════════════════
+const SESSAO_LIMIAR_MS = 90 * 1000;
+const MEU_TOKEN = Date.now() + '_' + Math.random().toString(36).slice(2);
+let heartbeatIntervalo = null;
+
+// Normaliza o nome para uso como chave no Firebase (remove caracteres não permitidos em paths)
+function chaveSessao(nome) {
+  return nome.toLowerCase().trim().replace(/[.#$\/\[\]\s]+/g, '_');
+}
+
+// Mantém o carimbo de sessão "vivo" enquanto o usuário estiver com a aba aberta
+function iniciarHeartbeat(chave) {
+  clearInterval(heartbeatIntervalo);
+  heartbeatIntervalo = setInterval(() => {
+    if (me) fbSet(`sessoes/${chave}`, { token: MEU_TOKEN, timestamp: Date.now() });
+  }, 45000);
+}
+
+// Verifica se já existe sessão ativa recente para esse nome; se sim, avisa e
+// pede confirmação antes de prosseguir. Só efetiva o login se o usuário confirmar.
+async function verificarSessaoEEntrar(nomeExibicao, perfilVal) {
+  const chave = chaveSessao(nomeExibicao);
+  try {
+    const sessao = await fbGet(`sessoes/${chave}`);
+    if (sessao && sessao.token !== MEU_TOKEN && (Date.now() - sessao.timestamp) < SESSAO_LIMIAR_MS) {
+      const continuar = confirm(`⚠️ O usuário "${nomeExibicao}" parece já estar logado em outro dispositivo ou aba agora.\n\nEntrar também aqui pode causar avaliações duplicadas se as duas sessões forem usadas ao mesmo tempo.\n\nDeseja continuar mesmo assim?`);
+      if (!continuar) return;
+    }
+  } catch(e) { /* se a checagem falhar, não bloqueia o login */ }
+  me = nomeExibicao; perfil = perfilVal;
+  fbSet(`sessoes/${chave}`, { token: MEU_TOKEN, timestamp: Date.now() });
+  iniciarHeartbeat(chave);
+  entrar();
+}
+
+// ═══════════════════════════════════════════════════════════════
 // NAVEGAÇÃO ENTRE TELAS
 // show() esconde todas as telas e exibe apenas a solicitada.
 // Cada tela é uma <div id='screen-...'> no HTML.
@@ -562,12 +604,12 @@ window.fazerLogin = async function() {
   try {
     const cfg=await fbGet('config');
     if(!cfg){err.textContent='Erro ao conectar.';err.style.display='block';return;}
-    if(nome.toLowerCase()==='admin'&&senha===cfg.senha_admin){me='admin';perfil='admin';entrar();return;}
+    if(nome.toLowerCase()==='admin'&&senha===cfg.senha_admin){ await verificarSessaoEEntrar('admin','admin'); return; }
     if(senha!==cfg.senha_evento){err.textContent='Senha incorreta.';err.style.display='block';return;}
     const juizes=await fbGet('juizes')||{};
     const found=Object.entries(juizes).find(([k,v])=>v.nome.toLowerCase()===nome.toLowerCase());
     if(!found){err.textContent='Juiz não encontrado. Contate o admin.';err.style.display='block';return;}
-    me=found[1].nome;perfil=found[1].perfil;entrar();
+    await verificarSessaoEEntrar(found[1].nome, found[1].perfil);
   } catch(e){err.textContent='Erro de conexão.';err.style.display='block';}
   finally{btn.textContent='ENTRAR';btn.disabled=false;}
 };
@@ -590,7 +632,7 @@ function entrar() {
 
 // Desloga o usuário, limpa os campos e volta para a tela de login
 window.logout = function() {
-  me=null;perfil=null;clearTimeout(timer);
+  me=null;perfil=null;clearTimeout(timer);clearInterval(heartbeatIntervalo);
   document.getElementById('app-header').style.display='none';
   document.getElementById('login-nome').value='';
   document.getElementById('login-senha').value='';
@@ -631,6 +673,14 @@ window.irParaSala = async function() {
 window.irParaRubricas = async function() {
   const id=document.getElementById('sala-equipe-select').value;
   if(!id){alert('Selecione uma equipe.');return;}
+  // Bloqueia duplicidade: mesmo juiz avaliando a mesma equipe duas vezes
+  // (evita que a nota dessa equipe entre em dobro na média final)
+  const existentes = await fbGet('avaliacoes_sala') || {};
+  const jaAvaliou = Object.values(existentes).some(v => v.juiz === me && v.equipeId === id);
+  if (jaAvaliou) {
+    alert('Você já avaliou esta equipe. Para corrigir a avaliação existente, use "Ver minhas avaliações" no menu — não é possível enviar duas avaliações da mesma equipe pelo mesmo juiz.');
+    return;
+  }
   document.getElementById('rubricas-equipe-nome').textContent=equipes.find(e=>e.id===id).nome;
   renderCrit();
   // Limpa campos do juiz anterior
@@ -697,6 +747,13 @@ window.enviarRubricas = async function() {
   if(!feedbackMelhoria){alert('Preencha o campo "💡 Pensem sobre..." antes de enviar.');return;}
   const indicacao=document.getElementById('indicacao-proxima-fase').checked;
   const total=CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
+  // Verificação final (previne condição de corrida: duas abas enviando ao mesmo tempo)
+  const existentes = await fbGet('avaliacoes_sala') || {};
+  if (Object.values(existentes).some(v => v.juiz === me && v.equipeId === eqId)) {
+    alert('Esta equipe já foi avaliada por você (talvez em outra aba). A avaliação não foi enviada novamente.');
+    show('screen-menu');
+    return;
+  }
   await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,indicacao,timestamp:Date.now()});
   alert(`✅ Avaliação enviada! Total: ${total}/20`);show('screen-menu');
 };
@@ -793,11 +850,18 @@ window.toggleJustificativa = function(lado) {
   if (!checked) document.getElementById(`justif-${lado}`).value = '';
 };
 
-window.irParaMissoes = function() {
+window.irParaMissoes = async function() {
   const a=document.getElementById('arena-equipe-a').value;
   const b=document.getElementById('arena-equipe-b').value;
   if(!a||!b){alert('Selecione as duas equipes.');return;}
   if(a===b){alert('As equipes devem ser diferentes.');return;}
+  // Bloqueia duplicidade: mesmo juiz registrando a mesma aliança duas vezes
+  const existentes = await fbGet('rodadas_arena') || {};
+  const jaRegistrou = Object.values(existentes).some(v => v.juiz === me && ((v.equipeA===a && v.equipeB===b) || (v.equipeA===b && v.equipeB===a)));
+  if (jaRegistrou) {
+    alert('Você já registrou uma rodada para esta aliança. Para corrigir, use "Ver rodadas registradas" no menu — não é possível registrar a mesma aliança duas vezes pelo mesmo juiz.');
+    return;
+  }
   const eA=equipes.find(e=>e.id===a),eB=equipes.find(e=>e.id===b);
   document.getElementById('arena-chips').innerHTML=`
     <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${eA.nome}</span>
@@ -859,6 +923,14 @@ window.enviarArena = async function() {
   // Se marcou valores, a justificativa é obrigatória
   if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
   if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
+  // Verificação final (previne condição de corrida: duas abas enviando ao mesmo tempo)
+  const existentes = await fbGet('rodadas_arena') || {};
+  if (Object.values(existentes).some(v => v.juiz === me && ((v.equipeA===a && v.equipeB===b) || (v.equipeA===b && v.equipeB===a)))) {
+    alert('Esta aliança já foi registrada por você (talvez em outra aba). A rodada não foi enviada novamente.');
+    cronZerar();
+    show('screen-menu');
+    return;
+  }
   await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',juiz:me,timestamp:Date.now()});
   cronZerar();
   alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');

@@ -3,162 +3,136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TPR Innov 2026 — Sistema de Avaliação</title>
-<link rel="icon" type="image/png" href="./favicon-innov.png">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>TPR Explore 2026 — Sistema de Avaliação</title>
+<link rel="icon" type="image/png" href="./04-TPR.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --green: #E8650A;
-    --green-dark: #0D3B7A;
-    --green-bg: #FFF0E6;
-    --amber: #E8650A;
-    --teal: #1A5FB5;
-    --coral: #C94A0A;
-    --gray: #374151;
-    --light: #F4F7FB;
-    --text: #0D1B2A;
-    --text-muted: #5B7BA0;
-    --border: #BDD1EE;
-    --shadow: 0 2px 12px rgba(13,59,122,0.08);
-    --shadow-lg: 0 8px 32px rgba(13,59,122,0.14);
-    --radius: 12px; --radius-sm: 8px;
-    --blue: #1A5FB5;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Barlow', sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
-  .header { background: linear-gradient(90deg, #0D3B7A 0%, #1A5FB5 100%); color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-  .header-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
-  .header-sub { font-size: 12px; opacity: 0.7; }
-  .header-user { display: flex; align-items: center; gap: 10px; }
-  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-  .badge-admin { background: #E8650A; color: white; }
-  .badge-sala { background: #1A5FB5; color: white; }
-  .badge-arena { background: #E8650A; color: white; }
-  .btn-logout { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: 'Barlow', sans-serif; }
-  .screen { display: none; padding: 24px 16px; max-width: 540px; margin: 0 auto; }
-  .screen.active { display: block; }
-  .screen-wide { max-width: 920px; }
-  .card { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 20px; }
-  .card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; text-transform: uppercase; color: var(--green-dark); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #BDD1EE; }
-  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: linear-gradient(160deg, #0D3B7A 0%, #1A5FB5 60%, #0A2D6B 100%); flex-direction: column; gap: 14px; }
-  .login-card { background: white; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-  .login-logo { text-align: center; margin-bottom: 28px; }
-  .login-logo-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; color: var(--green-dark); text-transform: uppercase; letter-spacing: 2px; }
-  .login-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin: 0 3px; animation: pulse 1.5s ease-in-out infinite; }
-  .login-logo-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4);opacity:0.7} }
-  .btn-telao-direto { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); color: white; padding: 12px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; max-width: 400px; }
-  .btn-telao-direto:hover { background: rgba(255,255,255,0.25); }
-  .form-group { margin-bottom: 18px; }
-  label { display: block; font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-  input:not([type=checkbox]), select, textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Barlow', sans-serif; font-size: 15px; color: var(--text); background: white; transition: border-color 0.2s; appearance: none; }
-  input:not([type=checkbox]):focus, select:focus, textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(26,95,181,0.15); }
-  input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--blue); flex-shrink: 0; }
-  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23607d60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
-  .pass-wrap { position: relative; }
-  .pass-wrap input { padding-right: 44px; }
-  .btn-ver-senha { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; }
-  .btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background-color 0.2s; }
-  .btn-primary { background: #0D3B7A; color: white; }
-  .btn-primary:hover { background: #0A2D6B; }
-  .btn-secondary { background: #EEF4FD; color: #0D3B7A; }
-  .btn-danger { background: #ffebee; color: #c62828; }
-  .btn-danger:hover { background: #ffcdd2; }
-  .btn-amber { background: var(--amber); color: white; }
-  .btn-sm { padding: 7px 14px; width: auto; font-size: 13px; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .error-msg { background: #ffebee; color: #c62828; border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; display: none; }
-  .success-msg { background: #EEF4FD; color: #0D3B7A; border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; display: none; }
-  .criterio-block { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 14px; }
-  .criterio-block.selected { border-color: var(--teal); background: var(--green-bg); }
-  .criterio-label { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-  .criterio-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
-  .rubrica-options { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
-  .rubrica-opt { border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.15s; background: white; }
-  .rubrica-opt:hover { border-color: var(--teal); }
-  .rubrica-opt.active { background: #0D3B7A; border-color: #0D3B7A; color: white; }
-  .rubrica-opt .score { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; display: block; }
-  .rubrica-opt .score-label { font-size: 10px; font-weight: 600; text-transform: uppercase; opacity: 0.8; }
-  .excede-comment { margin-top: 8px; display: none; }
-  .excede-comment textarea { border-color: var(--amber); min-height: 60px; resize: vertical; font-size: 14px; }
-  .excede-note { font-size: 12px; color: var(--amber); font-weight: 600; margin-bottom: 6px; }
-  .criterio-feedback { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-  .criterio-feedback textarea { min-height: 54px; resize: vertical; font-size: 13px; padding: 8px 10px; }
-  .fb-label { font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-  .fb-pos .fb-label { color: var(--teal); }
-  .fb-mel .fb-label { color: var(--coral); }
-  .missao-group { margin-bottom: 20px; }
-  .missao-group-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; text-transform: uppercase; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; }
-  .robo-a .missao-group-title { background: #e8f0fc; color: #0D3B7A; }
-  .robo-b .missao-group-title { background: #fff0e6; color: #C94A0A; }
-  .missao-item { display: flex; align-items: center; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: white; }
-  .missao-item:hover { border-color: var(--teal); }
-  .missao-item.done { background: var(--green-bg); border-color: var(--teal); }
-  .missao-name { font-size: 14px; flex: 1; }
-  .missao-pts { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-muted); margin-left: 10px; }
-  .missao-item.done .missao-pts { color: var(--green-dark); font-weight: 700; }
-  .missao-check { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 50%; margin-left: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .missao-item.done .missao-check { background: var(--green); border-color: var(--teal); }
-  .missao-check::after { content: '✓'; font-size: 13px; color: white; display: none; }
-  .missao-item.done .missao-check::after { display: block; }
-  .total-pts { text-align: center; padding: 16px; background: #0D3B7A; color: white; border-radius: var(--radius-sm); margin-top: 16px; font-family: 'Barlow Condensed', sans-serif; }
-  .total-pts .num { font-size: 48px; font-weight: 900; line-height: 1; }
-  .total-pts .label { font-size: 13px; opacity: 0.8; text-transform: uppercase; }
-  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .admin-tile { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); cursor: pointer; transition: all 0.2s; border: 2px solid transparent; text-align: center; }
-  .admin-tile:hover { box-shadow: var(--shadow-lg); border-color: #1A5FB5; }
-  .admin-tile-icon { font-size: 32px; margin-bottom: 8px; }
-  .admin-tile-title { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; text-transform: uppercase; color: var(--green-dark); }
-  .admin-tile-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { background: #0D3B7A; color: white; padding: 10px 12px; text-align: left; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; }
-  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--green-bg); }
-  .table-wrap { overflow-x: auto; border-radius: var(--radius-sm); box-shadow: var(--shadow); }
-  .csv-drop { border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
-  .csv-drop:hover { border-color: var(--teal); background: var(--green-bg); }
-  .csv-drop-icon { font-size: 32px; margin-bottom: 8px; }
-  .csv-drop-text { font-size: 14px; color: var(--text-muted); }
-  .csv-col-map { background: var(--green-bg); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; display: none; }
-  .csv-col-map-title { font-weight: 600; font-size: 14px; margin-bottom: 12px; color: var(--green-dark); }
-  .telao-wrap { min-height: 100vh; background: #050D1A; color: white; display: none; overflow: hidden; }
-  .telao-wrap.active { display: block; }
-  .telao-header { background: linear-gradient(90deg, #0D3B7A 0%, #1A5FB5 100%); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-  .telao-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-  .telao-subtitle { font-size: 12px; opacity: 0.7; }
-  .telao-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .telao-speed-label { font-size: 12px; opacity: 0.7; }
-  .telao-speed-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: 'Barlow', sans-serif; }
-  .telao-speed-btn.ativo { background: #E8650A; border-color: var(--teal); }
-  .live-dot { width: 9px; height: 9px; background: #f44336; border-radius: 50%; animation: pulse 1s infinite; display: inline-block; margin-right: 4px; }
-  .telao-body { padding: 16px 32px; height: calc(100vh - 70px); overflow: hidden; }
-  .telao-header-row { display: grid; grid-template-columns: 55px 1fr 90px 110px 120px; gap: 12px; padding: 0 16px 10px; font-size: 11px; text-transform: uppercase; opacity: 0.4; }
-  .telao-lista-wrap { overflow: hidden; }
-  .telao-lista { transition: transform 0.6s ease; }
-  .telao-row { display: grid; grid-template-columns: 55px 1fr 90px 110px 120px; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
-  .telao-pos { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.4); text-align: center; }
-  .telao-equipe { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
-  .telao-col-label { font-size: 10px; opacity: 0.5; text-transform: uppercase; }
-  .telao-col-val { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
-  .telao-total { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: #F5A05A; }
-  .divider { height: 1px; background: var(--border); margin: 20px 0; }
-  .text-muted { color: var(--text-muted); font-size: 13px; }
-  .mt-12 { margin-top: 12px; }
-  .back-btn { display: flex; align-items: center; gap: 6px; color: #0D3B7A; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px; background: none; border: none; padding: 0; font-family: 'Barlow', sans-serif; }
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-  .chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-  .nota-display { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 900; color: #0D3B7A; text-align: center; }
-  .nota-label { text-align: center; font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
-  .loading { text-align: center; padding: 40px; color: var(--text-muted); }
-  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--amber); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .inline-flex { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .tag-alias { background: #EEF4FD; color: #0D3B7A; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .comment-box { background: #FFF8EE; border-left: 3px solid #E8650A; padding: 6px 10px; border-radius: 0 6px 6px 0; font-size: 12px; color: #5d4037; margin-top: 4px; }
-  .feedback-pos-box { background: #EEF4FD; border-left: 3px solid #1A5FB5; padding: 6px 10px; border-radius: 0 6px 6px 0; font-size: 12px; color: #004d40; margin-top: 4px; }
-  .feedback-mel-box { background: #FFF0E6; border-left: 3px solid #E8650A; padding: 6px 10px; border-radius: 0 6px 6px 0; font-size: 12px; color: #bf360c; margin-top: 4px; }
-  @media(max-width:500px) { .admin-grid{grid-template-columns:1fr} .rubrica-options{grid-template-columns:repeat(2,1fr)} .criterio-feedback{grid-template-columns:1fr} .telao-row,.telao-header-row{grid-template-columns:40px 1fr 70px 90px} }
+:root {
+  --bege:#f4f0eb; --bege-dark:#e8e2d9; --caramelo:#c69c6d; --caramelo-dark:#a67c50;
+  --marrom:#534741; --marrom-dark:#3a302b; --marrom-light:#7a6358;
+  --vermelho:#b94040; --verde:#6b8c3e; --azul:#3a6b8c;
+  --text:#2e1f18; --text-muted:#7a6358; --border:#d8cfc4;
+  --shadow:0 2px 12px rgba(83,71,65,0.10); --shadow-lg:0 8px 32px rgba(83,71,65,0.16);
+  --radius:14px; --radius-sm:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bege);color:var(--text);min-height:100vh;}
+.header{background:var(--marrom-dark);color:white;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,0.25);}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header-logo{height:34px;width:auto;}
+.header-divider{width:1px;height:28px;background:rgba(255,255,255,0.2);}
+.header-title{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;color:var(--caramelo);}
+.header-sub{font-size:11px;opacity:0.55;margin-top:1px;}
+.header-user{display:flex;align-items:center;gap:10px;}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.badge-admin{background:var(--caramelo);color:white;}
+.badge-sala{background:var(--verde);color:white;}
+.btn-logout{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Nunito Sans',sans-serif;transition:background 0.2s;}
+.btn-logout:hover{background:rgba(255,255,255,0.22);}
+.screen{display:none;padding:24px 16px;max-width:560px;margin:0 auto;}
+.screen.active{display:block;}
+.screen-wide{max-width:940px;}
+.card{background:white;border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:20px;border:1px solid var(--border);}
+.card-title{font-family:'Nunito',sans-serif;font-size:19px;font-weight:800;text-transform:uppercase;color:var(--marrom);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--bege-dark);letter-spacing:0.5px;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;flex-direction:column;gap:16px;background:var(--caramelo);position:relative;overflow:hidden;}
+.login-wrap::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 15% 85%,rgba(244,240,235,0.25) 0%,transparent 45%),radial-gradient(circle at 85% 15%,rgba(244,240,235,0.15) 0%,transparent 45%),radial-gradient(circle at 50% 50%,rgba(83,71,65,0.08) 0%,transparent 60%);}
+.login-stripes{position:absolute;bottom:0;left:0;right:0;height:6px;display:flex;}
+.login-stripes span{flex:1;}
+.login-stripes span:nth-child(1){background:var(--vermelho);}
+.login-stripes span:nth-child(2){background:var(--verde);}
+.login-stripes span:nth-child(3){background:var(--azul);}
+.login-stripes span:nth-child(4){background:var(--marrom);}
+.login-card{background:var(--bege);border-radius:20px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(83,71,65,0.28),0 4px 16px rgba(83,71,65,0.12);position:relative;z-index:1;border:1px solid rgba(255,255,255,0.6);}
+.login-logo-wrap{text-align:center;margin-bottom:28px;}
+.login-logo-wrap img{height:96px;width:auto;margin-bottom:0;}
+.login-logo-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.login-evento-badge{display:inline-block;background:var(--caramelo);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.form-group{margin-bottom:18px;}
+label{display:block;font-size:12px;font-weight:700;color:var(--marrom-light);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.6px;font-family:'Nunito',sans-serif;}
+input:not([type=checkbox]),select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito Sans',sans-serif;font-size:15px;color:var(--text);background:white;transition:border-color 0.2s;appearance:none;}
+input:not([type=checkbox]):focus,select:focus,textarea:focus{outline:none;border-color:var(--caramelo);box-shadow:0 0 0 3px rgba(198,156,109,0.18);}
+input[type=checkbox]{width:20px;height:20px;cursor:pointer;accent-color:var(--caramelo);flex-shrink:0;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6358' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
+.pass-wrap{position:relative;}
+.pass-wrap input{padding-right:44px;}
+.btn-ver-senha{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:0;}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:var(--marrom);color:white;}
+.btn-primary:hover{background:var(--marrom-dark);transform:translateY(-1px);box-shadow:var(--shadow);}
+.btn-secondary{background:var(--bege-dark);color:var(--marrom);}
+.btn-secondary:hover{background:var(--border);}
+.btn-caramelo{background:var(--caramelo);color:white;}
+.btn-caramelo:hover{background:var(--caramelo-dark);}
+.btn-danger{background:#fdecea;color:#922;}
+.btn-danger:hover{background:#fbd5d2;}
+.btn-sm{padding:7px 14px;width:auto;font-size:13px;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none!important;}
+.error-msg{background:#fdecea;color:#922;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:14px;display:none;border-left:3px solid #c44;}
+.success-msg{background:#edf7ed;color:#2d6a2d;border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:14px;display:none;border-left:3px solid var(--verde);}
+.categoria-header{font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;padding:6px 0 6px 12px;margin:24px 0 10px;display:flex;align-items:center;gap:8px;border-left:3px solid;}
+.cat-challenge{border-color:#1a4a8c;color:#1a4a8c;}
+.cat-corevalues{border-color:#1a5c1a;color:#1a5c1a;}
+.cat-teammodel{border-color:#4a2a8c;color:#4a2a8c;}
+.cat-coding{border-color:#7a4a00;color:#7a4a00;}
+.cat-poster{border-color:#7a1a1a;color:#7a1a1a;}
+.criterio-block{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;background:white;transition:border-color 0.2s,background 0.2s;}
+.criterio-block.selected{border-color:var(--caramelo);background:#fdf8f2;}
+.criterio-label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px;color:var(--marrom);}
+.criterio-desc{font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.5;}
+.rubrica-options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+.rubrica-opt{border:1.5px solid var(--border);border-radius:8px;padding:10px 4px;text-align:center;cursor:pointer;transition:all 0.15s;background:white;}
+.rubrica-opt:hover{border-color:var(--caramelo);background:#fdf8f2;}
+.rubrica-opt.active{background:var(--marrom);border-color:var(--marrom);color:white;}
+.rubrica-opt .score{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;display:block;}
+.rubrica-opt .score-label{font-size:9px;font-weight:700;text-transform:uppercase;opacity:0.75;letter-spacing:0.3px;}
+.excede-comment{margin-top:10px;display:none;}
+.excede-comment textarea{border-color:var(--caramelo);min-height:60px;resize:vertical;font-size:14px;}
+.excede-note{font-size:12px;color:var(--caramelo-dark);font-weight:700;margin-bottom:6px;}
+
+
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.admin-tile{background:white;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;border:1.5px solid var(--border);text-align:center;}
+.admin-tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--caramelo);}
+.admin-tile-icon{font-size:30px;margin-bottom:8px;}
+.admin-tile-title{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;color:var(--marrom);letter-spacing:0.3px;}
+.admin-tile-desc{font-size:12px;color:var(--text-muted);margin-top:4px;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--marrom-dark);color:white;padding:10px 12px;text-align:left;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bege);}
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);box-shadow:var(--shadow);border:1px solid var(--border);}
+.csv-drop{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;}
+.csv-drop:hover{border-color:var(--caramelo);background:#fdf8f2;}
+.csv-drop-icon{font-size:32px;margin-bottom:8px;}
+.csv-drop-text{font-size:14px;color:var(--text-muted);}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+.text-muted{color:var(--text-muted);font-size:13px;}
+.mt-12{margin-top:12px;}
+.back-btn{display:flex;align-items:center;gap:6px;color:var(--marrom);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:16px;background:none;border:none;padding:0;font-family:'Nunito',sans-serif;opacity:0.7;transition:opacity 0.15s;}
+.back-btn:hover{opacity:1;}
+.loading{text-align:center;padding:40px;color:var(--text-muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--caramelo);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.comment-box{background:#fef6e4;border-left:3px solid var(--caramelo);padding:6px 10px;border-radius:0 6px 6px 0;font-size:12px;color:var(--marrom);margin-top:4px;}
+.feedback-pos-box{background:#edf7ed;border-left:3px solid var(--verde);padding:6px 10px;border-radius:0 6px 6px 0;font-size:12px;color:#1a5c1a;margin-top:4px;}
+.feedback-mel-box{background:#fdecea;border-left:3px solid var(--vermelho);padding:6px 10px;border-radius:0 6px 6px 0;font-size:12px;color:#7a1a1a;margin-top:4px;}
+.badge-arena{background:var(--vermelho);color:white;}
+.lado-card{border:2px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;}
+.lado-vermelho{border-color:#b94040;background:#fdf5f5;}
+.lado-amarelo{border-color:#b8860b;background:#fdf9ee;}
+.lado-title{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;}
+.lado-vermelho .lado-title{color:#b94040;}
+.lado-amarelo .lado-title{color:#b8860b;}
+.telao-arena{min-height:100vh;background:#1a0f0a;color:white;display:none;overflow:hidden;}
+.telao-arena.active{display:block;}
+.telao-arena-header{background:var(--marrom-dark);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;}
+.telao-arena-body{padding:20px 32px;}
+.arena-card-telao{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px;margin-bottom:12px;}
+.arena-cor-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:8px;}
+.live-dot{width:9px;height:9px;background:#f44336;border-radius:50%;animation:pulse 1s infinite;display:inline-block;margin-right:4px;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4);opacity:0.7}}
+@media(max-width:500px){.admin-grid{grid-template-columns:1fr;}.rubrica-options{grid-template-columns:repeat(2,1fr);}.login-card{padding:28px 20px;}}
 </style>
 </head>
 <body>
@@ -166,16 +140,10 @@
 <!-- LOGIN -->
 <div id="screen-login" class="login-wrap">
   <div class="login-card">
-    <div class="login-logo">
-      <!-- Logo TPR preta pequena acima -->
-      <div style="height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;margin-top:-8px">
-        <img src="./logo-tpr-preta.png" alt="TPR" style="height:20px;width:auto">
-      </div>
-      <!-- Logo Innov colorida maior -->
-      <div style="width:220px;margin:0 auto 6px">
-        <img src="./logo-innov-color.png" alt="Innov" style="width:100%;height:auto">
-      </div>
-      <div style="color:#5B7BA0;font-size:13px;margin-top:4px;font-family:Barlow,sans-serif">Sistema de Avaliação · 2026</div>
+    <div class="login-logo-wrap">
+      <div style="display:block;margin-bottom:10px"><img src="./04-TPR.png" alt="TPR 2026"></div>
+      <div class="login-evento-badge">Explore 2026</div>
+      <div class="login-logo-sub">Sistema de Avaliação</div>
     </div>
     <div id="login-error" class="error-msg"></div>
     <div class="form-group">
@@ -190,72 +158,53 @@
       </div>
     </div>
     <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
-    <p class="text-muted mt-12" style="text-align:center;font-size:12px">Sessão expira após 30 min de inatividade</p>
+    <p class="text-muted mt-12" style="text-align:center;font-size:11px">Sessão expira após 30 min de inatividade</p>
   </div>
-  <button class="btn-telao-direto" onclick="irParaTelao()">📺 Ver Telão — sem login</button>
-  <p style="color:rgba(255,255,255,0.45);font-size:11px;text-align:center;margin-top:8px;line-height:1.6;max-width:400px;padding:0 16px">
-    TPR Innov 2026 · Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
+  <p style="color:rgba(255,255,255,0.65);font-size:11px;text-align:center;margin-top:4px;line-height:1.7;max-width:400px;padding:0 16px;position:relative;z-index:1">
+    Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
   </p>
+  <div class="login-stripes"><span></span><span></span><span></span><span></span></div>
 </div>
 
 <!-- HEADER -->
 <div id="app-header" style="display:none">
   <div class="header">
-    <div style="display:flex;align-items:center;gap:14px">
-      <div style="height:32px;display:flex;align-items:center;flex-shrink:0"><img src="./logo-tpr-branco.png" alt="TPR" style="height:32px;width:auto"></div>
-      <div style="width:1.5px;height:28px;background:rgba(255,255,255,0.3)"></div>
+    <div class="header-left">
+      <img src="./03-TPR.png" alt="TPR" class="header-logo">
+      <div class="header-divider"></div>
       <div>
-        <div class="header-title" style="color:#F5A05A">INNOV 2026</div>
+        <div class="header-title">Explore 2026</div>
         <div class="header-sub">Sistema de Avaliação</div>
       </div>
     </div>
     <div class="header-user">
       <span id="header-badge" class="badge"></span>
-      <span id="header-nome" style="font-size:14px"></span>
+      <span id="header-nome" style="font-size:13px;color:rgba(255,255,255,0.8)"></span>
       <button class="btn-logout" onclick="logout()">Sair</button>
     </div>
   </div>
 </div>
 
-<!-- MENU -->
+<!-- MENU JUIZ -->
 <div id="screen-menu" class="screen">
   <div class="card" style="margin-top:24px">
     <div class="card-title">O que deseja fazer?</div>
     <div id="menu-sala" style="display:none">
-      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaSala()">📋 Avaliar Projeto de Inovação</button>
-      <button class="btn btn-secondary" style="margin-bottom:12px" onclick="verMinhasAvaliacoes()">📝 Ver minhas avaliações</button>
+      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaSala()">📋 Avaliar Equipe</button>
+      <button class="btn btn-secondary" onclick="verMinhasAvaliacoes()">📝 Ver minhas avaliações</button>
     </div>
     <div id="menu-arena" style="display:none">
-      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🤖 Registrar Rodada de Arena</button>
-      <button class="btn btn-secondary" style="margin-bottom:12px" onclick="verMinhasRodadas()">📊 Ver rodadas registradas</button>
+      <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🏟️ Registrar Rodada de Arena</button>
+      <button class="btn btn-secondary" onclick="verMinhasRodadas()">📊 Ver rodadas registradas</button>
     </div>
-    <button class="btn btn-secondary" onclick="irParaTelao()">📺 Ver Painel do Telão</button>
   </div>
 </div>
 
-<!-- JUIZ ARENA: MINHAS RODADAS -->
-<div id="screen-minhas-rodadas" class="screen">
-  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
-  <div class="card">
-    <div class="card-title">Rodadas Registradas</div>
-    <div id="minhas-rodadas-content"></div>
-  </div>
-</div>
-
-<!-- JUIZ: MINHAS AVALIAÇÕES -->
-<div id="screen-minhas-aval" class="screen">
-  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
-  <div class="card">
-    <div class="card-title">Minhas Avaliações</div>
-    <div id="minhas-aval-content"></div>
-  </div>
-</div>
-
-<!-- SALA: EQUIPE -->
+<!-- SALA: SELEÇÃO DE EQUIPE -->
 <div id="screen-sala-equipe" class="screen">
   <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
   <div class="card">
-    <div class="card-title">Avaliação de Projeto</div>
+    <div class="card-title">Avaliação de Equipe</div>
     <div class="form-group">
       <label>Selecione a equipe</label>
       <select id="sala-equipe-select"><option value="">-- Escolha a equipe --</option></select>
@@ -269,142 +218,179 @@
 <div id="screen-rubricas" class="screen">
   <button class="back-btn" onclick="voltar('screen-sala-equipe')">← Voltar</button>
   <div class="card">
-    <div class="card-title" id="rubricas-equipe-nome">Projeto de Inovação</div>
+    <div class="card-title" id="rubricas-equipe-nome">Avaliação</div>
     <p class="text-muted" style="margin-bottom:20px;font-size:13px">Avalie de 1 a 4. Se marcar <strong>Excede</strong>, o comentário é obrigatório.</p>
+    <div id="rubrica-error" class="error-msg"></div>
     <div id="criterios-container"></div>
     <div class="divider"></div>
-    <div class="nota-display" id="nota-preview">0</div>
-    <div class="nota-label">pontos totais (máx. 20)</div>
+    <div style="text-align:center;padding:16px 0">
+      <div style="font-family:'Nunito',sans-serif;font-size:52px;font-weight:900;color:var(--marrom);line-height:1" id="nota-preview">0</div>
+      <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px">Pontos totais (máx. 40)</div>
+    </div>
     <div class="divider"></div>
-    <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">Feedback geral da apresentação</p>
+    <p style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text);font-family:'Nunito',sans-serif">Feedback geral da apresentação</p>
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
       <div>
-        <div style="font-size:12px;font-weight:600;color:var(--teal);text-transform:uppercase;margin-bottom:6px">✅ Muito bom...</div>
+        <div style="font-size:12px;font-weight:700;color:var(--verde);text-transform:uppercase;margin-bottom:6px;letter-spacing:0.4px">✅ Muito bom...</div>
         <textarea id="fb-geral-pos" placeholder="O que a equipe fez bem..." style="min-height:90px;resize:vertical;font-size:14px"></textarea>
       </div>
       <div>
-        <div style="font-size:12px;font-weight:600;color:var(--coral);text-transform:uppercase;margin-bottom:6px">💡 Pensem sobre...</div>
+        <div style="font-size:12px;font-weight:700;color:var(--vermelho);text-transform:uppercase;margin-bottom:6px;letter-spacing:0.4px">💡 Pensem sobre...</div>
         <textarea id="fb-geral-mel" placeholder="O que pode melhorar..." style="min-height:90px;resize:vertical;font-size:14px"></textarea>
       </div>
     </div>
-    <div style="background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:16px;margin-bottom:4px">
+    <div style="background:#fef6e4;border:1.5px solid #f0d080;border-radius:var(--radius-sm);padding:16px;margin-bottom:4px">
       <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
-        <input type="checkbox" id="indicacao-proxima-fase" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--blue)">
+        <input type="checkbox" id="indicacao-proxima-fase" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--caramelo)">
         <div>
-          <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px">⭐ Indicar para próxima fase</div>
-          <div style="font-size:12px;color:#546e7a;line-height:1.4">Esta indicação não altera a nota. Serve apenas como critério de desempate caso duas equipes terminem com a mesma pontuação final.</div>
+          <div style="font-weight:700;font-size:15px;color:var(--marrom);margin-bottom:2px">⭐ Indicar para próxima fase</div>
+          <div style="font-size:12px;color:var(--text-muted);line-height:1.4">Esta indicação não altera a nota. Serve apenas como critério de desempate caso duas equipes terminem com a mesma pontuação final.</div>
         </div>
       </label>
     </div>
-    <div id="rubrica-error" class="error-msg" style="margin-top:16px"></div>
+    <div id="rubrica-error-bottom" class="error-msg" style="margin-top:16px"></div>
     <button class="btn btn-primary mt-12" onclick="enviarRubricas()">Confirmar e Enviar Avaliação</button>
   </div>
 </div>
 
-<!-- ARENA: ALIANÇA -->
-<div id="screen-arena-alianca" class="screen">
+<!-- JUIZ: MINHAS AVALIAÇÕES -->
+<div id="screen-minhas-aval" class="screen">
   <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
   <div class="card">
-    <div class="card-title">Rodada de Arena</div>
-    <div class="form-group"><label>Equipe — Robô A (lado vermelho)</label><select id="arena-equipe-a"><option value="">-- Selecione --</option></select></div>
-    <div class="form-group"><label>Equipe — Robô B (lado azul)</label><select id="arena-equipe-b"><option value="">-- Selecione --</option></select></div>
-    <button class="btn btn-primary" onclick="irParaMissoes()">Iniciar Registro de Missões</button>
+    <div class="card-title">Minhas Avaliações</div>
+    <div id="minhas-aval-content"></div>
   </div>
 </div>
 
-<!-- ARENA: MISSÕES -->
-<div id="screen-missoes" class="screen">
-  <button class="back-btn" onclick="cronPause();voltar('screen-arena-alianca')">← Voltar</button>
+<!-- ARENA: SELEÇÃO -->
+<div id="screen-arena" class="screen">
+  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
   <div class="card">
-    <div class="card-title">Registro de Missões</div>
-    <div class="chips" id="arena-chips"></div>
-    <p class="text-muted" style="margin-bottom:16px;font-size:13px">Toque na missão para marcar como concluída.</p>
-    <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div><div id="missoes-a"></div></div>
-    <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div><div id="missoes-b"></div></div>
-    <div class="total-pts"><div class="num" id="arena-total">0</div><div class="label">pontos da aliança (máx. 100)</div></div>
+    <div class="card-title" id="arena-titulo">Rodada de Arena</div>
+    <p class="text-muted" style="margin-bottom:20px;font-size:13px">Registre as equipes de cada lado e a pontuação do round.</p>
 
-    <!-- TEMPO DA RODADA -->
-    <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
-      <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">⏱️ Tempo gasto na rodada</p>
+    <div class="form-group">
+      <label>Rodada</label>
+      <select id="arena-rodada">
+        <option value="">-- Selecione a rodada --</option>
+        <option value="1">Rodada 1 — Check-in 13:40</option>
+        <option value="2">Rodada 2 — Check-in 14:00</option>
+        <option value="3">Rodada 3 — Check-in 14:20</option>
+        <option value="4">Rodada 4 — Check-in 15:20</option>
+        <option value="5">Rodada 5 — Check-in 15:40</option>
+        <option value="6">Rodada 6 — Check-in 16:00</option>
+        <option value="7">Rodada 7 — Check-in 16:20</option>
+      </select>
+    </div>
 
-      <!-- CRONÔMETRO: play/pause/zerar. Preenche automaticamente os campos de min/seg abaixo. -->
-      <div style="text-align:center;margin-bottom:16px">
-        <div id="cronometro-display" style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--green-dark);letter-spacing:1px">0:00</div>
-        <div style="display:flex;justify-content:center;gap:10px;margin-top:10px">
-          <button type="button" class="btn btn-primary btn-sm" id="btn-cron-play" onclick="cronPlay()">▶ Iniciar</button>
-          <button type="button" class="btn btn-secondary btn-sm" id="btn-cron-pause" onclick="cronPause()" style="display:none">⏸ Pausar</button>
-          <button type="button" class="btn btn-danger btn-sm" onclick="cronZerar()">⏹ Zerar</button>
-        </div>
+    <div class="lado-card lado-vermelho">
+      <div class="lado-title">🔴 Lado Vermelho (Base Vermelha)</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Equipes neste lado</label>
+        <div id="equipes-vermelho-list"></div>
+        <select id="add-eq-vermelho" onchange="adicionarEquipeLado('vermelho')">
+          <option value="">+ Adicionar equipe...</option>
+        </select>
       </div>
-
-      <p class="text-muted" style="font-size:11px;text-align:center;margin-bottom:10px">Ou preencha manualmente, se preferir:</p>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-        <div style="text-align:center">
-          <input type="number" id="tempo-min" min="0" max="2" placeholder="0" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px" oninput="autoAvancarSegundos(this)">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
-        </div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
-        <div style="text-align:center">
-          <input type="number" id="tempo-seg" min="0" max="59" placeholder="00" style="width:70px;font-size:28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
-        </div>
+      <div class="form-group" style="margin:0">
+        <label>Peças transportadas</label>
+        <input type="number" id="pecas-vermelho" min="0" placeholder="0" style="font-size:28px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:12px">
       </div>
     </div>
 
-    <!-- VALORES NA RODADA -->
-    <div style="margin-top:20px">
-      <p style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text)">Valores durante a rodada <span style="font-weight:400;color:var(--text-muted);font-size:12px">(critério de desempate individual)</span></p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div id="box-valores-a" style="background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px">
-          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
-            <input type="checkbox" id="valores-a" onchange="toggleJustificativa('a')" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
-            <div>
-              <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-a-nome">🔴 Equipe A — demonstrou valores durante a rodada</div>
-              <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
-            </div>
-          </label>
-          <div id="justif-wrap-a" style="display:none;margin-top:10px">
-            <div style="font-size:11px;font-weight:600;color:#1565c0;text-transform:uppercase;margin-bottom:4px">Justifique brevemente</div>
-            <textarea id="justif-a" placeholder="Ex: ajudou a equipe adversária a reposicionar o robô após uma falha..." style="min-height:54px;resize:vertical;font-size:13px;padding:8px 10px"></textarea>
-          </div>
-        </div>
-        <div id="box-valores-b" style="background:#f0f7ff;border:1.5px solid #90caf9;border-radius:var(--radius-sm);padding:14px">
-          <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
-            <input type="checkbox" id="valores-b" onchange="toggleJustificativa('b')" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:#1565c0">
-            <div>
-              <div style="font-weight:700;font-size:15px;color:#1565c0;margin-bottom:2px" id="valores-b-nome">🔵 Equipe B — demonstrou valores durante a rodada</div>
-              <div style="font-size:12px;color:#546e7a;line-height:1.4">Não altera a pontuação. Serve apenas como critério de desempate.</div>
-            </div>
-          </label>
-          <div id="justif-wrap-b" style="display:none;margin-top:10px">
-            <div style="font-size:11px;font-weight:600;color:#1565c0;text-transform:uppercase;margin-bottom:4px">Justifique brevemente</div>
-            <textarea id="justif-b" placeholder="Ex: cedeu espaço na trilha para o robô adversário passar..." style="min-height:54px;resize:vertical;font-size:13px;padding:8px 10px"></textarea>
-          </div>
-        </div>
+    <div class="lado-card lado-amarelo">
+      <div class="lado-title">🟡 Lado Amarelo (Base Amarela)</div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>Equipes neste lado</label>
+        <div id="equipes-amarelo-list"></div>
+        <select id="add-eq-amarelo" onchange="adicionarEquipeLado('amarelo')">
+          <option value="">+ Adicionar equipe...</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label>Peças transportadas</label>
+        <input type="number" id="pecas-amarelo" min="0" placeholder="0" style="font-size:28px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:12px">
       </div>
     </div>
 
-    <div id="arena-error" class="error-msg" style="margin-top:16px"></div>
-    <button class="btn btn-primary mt-12" onclick="enviarArena()">Confirmar e Enviar Rodada</button>
+    <div id="arena-error" class="error-msg"></div>
+    <button class="btn btn-primary" onclick="enviarArena()">Confirmar e Enviar Rodada</button>
   </div>
 </div>
 
-<!-- ADMIN: PAINEL -->
+<!-- ARENA: MINHAS RODADAS -->
+<div id="screen-minhas-rodadas" class="screen">
+  <button class="back-btn" onclick="voltar('screen-menu')">← Voltar</button>
+  <div class="card">
+    <div class="card-title">Rodadas Registradas</div>
+    <div id="minhas-rodadas-content"></div>
+  </div>
+</div>
+
+<!-- TELÃO DA ARENA -->
+<div id="screen-telao-arena" class="telao-arena">
+  <div class="telao-arena-header">
+    <div style="display:flex;align-items:center;gap:16px">
+      <img src="./03-TPR.png" alt="TPR" style="height:34px">
+      <div>
+        <div style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;color:var(--caramelo)">🏟️ Desafio das Alianças — Explore 2026</div>
+        <div style="font-size:12px;opacity:0.6" id="telao-rodada-label">Aguardando rodada...</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span><span class="live-dot"></span><span style="font-size:12px;opacity:0.7">AO VIVO</span></span>
+      <button onclick="fecharTelao()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px">✕ Fechar</button>
+    </div>
+  </div>
+  <div class="telao-arena-body" id="telao-arena-body">
+    <p style="text-align:center;opacity:0.4;padding:60px 0">Nenhuma rodada registrada ainda.</p>
+  </div>
+</div>
+
+<!-- ADMIN -->
 <div id="screen-admin" class="screen screen-wide">
   <div style="margin-top:24px">
     <div class="admin-grid">
-      <div class="admin-tile" onclick="irAdmin('juizes')"><div class="admin-tile-icon">👥</div><div class="admin-tile-title">Gerenciar Juízes</div><div class="admin-tile-desc">Cadastrar, importar CSV e remover</div></div>
-      <div class="admin-tile" onclick="irAdmin('equipes')"><div class="admin-tile-icon">🏆</div><div class="admin-tile-title">Gerenciar Equipes</div><div class="admin-tile-desc">Cadastrar, importar CSV e remover</div></div>
-      <div class="admin-tile" onclick="irAdmin('notas-sala')"><div class="admin-tile-icon">📋</div><div class="admin-tile-title">Notas de Sala</div><div class="admin-tile-desc">Ver, editar e apagar avaliações</div></div>
-      <div class="admin-tile" onclick="irAdmin('notas-arena')"><div class="admin-tile-icon">🤖</div><div class="admin-tile-title">Notas de Arena</div><div class="admin-tile-desc">Ver, editar e apagar rodadas</div></div>
-      <div class="admin-tile" onclick="irAdmin('senha')"><div class="admin-tile-icon">🔑</div><div class="admin-tile-title">Alterar Senhas</div><div class="admin-tile-desc">Senha do evento e do admin</div></div>
-      <div class="admin-tile" onclick="irAdmin('notas-gerais')"><div class="admin-tile-icon">🏅</div><div class="admin-tile-title">Notas Gerais</div><div class="admin-tile-desc">Ranking final com desempate</div></div>
-      <div class="admin-tile" onclick="irParaTelao()"><div class="admin-tile-icon">📺</div><div class="admin-tile-title">Painel Telão</div><div class="admin-tile-desc">Placar público da arena</div></div>
+      <div class="admin-tile" onclick="irAdmin('juizes')">
+        <div class="admin-tile-icon">👥</div>
+        <div class="admin-tile-title">Gerenciar Juízes</div>
+        <div class="admin-tile-desc">Cadastrar, importar CSV e remover</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('equipes')">
+        <div class="admin-tile-icon">🏆</div>
+        <div class="admin-tile-title">Gerenciar Equipes</div>
+        <div class="admin-tile-desc">Cadastrar, importar CSV e remover</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-sala')">
+        <div class="admin-tile-icon">📋</div>
+        <div class="admin-tile-title">Notas de Sala</div>
+        <div class="admin-tile-desc">Ver, editar e apagar avaliações</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('senha')">
+        <div class="admin-tile-icon">🔑</div>
+        <div class="admin-tile-title">Alterar Senhas</div>
+        <div class="admin-tile-desc">Senha do evento e do admin</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-arena')">
+        <div class="admin-tile-icon">🏟️</div>
+        <div class="admin-tile-title">Notas de Arena</div>
+        <div class="admin-tile-desc">Ver e apagar rodadas</div>
+      </div>
+      <div class="admin-tile" onclick="irAdmin('notas-gerais')">
+        <div class="admin-tile-icon">🏅</div>
+        <div class="admin-tile-title">Notas Gerais</div>
+        <div class="admin-tile-desc">Ranking final com desempate</div>
+      </div>
+      <div class="admin-tile" onclick="abrirTelao()" style="grid-column:1/-1;max-width:320px;margin:0 auto">
+        <div class="admin-tile-icon">📺</div>
+        <div class="admin-tile-title">Painel Telão</div>
+        <div class="admin-tile-desc">Placar da arena ao vivo</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ADMIN: SUB -->
+<!-- ADMIN: SUB (tela única dinâmica) -->
 <div id="screen-admin-sub" class="screen screen-wide">
   <button class="back-btn" onclick="voltar('screen-admin')">← Painel Admin</button>
   <div class="card">
@@ -413,140 +399,102 @@
   </div>
 </div>
 
-<!-- TELÃO -->
-<div id="screen-telao" class="telao-wrap">
-  <div class="telao-header">
-    <div style="display:flex;align-items:center;gap:20px">
-      <div style="height:38px;display:flex;align-items:center"><img src="./logo-tpr-branco.png" alt="TPR" style="height:38px;width:auto"></div>
-      <div><div class="telao-title" style="color:#F5A05A">🏆 Placar da Arena — Innov</div></div>
-    </div>
-    <div class="telao-controls">
-      <span class="telao-speed-label">Velocidade:</span>
-      <button class="telao-speed-btn" onclick="setVel(8000,this)">Lento</button>
-      <button class="telao-speed-btn ativo" onclick="setVel(4000,this)">Normal</button>
-      <button class="telao-speed-btn" onclick="setVel(2000,this)">Rápido</button>
-      <span style="margin-left:8px"><span class="live-dot"></span>AO VIVO</span>
-      <button class="btn-logout" onclick="voltarDoTelao()">Sair</button>
-    </div>
-  </div>
-  <div class="telao-body">
-    <div class="telao-header-row"><div>#</div><div>Aliança</div><div>Rodadas</div><div>Pontos</div><div>Total</div></div>
-    <div class="telao-lista-wrap"><div class="telao-lista" id="telao-lista"></div></div>
-  </div>
-</div>
-
 <script>
 // ═══════════════════════════════════════════════════════════════
-// FIREBASE — COMUNICAÇÃO COM O BANCO DE DADOS
-// Todas as funções abaixo fazem chamadas à API REST do Firebase.
-// O Firebase é o "caderno na nuvem" onde ficam guardados todos
-// os dados: equipes, juízes, avaliações e rodadas de arena.
+// FIREBASE — prefixo explore/
 // ═══════════════════════════════════════════════════════════════
-
-// Endereço base do banco de dados no Firebase
-const DB = 'https://tpr-2026-innov-default-rtdb.firebaseio.com';
-// Lê dados de um caminho no Firebase (ex: 'equipes', 'config')
-const fbGet = async p => { try { return await (await fetch(`${DB}/${p}.json`)).json(); } catch { return null; } };
-// Grava (substitui completamente) dados num caminho do Firebase
-const fbSet = (p,v) => fetch(`${DB}/${p}.json`,{method:'PUT',body:JSON.stringify(v)});
-// Adiciona novo item numa lista — Firebase gera um ID único automático
-const fbPush = (p,v) => fetch(`${DB}/${p}.json`,{method:'POST',body:JSON.stringify(v)}).then(r=>r.json());
-// Atualiza campos específicos sem apagar os demais dados do item
-const fbPatch = (p,v) => fetch(`${DB}/${p}.json`,{method:'PATCH',body:JSON.stringify(v)});
-// Apaga permanentemente um item do Firebase
-const fbDel = p => fetch(`${DB}/${p}.json`,{method:'DELETE'});
+const DB='https://tpr-2026-innov-default-rtdb.firebaseio.com/explore';
+const fbGet=async p=>{try{return await(await fetch(`${DB}/${p}.json`)).json();}catch{return null;}};
+const fbSet=(p,v)=>fetch(`${DB}/${p}.json`,{method:'PUT',body:JSON.stringify(v)});
+const fbPush=(p,v)=>fetch(`${DB}/${p}.json`,{method:'POST',body:JSON.stringify(v)}).then(r=>r.json());
+const fbPatch=(p,v)=>fetch(`${DB}/${p}.json`,{method:'PATCH',body:JSON.stringify(v)});
+const fbDel=p=>fetch(`${DB}/${p}.json`,{method:'DELETE'});
 
 // ═══════════════════════════════════════════════════════════════
-// ESTADO GLOBAL DA APLICAÇÃO
-// Variáveis que guardam informações enquanto o sistema está aberto.
+// ESTADO GLOBAL
 // ═══════════════════════════════════════════════════════════════
-let me=null;      // Nome do usuário logado
-let perfil=null;  // Perfil: 'admin', 'sala' ou 'arena'
-let equipes=[];   // Lista de equipes carregadas do Firebase
-let timer=null;   // Referência ao timer de inatividade
-// Tempo máximo de inatividade antes do logout automático (30 minutos em ms)
-const INACT = 30*60*1000;
+let me=null,perfil=null,equipes=[],timer=null;
+const INACT=30*60*1000;
 
 // ═══════════════════════════════════════════════════════════════
-// CRITÉRIOS DE AVALIAÇÃO DO PROJETO DE INOVAÇÃO
-// Cada critério tem ID, nome e descrição exibidos na tela do juiz.
-// A escala vai de 1 (Iniciante) a 4 (Excede).
+// ARENAS — 6 arenas com cores fixas
 // ═══════════════════════════════════════════════════════════════
-const CRIT = [
-  {id:'identificacao',nome:'Identificação',desc:'A equipe definiu uma questão de problema clara e bem pesquisada.'},
-  {id:'projeto',nome:'Projeto',desc:'A equipe trabalhou em conjunto na criação de um plano de projeto e no desenvolvimento de evidências de suas ideias.'},
-  {id:'criacao',nome:'Criação',desc:'A equipe desenvolveu uma ideia original ou aprimorou uma ideia existente com um modelo/desenho do protótipo.'},
-  {id:'iteracao',nome:'Iteração',desc:'A equipe compartilhou suas ideias, buscou opiniões e incluiu melhorias em sua solução.'},
-  {id:'comunicacao',nome:'Comunicação',desc:'A equipe fez uma apresentação eficaz de sua solução, seu impacto sobre outras pessoas e comemoraram o progresso.'}
-];
-// Rótulos da escala 1-4 usados para exibir o nível de avaliação
-const LBL = ['','Iniciante','Em desenv.','Cumprido','Excede'];
-// ═══════════════════════════════════════════════════════════════
-// MISSÕES DA ARENA
-// MA = missões do Robô A (lado vermelho) | MB = Robô B (azul)
-// Para alterar pontuações ou adicionar missões, edite aqui.
-// ═══════════════════════════════════════════════════════════════
-const MA = [
-  {id:'limpeza_rio',nome:'M01 — Recolher lixo do rio Jaguaribe e entregar na área de lançamento Azul',pts:15},
-  {id:'salvar_animal',nome:'M02 — Resgatar e devolver a tartaruga ao habitat (área branca)',pts:20},
-  {id:'devolver_animal_mata',nome:'M03 — Devolver o macaco ao habitat (área vermelha)',pts:15}
-];
-const MB = [
-  {id:'recolher_animal',nome:'M04 — Resgatar o macaco da cidade e entregar na área de lançamento Vermelha',pts:20},
-  {id:'desobstruir_trilha',nome:'M05 — Desobstruir trilha do jardim botânico (área verde)',pts:15},
-  {id:'deposito_lixo',nome:'M06 — Depositar resíduos no local correto (área amarela)',pts:15}
+const ARENAS=[
+  {num:1,cor:'Vermelho',emoji:'🔴',bg:'#fdf5f5',clr:'#b94040'},
+  {num:2,cor:'Amarelo', emoji:'🟡',bg:'#fdf9ee',clr:'#b8860b'},
+  {num:3,cor:'Azul',    emoji:'🔵',bg:'#f0f4fb',clr:'#1a4a8c'},
+  {num:4,cor:'Verde',   emoji:'🟢',bg:'#f0f7f0',clr:'#2d6a2d'},
+  {num:5,cor:'Laranja', emoji:'🟠',bg:'#fdf2ee',clr:'#b94a10'},
+  {num:6,cor:'Roxo',    emoji:'🟣',bg:'#f4f0fb',clr:'#4a2a8c'}
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// CONTROLE DE INATIVIDADE
-// Reinicia o contador a cada clique ou tecla pressionada.
-// Se o usuário ficar 30 min sem ação, é deslogado automaticamente.
+// CRITÉRIOS — 10 critérios em 5 categorias, escala 1-4, máx 40pts
 // ═══════════════════════════════════════════════════════════════
-function resetInact() { clearTimeout(timer); if(me) timer=setTimeout(logout,INACT); }
+const CATEGORIAS=[
+  {id:'challenge',label:'Challenge Solution',cls:'cat-challenge',emoji:'🔬',criterios:[
+    {id:'ch_aprendeu',label:'O que aprenderam sobre o desafio?',desc:'A equipe aprendeu sobre o desafio e explorou possíveis soluções.'},
+    {id:'ch_impacto',label:'Como isso pode impactar a comunidade?',desc:'A solução da equipe tem potencial para ter um ótimo impacto na comunidade.'}
+  ]},
+  {id:'corevalues',label:'Core Values',cls:'cat-corevalues',emoji:'🤝',criterios:[
+    {id:'cv_usou',label:'Como vocês usaram os Core Values?',desc:'Os integrantes explicaram como trabalham em equipe e compreenderam os Core Values.'},
+    {id:'cv_habilidades',label:'Que habilidades aprenderam uns com os outros?',desc:'Os integrantes demonstraram que aprenderam novas habilidades juntos.'}
+  ]},
+  {id:'teammodel',label:'Team Model',cls:'cat-teammodel',emoji:'🤖',criterios:[
+    {id:'tm_descricao',label:'Descrição do Modelo da Equipe',desc:'A equipe descreveu o Modelo da Equipe e as soluções para o desafio que representava.'},
+    {id:'tm_exploreset',label:'Como incluíram o Explore Set no modelo?',desc:'A equipe descreveu como usou criativamente um ou mais componentes do Explore Set.'}
+  ]},
+  {id:'coding',label:'Coding',cls:'cat-coding',emoji:'💻',criterios:[
+    {id:'co_motorizado',label:'Qual parte do modelo é motorizada?',desc:'A equipe explicou como usou motor(es) e sensor(es) para fazer o modelo se mover e ser iterativo.'},
+    {id:'co_programou',label:'Como programaram a parte motorizada?',desc:'A equipe explicou como o seu código fez o modelo se mover.'}
+  ]},
+  {id:'poster',label:'Team Poster',cls:'cat-poster',emoji:'🎨',criterios:[
+    {id:'po_incluiu',label:'O que incluíram no Show Me Poster?',desc:'O Show Me Poster mostrou informações sobre soluções para o desafio, modelo, programação, etc.'},
+    {id:'po_jornada',label:'Como mostra a jornada da equipe?',desc:'Os integrantes contaram ou mostraram como trabalharam em equipe para criar o poster.'}
+  ]}
+];
+const TODOS_CRIT=CATEGORIAS.flatMap(c=>c.criterios);
+const LBL=['','Iniciante','Em desenv.','Cumprido','Excede'];
+
+// ═══════════════════════════════════════════════════════════════
+// INATIVIDADE
+// ═══════════════════════════════════════════════════════════════
+function resetInact(){clearTimeout(timer);if(me)timer=setTimeout(logout,INACT);}
 document.addEventListener('click',resetInact);
 document.addEventListener('keydown',resetInact);
 
 // ═══════════════════════════════════════════════════════════════
-// NAVEGAÇÃO ENTRE TELAS
-// show() esconde todas as telas e exibe apenas a solicitada.
-// Cada tela é uma <div id='screen-...'> no HTML.
+// NAVEGAÇÃO
 // ═══════════════════════════════════════════════════════════════
-function show(id) {
-  document.querySelectorAll('.screen,.telao-wrap,.login-wrap').forEach(el=>{
+function show(id){
+  document.querySelectorAll('.screen,.login-wrap').forEach(el=>{
     el.classList.remove('active');
-    if(el.classList.contains('telao-wrap')||el.classList.contains('login-wrap')) el.style.display='none';
+    if(el.classList.contains('login-wrap'))el.style.display='none';
   });
   const el=document.getElementById(id);
-  if(el.classList.contains('telao-wrap')) el.style.display='block';
-  else if(el.classList.contains('login-wrap')) el.style.display='flex';
+  if(el.classList.contains('login-wrap'))el.style.display='flex';
   else el.classList.add('active');
 }
-window.voltar = show; // Botão '← Voltar' chama esta função
-
-// Alterna a visibilidade da senha entre texto e pontos
-window.toggleSenha = function(id,btn) {
+window.voltar=show;
+window.toggleSenha=function(id,btn){
   const el=document.getElementById(id);
-  el.type = el.type==='password'?'text':'password';
-  btn.textContent = el.type==='password'?'👁':'🙈';
+  el.type=el.type==='password'?'text':'password';
+  btn.textContent=el.type==='password'?'👁':'🙈';
 };
 
 // ═══════════════════════════════════════════════════════════════
-// INICIALIZAÇÃO
-// Executado quando a página carrega. Exibe o login e garante
-// que as configurações de senha existam no Firebase.
+// INIT
 // ═══════════════════════════════════════════════════════════════
-async function init() {
+async function init(){
   show('screen-login');
-  const cfg = await fbGet('config');
-  if(!cfg) await fbSet('config',{senha_evento:'tpr2026',senha_admin:'admin2026'});
+  const cfg=await fbGet('config');
+  if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026'});
 }
 
 // ═══════════════════════════════════════════════════════════════
 // LOGIN
-// Verifica nome e senha consultando o Firebase.
-// Admin tem senha separada dos juízes.
 // ═══════════════════════════════════════════════════════════════
-window.fazerLogin = async function() {
+window.fazerLogin=async function(){
   const nome=document.getElementById('login-nome').value.trim();
   const senha=document.getElementById('login-senha').value;
   const err=document.getElementById('login-error');
@@ -554,7 +502,7 @@ window.fazerLogin = async function() {
   if(!nome||!senha){err.textContent='Preencha nome e senha.';err.style.display='block';return;}
   const btn=document.querySelector('#screen-login .btn-primary');
   btn.textContent='Entrando...';btn.disabled=true;
-  try {
+  try{
     const cfg=await fbGet('config');
     if(!cfg){err.textContent='Erro ao conectar.';err.style.display='block';return;}
     if(nome.toLowerCase()==='admin'&&senha===cfg.senha_admin){me='admin';perfil='admin';entrar();return;}
@@ -562,20 +510,20 @@ window.fazerLogin = async function() {
     const juizes=await fbGet('juizes')||{};
     const found=Object.entries(juizes).find(([k,v])=>v.nome.toLowerCase()===nome.toLowerCase());
     if(!found){err.textContent='Juiz não encontrado. Contate o admin.';err.style.display='block';return;}
-    me=found[1].nome;perfil=found[1].perfil;entrar();
-  } catch(e){err.textContent='Erro de conexão.';err.style.display='block';}
+    me=found[1].nome;perfil='sala';entrar();
+  }catch(e){err.textContent='Erro de conexão.';err.style.display='block';}
   finally{btn.textContent='ENTRAR';btn.disabled=false;}
 };
 
-// Configura a interface após login bem-sucedido e redireciona para a tela correta
-function entrar() {
+function entrar(){
   document.getElementById('app-header').style.display='block';
   document.getElementById('header-nome').textContent=me;
   const b=document.getElementById('header-badge');
-  if(perfil==='admin'){b.textContent='Admin';b.className='badge badge-admin';show('screen-admin');}
-  else {
-    b.textContent=perfil==='sala'?'Juiz de Sala':'Juiz de Arena';
-    b.className=perfil==='sala'?'badge badge-sala':'badge badge-arena';
+  if(perfil==='admin'){
+    b.textContent='Admin';b.className='badge badge-admin';show('screen-admin');
+  } else {
+    b.textContent=perfil==='arena'?'Juiz de Arena':'Juiz de Sala';
+    b.className=perfil==='arena'?'badge badge-arena':'badge badge-sala';
     document.getElementById('menu-sala').style.display=perfil==='sala'?'block':'none';
     document.getElementById('menu-arena').style.display=perfil==='arena'?'block':'none';
     show('screen-menu');
@@ -583,8 +531,7 @@ function entrar() {
   resetInact();
 }
 
-// Desloga o usuário, limpa os campos e volta para a tela de login
-window.logout = function() {
+window.logout=function(){
   me=null;perfil=null;clearTimeout(timer);
   document.getElementById('app-header').style.display='none';
   document.getElementById('login-nome').value='';
@@ -594,41 +541,35 @@ window.logout = function() {
 
 // ═══════════════════════════════════════════════════════════════
 // EQUIPES
-// loadEquipes() busca a lista no Firebase e ordena por nome.
-// fillSelect() preenche um <select> HTML com as equipes.
 // ═══════════════════════════════════════════════════════════════
-async function loadEquipes() {
+async function loadEquipes(){
   const d=await fbGet('equipes')||{};
   equipes=Object.entries(d).map(([k,v])=>({id:k,...v})).sort((a,b)=>a.nome.localeCompare(b.nome));
 }
-function fillSelect(id,excl=null) {
+function fillSelect(id){
   const s=document.getElementById(id);
   s.innerHTML='<option value="">-- Selecione --</option>';
-  equipes.forEach(e=>{if(e.id!==excl) s.innerHTML+=`<option value="${e.id}">${e.nome}</option>`;});
+  equipes.forEach(e=>{s.innerHTML+=`<option value="${e.id}">${e.nome}${e.numero?' ('+e.numero+')':''}</option>`;});
 }
 
 // ═══════════════════════════════════════════════════════════════
-// JUIZ DE SALA — FLUXO DE AVALIAÇÃO
-// 1. irParaSala()     → tela de seleção de equipe
-// 2. irParaRubricas() → tela com os 5 critérios
-// 3. enviarRubricas() → salva avaliação no Firebase
+// JUIZ DE SALA — FLUXO
 // ═══════════════════════════════════════════════════════════════
-window.irParaSala = async function() {
+window.irParaSala=async function(){
   await loadEquipes();
   fillSelect('sala-equipe-select');
   const d=await fbGet('avaliacoes_sala')||{};
   const c=Object.values(d).filter(v=>v.juiz===me).length;
-  document.getElementById('sala-info').textContent=c>0?`Você já avaliou ${c} equipe(s) hoje.`:'';
+  document.getElementById('sala-info').textContent=c>0?`Você já enviou ${c} avaliação(ões) neste evento.`:'';
   show('screen-sala-equipe');
 };
 
-// Abre a tela de rubricas e limpa campos da avaliação anterior
-window.irParaRubricas = async function() {
+window.irParaRubricas=async function(){
   const id=document.getElementById('sala-equipe-select').value;
   if(!id){alert('Selecione uma equipe.');return;}
-  document.getElementById('rubricas-equipe-nome').textContent=equipes.find(e=>e.id===id).nome;
+  const eq=equipes.find(e=>e.id===id);
+  document.getElementById('rubricas-equipe-nome').textContent=`Avaliando: ${eq.nome}`;
   renderCrit();
-  // Limpa campos do juiz anterior
   document.getElementById('fb-geral-pos').value='';
   document.getElementById('fb-geral-mel').value='';
   document.getElementById('indicacao-proxima-fase').checked=false;
@@ -636,28 +577,34 @@ window.irParaRubricas = async function() {
   show('screen-rubricas');
 };
 
-// Renderiza os 5 blocos de critério com botões de nota 1 a 4
-function renderCrit() {
-  document.getElementById('criterios-container').innerHTML=CRIT.map(c=>`
-    <div class="criterio-block" id="blk-${c.id}">
-      <div class="criterio-label">${c.nome}</div>
-      <div class="criterio-desc">${c.desc}</div>
-      <div class="rubrica-options">
-        ${[1,2,3,4].map(n=>`
-          <div class="rubrica-opt" id="opt-${c.id}-${n}" onclick="selRub('${c.id}',${n})">
-            <span class="score">${n}</span><span class="score-label">${LBL[n]}</span>
-          </div>`).join('')}
-      </div>
-      <div class="excede-comment" id="exc-${c.id}">
-        <div class="excede-note">⚠️ Excede exige comentário obrigatório</div>
-        <textarea id="com-${c.id}" placeholder="Justifique o Excede..."></textarea>
-      </div>
-    </div>`).join('');
+function renderCrit(){
+  let html='';
+  CATEGORIAS.forEach(cat=>{
+    html+=`<div class="categoria-header ${cat.cls}">${cat.emoji} ${cat.label}</div>`;
+    cat.criterios.forEach(cr=>{
+      html+=`
+      <div class="criterio-block" id="blk-${cr.id}">
+        <div class="criterio-label">${cr.label}</div>
+        <div class="criterio-desc">${cr.desc}</div>
+        <div class="rubrica-options">
+          ${[1,2,3,4].map(n=>`
+            <div class="rubrica-opt" id="opt-${cr.id}-${n}" onclick="selRub('${cr.id}',${n})">
+              <span class="score">${n}</span>
+              <span class="score-label">${LBL[n]}</span>
+            </div>`).join('')}
+        </div>
+        <div class="excede-comment" id="exc-${cr.id}">
+          <div class="excede-note" style="font-size:12px;color:var(--caramelo-dark);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:4px">⚠️ Excede exige comentário obrigatório</div>
+          <textarea id="com-${cr.id}" placeholder="Justifique o Excede..." style="border-color:var(--caramelo);min-height:60px;resize:vertical;font-size:14px"></textarea>
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('criterios-container').innerHTML=html;
   updNota();
 }
 
-// Marca a nota escolhida e mostra campo de comentário se for Excede (4)
-window.selRub = function(cid,val) {
+window.selRub=function(cid,val){
   [1,2,3,4].forEach(n=>document.getElementById(`opt-${cid}-${n}`).classList.toggle('active',n===val));
   const blk=document.getElementById(`blk-${cid}`);
   blk.classList.add('selected');blk.dataset.val=val;
@@ -665,24 +612,23 @@ window.selRub = function(cid,val) {
   updNota();
 };
 
-// Recalcula e exibe a soma das notas de todos os critérios
-function updNota() {
-  let t=0;CRIT.forEach(c=>{t+=parseInt(document.getElementById(`blk-${c.id}`).dataset.val||0);});
+function updNota(){
+  let t=0;
+  TODOS_CRIT.forEach(c=>{t+=parseInt(document.getElementById(`blk-${c.id}`)?.dataset.val||0);});
   document.getElementById('nota-preview').textContent=t;
 }
 
-// Valida todos os campos e salva a avaliação completa no Firebase
-window.enviarRubricas = async function() {
+window.enviarRubricas=async function(){
   const eqId=document.getElementById('sala-equipe-select').value;
   const err=document.getElementById('rubrica-error');err.style.display='none';
   let notas={},ok=true;
-  CRIT.forEach(c=>{
+  TODOS_CRIT.forEach(c=>{
     if(!ok)return;
     const blk=document.getElementById(`blk-${c.id}`);
     const val=parseInt(blk.dataset.val||0);
-    if(!val){alert(`Avalie o critério "${c.nome}" antes de enviar.`);ok=false;return;}
+    if(!val){alert(`Avalie o critério "${c.label}" antes de enviar.`);ok=false;return;}
     const comentario=val===4?document.getElementById(`com-${c.id}`).value.trim():'';
-    if(val===4&&!comentario){alert(`Comentário obrigatório para "${c.nome}" (Excede).`);ok=false;return;}
+    if(val===4&&!comentario){alert(`Comentário obrigatório para "${c.label}" (Excede).`);ok=false;return;}
     notas[c.id]={valor:val,comentario};
   });
   if(!ok)return;
@@ -691,975 +637,861 @@ window.enviarRubricas = async function() {
   if(!feedbackPositivo){alert('Preencha o campo "✅ Muito bom..." antes de enviar.');return;}
   if(!feedbackMelhoria){alert('Preencha o campo "💡 Pensem sobre..." antes de enviar.');return;}
   const indicacao=document.getElementById('indicacao-proxima-fase').checked;
-  const total=CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
-  await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,indicacao,timestamp:Date.now()});
-  alert(`✅ Avaliação enviada! Total: ${total}/20`);show('screen-menu');
+  const total=TODOS_CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
+  const btn=document.querySelector('#screen-rubricas .btn-primary');
+  btn.textContent='Enviando...';btn.disabled=true;
+  try{
+    await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,indicacao,timestamp:Date.now()});
+    alert(`✅ Avaliação enviada!\nEquipe: ${equipes.find(e=>e.id===eqId)?.nome}\nTotal: ${total}/40`);
+    show('screen-menu');
+  }catch(e){alert('Erro ao enviar. Tente novamente.');}
+  finally{btn.textContent='Enviar Avaliação';btn.disabled=false;}
 };
 
 // ═══════════════════════════════════════════════════════════════
-// JUIZ DE ARENA — FLUXO DE REGISTRO
-// 1. irParaArena()    → seleciona as duas equipes da aliança
-// 2. irParaMissoes()  → marca as missões cumpridas
-// 3. enviarArena()    → salva a rodada no Firebase
+// JUIZ: MINHAS AVALIAÇÕES
 // ═══════════════════════════════════════════════════════════════
-window.irParaArena = async function() {
-  await loadEquipes();fillSelect('arena-equipe-a');fillSelect('arena-equipe-b');show('screen-arena-alianca');
-};
-
-// Prepara a tela de missões com os nomes das equipes e limpa dados anteriores
-// Avança automaticamente para o campo de segundos ao digitar 2 dígitos nos minutos
-window.autoAvancarSegundos = function(el) {
-  if (el.value.length >= 1 && parseInt(el.value) >= 0) {
-    document.getElementById('tempo-seg').focus();
-  }
-};
-
-// ── CRONÔMETRO DA RODADA DE ARENA ──
-// Play/Pause/Zerar. Enquanto conta, preenche automaticamente os campos
-// tempo-min e tempo-seg (as mesmas variáveis lidas por enviarArena),
-// sem alterar em nada como o tempo é salvo, exportado ou exibido depois.
-let cronSegundos = 0;
-let cronIntervalo = null;
-let cronRodando = false;
-
-function cronAtualizarDisplay() {
-  const min = Math.floor(cronSegundos / 60);
-  const seg = cronSegundos % 60;
-  document.getElementById('cronometro-display').textContent = `${min}:${String(seg).padStart(2,'0')}`;
-  document.getElementById('tempo-min').value = min;
-  document.getElementById('tempo-seg').value = seg;
-}
-
-window.cronPlay = function() {
-  if (cronRodando) return;
-  cronRodando = true;
-  document.getElementById('btn-cron-play').style.display = 'none';
-  document.getElementById('btn-cron-pause').style.display = 'inline-block';
-  cronIntervalo = setInterval(() => {
-    cronSegundos++;
-    // Limite igual ao da validação de enviarArena: máx. 2min30seg
-    if (cronSegundos >= 150) {
-      cronSegundos = 150;
-      cronAtualizarDisplay();
-      cronPause();
-      alert('Tempo máximo do cronômetro (2:30) atingido. Pare o robô e confira o tempo registrado.');
-      return;
-    }
-    cronAtualizarDisplay();
-  }, 1000);
-};
-
-window.cronPause = function() {
-  cronRodando = false;
-  clearInterval(cronIntervalo);
-  document.getElementById('btn-cron-play').style.display = 'inline-block';
-  document.getElementById('btn-cron-pause').style.display = 'none';
-};
-
-window.cronZerar = function() {
-  cronPause();
-  cronSegundos = 0;
-  cronAtualizarDisplay();
-};
-
-// Mostra/oculta o campo de justificativa ao marcar/desmarcar valores na rodada
-window.toggleJustificativa = function(lado) {
-  const checked = document.getElementById(`valores-${lado}`).checked;
-  document.getElementById(`justif-wrap-${lado}`).style.display = checked ? 'block' : 'none';
-  if (!checked) document.getElementById(`justif-${lado}`).value = '';
-};
-
-window.irParaMissoes = function() {
-  const a=document.getElementById('arena-equipe-a').value;
-  const b=document.getElementById('arena-equipe-b').value;
-  if(!a||!b){alert('Selecione as duas equipes.');return;}
-  if(a===b){alert('As equipes devem ser diferentes.');return;}
-  const eA=equipes.find(e=>e.id===a),eB=equipes.find(e=>e.id===b);
-  document.getElementById('arena-chips').innerHTML=`
-    <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${eA.nome}</span>
-    <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 ${eB.nome}</span>`;
-  // Atualiza nomes nos checkboxes de valores
-  document.getElementById('valores-a-nome').textContent=`🔴 ${eA.nome} — demonstrou valores durante a rodada`;
-  document.getElementById('valores-b-nome').textContent=`🔵 ${eB.nome} — demonstrou valores durante a rodada`;
-  // Limpa checkboxes
-  document.getElementById('valores-a').checked=false;
-  document.getElementById('valores-b').checked=false;
-  document.getElementById('justif-wrap-a').style.display='none';
-  document.getElementById('justif-wrap-b').style.display='none';
-  document.getElementById('justif-a').value='';
-  document.getElementById('justif-b').value='';
-  document.getElementById('tempo-min').value='';
-  document.getElementById('tempo-seg').value='';
-  cronZerar();
-  renderMiss();show('screen-missoes');
-};
-
-// Renderiza os botões de missão para Robô A e Robô B
-function renderMiss() {
-  const r=(id,ms)=>{document.getElementById(id).innerHTML=ms.map(m=>`
-    <div class="missao-item" id="ms-${m.id}" onclick="togMs('${m.id}',${m.pts})">
-      <span class="missao-name">${m.nome}</span><span class="missao-pts">${m.pts} pts</span>
-      <div class="missao-check"></div></div>`).join('');};
-  r('missoes-a',MA);r('missoes-b',MB);updPts();
-}
-// Marca ou desmarca uma missão ao tocar nela
-window.togMs = function(id) { document.getElementById(`ms-${id}`)?.classList.toggle('done');updPts(); };
-// Recalcula e exibe a soma dos pontos das missões concluídas
-function updPts() {
-  let t=0;[...MA,...MB].forEach(m=>{if(document.getElementById(`ms-${m.id}`)?.classList.contains('done'))t+=m.pts;});
-  document.getElementById('arena-total').textContent=t;
-}
-
-// Coleta missões marcadas, valores demonstrados e salva a rodada no Firebase
-window.enviarArena = async function() {
-  const a=document.getElementById('arena-equipe-a').value;
-  const b=document.getElementById('arena-equipe-b').value;
-  let mA={},mB={},pA=0,pB=0;
-  MA.forEach(m=>{const d=document.getElementById(`ms-${m.id}`)?.classList.contains('done');mA[m.id]=d;if(d)pA+=m.pts;});
-  MB.forEach(m=>{const d=document.getElementById(`ms-${m.id}`)?.classList.contains('done');mB[m.id]=d;if(d)pB+=m.pts;});
-  const valoresA=document.getElementById('valores-a').checked;
-  const valoresB=document.getElementById('valores-b').checked;
-  const justifA=document.getElementById('justif-a').value.trim();
-  const justifB=document.getElementById('justif-b').value.trim();
-  const tMin = document.getElementById('tempo-min').value.trim();
-  const tSeg = document.getElementById('tempo-seg').value.trim();
-  if(tMin===''||tSeg===''){ alert('Informe o tempo gasto na rodada (minutos e segundos).'); return; }
-  const minVal=parseInt(tMin), segVal=parseInt(tSeg);
-  if(isNaN(minVal)||isNaN(segVal)||minVal<0||minVal>2||segVal<0||segVal>59){ alert('Tempo inválido. Minutos: 0-2, Segundos: 0-59.'); return; }
-  if((minVal*60+segVal) > 150){ alert('Tempo máximo permitido é 2:30. Confira o tempo informado.'); return; }
-  const tempoRodada = `${minVal}:${String(segVal).padStart(2,'0')}`;
-  // Se marcou valores, a justificativa é obrigatória
-  if(valoresA && !justifA){ alert('Justifique por que a Equipe A demonstrou valores na rodada.'); return; }
-  if(valoresB && !justifB){ alert('Justifique por que a Equipe B demonstrou valores na rodada.'); return; }
-  await fbPush('rodadas_arena',{equipeA:a,equipeB:b,missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',juiz:me,timestamp:Date.now()});
-  cronZerar();
-  alert(`✅ Rodada registrada! Total: ${pA+pB}/100`);show('screen-menu');
-};
-
-// ── MINHAS AVALIAÇÕES (juiz de sala) ──
-// ═══════════════════════════════════════════════════════════════
-// HISTÓRICO DO JUIZ DE SALA
-// Mostra todas as avaliações feitas pelo juiz logado.
-// O juiz pode editar apenas os campos de feedback geral.
-// ═══════════════════════════════════════════════════════════════
-window.verMinhasAvaliacoes = async function() {
+window.verMinhasAvaliacoes=async function(){
   show('screen-minhas-aval');
-  const ct = document.getElementById('minhas-aval-content');
-  ct.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+  const ct=document.getElementById('minhas-aval-content');
+  ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
   await loadEquipes();
-  const data = await fbGet('avaliacoes_sala') || {};
-  const minhas = Object.entries(data).filter(([k,v]) => v.juiz === me);
-
-  if (!minhas.length) {
-    ct.innerHTML = '<p class="text-muted" style="text-align:center;padding:20px">Você ainda não avaliou nenhuma equipe.</p>';
-    return;
-  }
-
-  ct.innerHTML = `<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Somente leitura.</p>
-    <div style="margin-bottom:16px">
-      <input type="text" id="filtro-minhas-aval" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-aval','cards-aval')" style="padding:10px 14px;font-size:14px">
-    </div>
-    <div id="cards-aval">` +
-    minhas.map(([k,v]) => {
-      const eq = equipes.find(e => e.id === v.equipeId);
-      const nomeEq = eq ? eq.nome : v.equipeId;      const hora = new Date(v.timestamp).toLocaleTimeString('pt-BR');
-      const criteriosHtml = CRIT.map(c => {
-        const n = v.notas?.[c.id] || {};
-        return `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-            <span style="font-size:14px">${c.nome}</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--green-dark)">${n.valor||'—'}</span>
-              <span style="font-size:11px;color:var(--text-muted)">${LBL[n.valor]||''}</span>
-            </div>
+  const data=await fbGet('avaliacoes_sala')||{};
+  const minhas=Object.entries(data).filter(([k,v])=>v.juiz===me).sort((a,b)=>b[1].timestamp-a[1].timestamp);
+  if(!minhas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Você ainda não fez nenhuma avaliação.</p>';return;}
+  ct.innerHTML=`<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Toque para expandir.</p>
+    <div style="margin-bottom:12px"><input type="text" id="filtro-minhas-aval" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-aval','cards-aval')" style="padding:10px 14px;font-size:14px"></div>
+    <div id="cards-aval">`+
+  minhas.map(([k,v])=>{
+    const eq=equipes.find(e=>e.id===v.equipeId);
+    const nomeEq=eq?eq.nome:v.equipeId;
+    const hora=new Date(v.timestamp).toLocaleTimeString('pt-BR');
+    const detalhes=CATEGORIAS.map(cat=>`
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">${cat.emoji} ${cat.label}</div>
+        ${cat.criterios.map(cr=>{const n=v.notas?.[cr.id];return n?`
+          <div style="display:flex;justify-content:space-between;padding:5px 8px;border-radius:6px;margin-bottom:3px;background:var(--bege);font-size:13px">
+            <span>${cr.label}</span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:700;color:${n.valor===4?'var(--caramelo-dark)':'var(--marrom)'}">${n.valor} — ${LBL[n.valor]}</span>
           </div>
-          ${n.comentario ? `<div class="comment-box">⚠️ ${n.comentario}</div>` : ''}`;
-      }).join('');
-
-      const feedbacks = `
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text)">Feedback geral <span style="font-weight:400;color:var(--teal);font-size:12px">(você pode editar)</span></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;margin-bottom:4px">✅ Muito bom...</div>
-              <textarea id="fbpos-${k}" style="min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${v.feedbackPositivo||''}</textarea>
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:var(--coral);text-transform:uppercase;margin-bottom:4px">💡 Pensem sobre...</div>
-              <textarea id="fbmel-${k}" style="min-height:64px;resize:vertical;font-size:13px;padding:8px 10px">${v.feedbackMelhoria||''}</textarea>
-            </div>
+          ${n.comentario?`<div class="comment-box">${n.comentario}</div>`:''}
+        `:'';}).join('')}
+      </div>`).join('')+
+      (v.feedbackPositivo?`<div class="feedback-pos-box">✅ ${v.feedbackPositivo}</div>`:'')+
+      (v.feedbackMelhoria?`<div class="feedback-mel-box">💡 ${v.feedbackMelhoria}</div>`:'');
+    return `
+    <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden" data-search="${nomeEq}">
+      <div onclick="toggleCard('aval-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
+        <div>
+          <div style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:var(--marrom)">${nomeEq}</div>
+          <div style="font-size:12px;color:var(--text-muted)">Avaliado às ${hora}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="text-align:right">
+            <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:var(--marrom);line-height:1">${v.total}</div>
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 40 pts</div>
+            ${v.indicacao?'<div style="font-size:11px;font-weight:700;color:#a06010">⭐ Indicada</div>':''}
           </div>
-          <div id="fb-save-msg-${k}" class="success-msg"></div>
-          <button class="btn btn-primary btn-sm" onclick="salvarFeedbackJuiz('${k}')">Salvar feedback</button>
-        </div>`;
-
-      return `
-        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:16px;overflow:hidden" data-search="${nomeEq}">
-          <!-- CABEÇALHO CLICÁVEL -->
-          <div onclick="toggleCard('sala-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
-            <div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green-dark)">${nomeEq}</div>
-              <div style="font-size:12px;color:var(--text-muted)">Avaliado às ${hora}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:14px">
-              <div style="text-align:right">
-                <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.total}</div>
-                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 20 pts</div>
-                ${v.indicacao ? `<div style="margin-top:4px;font-size:12px;font-weight:700;color:#1565c0">⭐ Indicada</div>` : ''}
-              </div>
-              <div id="arrow-sala-${k}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
-            </div>
-          </div>
-          <!-- DETALHES COLAPSÁVEIS -->
-          <div id="sala-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
-            <div style="margin-top:12px">
-              ${criteriosHtml}
-              ${feedbacks}
-            </div>
-          </div>
-        </div>`;
-    }).join('') + '</div>';
+          <div id="arrow-aval-${k}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
+        </div>
+      </div>
+      <div id="aval-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
+        <div style="margin-top:12px">${detalhes}</div>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
 };
 
 // ═══════════════════════════════════════════════════════════════
-// HISTÓRICO DO JUIZ DE ARENA
-// Mostra todas as rodadas registradas pelo juiz logado.
-// Somente leitura — sem campos editáveis.
+// ADMIN: EQUIPES
 // ═══════════════════════════════════════════════════════════════
-window.verMinhasRodadas = async function() {
-  show('screen-minhas-rodadas');
-  const ct = document.getElementById('minhas-rodadas-content');
-  ct.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
-  await loadEquipes();
-  const data = await fbGet('rodadas_arena') || {};
-  const minhas = Object.entries(data).filter(([k,v]) => v.juiz === me);
+// ═══════════════════════════════════════════════════════════════
+// ADMIN — tela única dinâmica (padrão Innov)
+// ═══════════════════════════════════════════════════════════════
+function csvUI(tipo) {
+  return `<div class="csv-drop" onclick="document.getElementById('csv-${tipo}-input').click()">
+    <div class="csv-drop-icon">📂</div>
+    <div class="csv-drop-text">Clique para selecionar arquivo CSV</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${tipo==='equipe'?'Colunas: nome, numero, escola':'Coluna: nome'}</div>
+  </div>
+  <input type="file" id="csv-${tipo}-input" accept=".csv" style="display:none" onchange="importCSV(this,'${tipo}')">
+  <div id="csv-${tipo}-preview" style="display:none;margin-bottom:12px"></div>
+  <button id="csv-${tipo}-btn" class="btn btn-primary btn-sm" style="display:none" onclick="confirmCSV('${tipo}')">Confirmar Importação</button>`;
+}
 
-  if (!minhas.length) {
-    ct.innerHTML = '<p class="text-muted" style="text-align:center;padding:20px">Você ainda não registrou nenhuma rodada.</p>';
-    return;
-  }
-
-  ct.innerHTML = `<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> rodada(s) registrada(s). Somente leitura.</p>
-    <div style="margin-bottom:16px">
-      <input type="text" id="filtro-minhas-rodadas" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-rodadas','cards-rodadas')" style="padding:10px 14px;font-size:14px">
-    </div>
-    <div id="cards-rodadas">` +
-    minhas.map(([k,v]) => {
-      const eA = equipes.find(e => e.id === v.equipeA);
-      const eB = equipes.find(e => e.id === v.equipeB);
-      const nA = eA ? eA.nome : v.equipeA;
-      const nB = eB ? eB.nome : v.equipeB;
-      const hora = new Date(v.timestamp).toLocaleTimeString('pt-BR');
-
-      const renderMissoesLeitura = (missoes, dados, cor, label) => `
-        <div style="margin-bottom:12px">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;padding:5px 10px;border-radius:4px;margin-bottom:8px;background:${cor.bg};color:${cor.text}">${label}</div>
-          ${missoes.map(m => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;margin-bottom:4px;background:${dados?.[m.id] ? 'var(--green-bg)' : '#f5f5f5'}">
-              <span style="font-size:13px;color:${dados?.[m.id] ? 'var(--green-dark)' : 'var(--text-muted)'}">${dados?.[m.id] ? '✅' : '⬜'} ${m.nome}</span>
-              <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:${dados?.[m.id] ? 'var(--green-dark)' : 'var(--text-muted)'}">${dados?.[m.id] ? m.pts : 0} pts</span>
-            </div>`).join('')}
-        </div>`;
-
-      return `
-        <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden" data-search="${nA} ${nB}">
-          <!-- CABEÇALHO CLICÁVEL -->
-          <div onclick="toggleCard('rod-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
-            <div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--green-dark)">${nA} + ${nB}</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:2px">🕐 ${hora} ${v.tempoRodada ? '· ⏱️ '+v.tempoRodada : ''}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:14px">
-              <div style="text-align:right">
-                <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--green-dark);line-height:1">${v.totalAlianca}</div>
-                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase">de 100 pts</div>
-              </div>
-              <div id="arrow-rod-${k}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
-            </div>
-          </div>
-          <!-- DETALHES COLAPSÁVEIS -->
-          <div id="rod-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
-            <div style="margin-top:12px">
-              ${renderMissoesLeitura(MA, v.missoesA, {bg:'#fce4ec',text:'#880e4f'}, '🔴 Robô A — ' + nA)}
-              ${renderMissoesLeitura(MB, v.missoesB, {bg:'#e3f2fd',text:'#0d47a1'}, '🔵 Robô B — ' + nB)}
-              ${v.tempoRodada ? `<div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;background:#f0f7ff;color:#0D3B7A;margin-bottom:8px">⏱️ Tempo da aliança: <strong>${v.tempoRodada}</strong></div>` : ''}
-              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-                <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresA ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
-                  🤝 ${nA}: ${v.valoresA ? 'Demonstrou valores' : 'Sem registro de valores'}
-                  ${v.valoresA && v.justifA ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifA}"</div>` : ''}
-                </div>
-                <div style="padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;${v.valoresB ? 'background:#EEF4FD;color:#0D3B7A' : 'background:#f5f5f5;color:#aaa'}">
-                  🤝 ${nB}: ${v.valoresB ? 'Demonstrou valores' : 'Sem registro de valores'}
-                  ${v.valoresB && v.justifB ? `<div style="font-weight:400;font-size:12px;margin-top:4px;color:#374151">"${v.justifB}"</div>` : ''}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>`;
-    }).join('') + '</div>';
+let csvPendente={};
+window.importCSV=function(input,tipo){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const linhas=e.target.result.split('\n').map(l=>l.trim()).filter(Boolean);
+    const header=linhas[0].toLowerCase().split(/[,;]/);
+    const iN=header.findIndex(h=>h.includes('nome'));
+    const iU=header.findIndex(h=>h.includes('num'));
+    const iE=header.findIndex(h=>h.includes('escola')||h.includes('inst'));
+    csvPendente[tipo]=linhas.slice(1).map(l=>{
+      const cols=l.split(/[,;]/);
+      return tipo==='equipe'
+        ?{nome:(cols[iN]||'').trim(),numero:(cols[iU]||'').trim(),escola:(cols[iE]||'').trim()}
+        :{nome:(cols[iN]||'').trim(),perfil:'sala'};
+    }).filter(r=>r.nome);
+    const prev=document.getElementById(`csv-${tipo}-preview`);
+    prev.style.display='block';
+    prev.innerHTML=`<div style="background:var(--bege);border-radius:8px;padding:12px;font-size:13px">
+      <strong>${csvPendente[tipo].length} registro(s) encontrado(s)</strong><br>
+      ${csvPendente[tipo].slice(0,5).map(r=>`• ${r.nome}`).join('<br>')}
+      ${csvPendente[tipo].length>5?`<br>... e mais ${csvPendente[tipo].length-5}`:''}
+    </div>`;
+    document.getElementById(`csv-${tipo}-btn`).style.display='inline-block';
+  };
+  reader.readAsText(file,'utf-8');
 };
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORTAR CSV
-// Gera um arquivo .csv com todas as avaliações detalhadas.
-// O arquivo abre corretamente no Excel e Google Planilhas.
-// ═══════════════════════════════════════════════════════════════
-window.exportarCSV = async function() {
-  const btn = document.querySelector('[onclick="exportarCSV()"]');
-  if(btn){ btn.textContent='⏳ Gerando...'; btn.disabled=true; }
-
-  await loadEquipes();
-  const sala = await fbGet('avaliacoes_sala') || {};
-  const arena = await fbGet('rodadas_arena') || {};
-
-  // Monta mapa de arena por equipe
-  const arenaMap = {};
-  Object.values(arena).forEach(r => {
-    arenaMap[r.equipeA] = { pts: r.totalAlianca, valores: r.valoresA || false, justif: r.justifA || '', tempo: r.tempoRodada || '' };
-    arenaMap[r.equipeB] = { pts: r.totalAlianca, valores: r.valoresB || false, justif: r.justifB || '', tempo: r.tempoRodada || '' };
-  });
-
-  // Cabeçalho do CSV
-  const cabecalho = [
-    'Equipe',
-    'Juiz',
-    'Identificação (nota)',
-    'Identificação (comentário Excede)',
-    'Projeto (nota)',
-    'Projeto (comentário Excede)',
-    'Criação (nota)',
-    'Criação (comentário Excede)',
-    'Iteração (nota)',
-    'Iteração (comentário Excede)',
-    'Comunicação (nota)',
-    'Comunicação (comentário Excede)',
-    'Total Sala (0-20)',
-    'Indicação próxima fase',
-    'Muito bom (feedback geral)',
-    'Pensem sobre (feedback geral)',
-    'Nota Arena (0-100)',
-    'Tempo na Rodada',
-    'Valores na Arena',
-    'Justificativa Valores na Arena',
-    'Nota Final (0-100)'
-  ];
-
-  const linhas = [cabecalho];
-
-  Object.values(sala).forEach(v => {
-    const eq = equipes.find(e => e.id === v.equipeId);
-    const nomeEq = eq ? eq.nome : v.equipeId;
-    const ad = arenaMap[v.equipeId];
-    const ptsArena = ad ? ad.pts : '';
-    const valoresArena = ad ? (ad.valores ? 'Sim' : 'Não') : '';
-    const justifArena = ad ? ad.justif : '';
-    const tempoArena = ad ? ad.tempo : '';
-    const mediaSala = v.total;
-    const ptsSala = (mediaSala / 20) * 100;
-    const notaFinal = ptsArena !== '' ? (ptsSala * 0.75 + ptsArena * 0.25).toFixed(1) : (ptsSala * 0.75).toFixed(1);
-
-    const n = v.notas || {};
-    const linha = [
-      nomeEq, v.juiz,
-      n.identificacao?.valor ?? '', n.identificacao?.comentario ?? '',
-      n.projeto?.valor ?? '', n.projeto?.comentario ?? '',
-      n.criacao?.valor ?? '', n.criacao?.comentario ?? '',
-      n.iteracao?.valor ?? '', n.iteracao?.comentario ?? '',
-      n.comunicacao?.valor ?? '', n.comunicacao?.comentario ?? '',
-      v.total ?? '',
-      v.indicacao ? 'Sim' : 'Não',
-      v.feedbackPositivo ?? '',
-      v.feedbackMelhoria ?? '',
-      ptsArena,
-      tempoArena,
-      valoresArena,
-      justifArena,
-      notaFinal
-    ].map(cell => `"${String(cell).replace(/"/g, '""')}"`);
-
-    linhas.push(linha);
-  });
-
-  // Gera o arquivo CSV
-  const csvContent = '\uFEFF' + linhas.map(l => l.join(',')).join('\n'); // \uFEFF = BOM para Excel reconhecer UTF-8
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `TPR2026_Avaliações_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  if(btn){ btn.textContent='📥 Exportar CSV completo'; btn.disabled=false; }
+window.confirmCSV=async function(tipo){
+  const lista=csvPendente[tipo]||[];if(!lista.length)return;
+  const btn=document.getElementById(`csv-${tipo}-btn`);
+  btn.textContent='Importando...';btn.disabled=true;
+  const path=tipo==='equipe'?'equipes':'juizes';
+  for(const item of lista)await fbPush(path,item);
+  document.getElementById(`csv-${tipo}-preview`).style.display='none';
+  btn.style.display='none';csvPendente[tipo]=[];
+  document.getElementById(`csv-${tipo}-input`).value='';
+  alert('Importação concluída!');
+  irAdmin(tipo==='equipe'?'equipes':'juizes');
 };
 
-// ═══════════════════════════════════════════════════════════════
-// FILTROS DE BUSCA
-// filtrarTabela() filtra linhas de uma <table> pelo texto digitado.
-// filtrarCards() filtra cards (divs) pelo texto digitado.
-// ═══════════════════════════════════════════════════════════════
-window.filtrarTabela = function(inputId, tabelaId) {
-  const termo = document.getElementById(inputId).value.toLowerCase();
-  const tabela = document.getElementById(tabelaId);
-  if (!tabela) return;
-  const linhas = tabela.querySelectorAll('tr:not(:first-child)');
-  linhas.forEach(linha => {
-    linha.style.display = linha.textContent.toLowerCase().includes(termo) ? '' : 'none';
+window.filtrarCards=function(inputId,containerId){
+  const termo=document.getElementById(inputId).value.toLowerCase();
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  container.querySelectorAll(':scope > div').forEach(card=>{
+    card.style.display=card.textContent.toLowerCase().includes(termo)?'':'none';
   });
 };
 
-// Filtra cards (divs filhas diretas) que contenham o texto buscado
-window.filtrarCards = function(inputId, containerId) {
-  const termo = document.getElementById(inputId).value.toLowerCase();
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.querySelectorAll(':scope > div').forEach(card => {
-    card.style.display = card.textContent.toLowerCase().includes(termo) ? '' : 'none';
+window.toggleCard=function(id){
+  const el=document.getElementById(id);
+  const arrow=document.getElementById('arrow-'+id);
+  if(!el)return;
+  const aberto=el.style.display!=='none';
+  el.style.display=aberto?'none':'block';
+  if(arrow)arrow.style.transform=aberto?'':'rotate(180deg)';
+};
+
+window.filtrarTabela=function(inputId,tabelaId){
+  const termo=document.getElementById(inputId).value.toLowerCase();
+  const tabela=document.getElementById(tabelaId);if(!tabela)return;
+  tabela.querySelectorAll('tr:not(:first-child)').forEach(tr=>{
+    tr.style.display=tr.textContent.toLowerCase().includes(termo)?'':'none';
   });
 };
 
-// Salva apenas os campos de feedback (Muito bom / Pensem sobre) no Firebase
-// Abre/fecha o detalhamento de um card colapsável
-window.toggleCard = function(id) {
-  const el = document.getElementById(id);
-  const arrow = document.getElementById('arrow-' + id);
-  if (!el) return;
-  const aberto = el.style.display !== 'none';
-  el.style.display = aberto ? 'none' : 'block';
-  if (arrow) arrow.style.transform = aberto ? '' : 'rotate(180deg)';
-};
-
-window.salvarFeedbackJuiz = async function(id) {
-  const pos = document.getElementById(`fbpos-${id}`).value.trim();
-  const mel = document.getElementById(`fbmel-${id}`).value.trim();
-  await fbPatch(`avaliacoes_sala/${id}`, { feedbackPositivo: pos, feedbackMelhoria: mel });
-  const msg = document.getElementById(`fb-save-msg-${id}`);
-  msg.textContent = '✅ Feedback salvo!';
-  msg.style.display = 'block';
-  setTimeout(() => msg.style.display = 'none', 3000);
-};
-
-// ── ADMIN ──
-// ═══════════════════════════════════════════════════════════════
-// PAINEL DO ADMIN
-// irAdmin(sub) carrega a sub-tela correspondente.
-// sub pode ser: 'juizes', 'equipes', 'notas-sala',
-//              'notas-arena', 'notas-gerais', 'senha'
-// ═══════════════════════════════════════════════════════════════
-window.irAdmin = async function(sub) {
+window.irAdmin=async function(sub){
   show('screen-admin-sub');
   const title=document.getElementById('admin-sub-title');
   const ct=document.getElementById('admin-sub-content');
   ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
 
-  if(sub==='juizes') {
+  if(sub==='juizes'){
     title.textContent='Gerenciar Juízes';
     const d=await fbGet('juizes')||{};
-    const rows=Object.entries(d).map(([k,v])=>`<tr><td>${v.nome}</td><td><span class="tag-alias">${v.perfil==='sala'?'Juiz de Sala':'Juiz de Arena'}</span></td><td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td></tr>`).join('');
+    const rows=Object.entries(d).sort((a,b)=>a[1].nome.localeCompare(b[1].nome))
+      .map(([k,v])=>{
+        const isArena=v.perfil==='arena';
+        const arInfo=isArena&&v.arena?ARENAS[v.arena-1]:null;
+        const perfilLabel=isArena
+          ?`🏟️ Juiz de Arena${arInfo?' — Arena '+v.arena+' '+arInfo.emoji+' '+arInfo.cor:''}`
+          :'📋 Juiz de Sala';
+        const perfilBg=isArena?'#fdf2ee':'var(--bege-dark)';
+        const perfilClr=isArena?'#b94a10':'var(--marrom)';
+        return `<tr>
+          <td style="font-weight:600">${v.nome}</td>
+          <td><span style="background:${perfilBg};color:${perfilClr};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700">${perfilLabel}</span></td>
+          <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
+        </tr>`;
+      }).join('');
     ct.innerHTML=`
       <div class="table-wrap" style="margin-bottom:20px"><table>
         <tr><th>Nome</th><th>Perfil</th><th>Ação</th></tr>
-        ${rows||'<tr><td colspan="3" style="text-align:center;color:#999">Nenhum juiz</td></tr>'}
+        ${rows||'<tr><td colspan="3" style="text-align:center;color:#999;padding:20px">Nenhum juiz cadastrado</td></tr>'}
       </table></div>
       <div class="divider"></div>
-      <p style="font-weight:600;margin-bottom:12px">Cadastrar novo juiz</p>
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo juiz</p>
       <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
-      <div class="form-group"><label>Perfil</label><select id="nj-perfil"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option></select></div>
+      <div class="form-group"><label>Perfil</label><select id="nj-perfil" onchange="document.getElementById('campo-arena-num').style.display=this.value==='arena'?'block':'none'"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option></select></div>
+      <div class="form-group" id="campo-arena-num" style="display:none"><label>Arena (1 a 6)</label><select id="nj-arena"><option value="1">Arena 1 — 🔴 Vermelho</option><option value="2">Arena 2 — 🟡 Amarelo</option><option value="3">Arena 3 — 🔵 Azul</option><option value="4">Arena 4 — 🟢 Verde</option><option value="5">Arena 5 — 🟠 Laranja</option><option value="6">Arena 6 — 🟣 Roxo</option></select></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
       <div class="divider"></div>
-      <p style="font-weight:600;margin:16px 0 12px">Importar via CSV</p>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
       ${csvUI('juiz')}`;
   }
-  else if(sub==='equipes') {
+  else if(sub==='equipes'){
     title.textContent='Gerenciar Equipes';
     await loadEquipes();
-    const rows=equipes.map(e=>`<tr><td>${e.nome}</td><td><button class="btn btn-danger btn-sm" onclick="remEq('${e.id}')">Remover</button></td></tr>`).join('');
+    const rows=equipes.map((e,i)=>`<tr>
+      <td style="font-weight:700;color:var(--text-muted)">${i+1}</td>
+      <td style="font-weight:600">${e.nome}</td>
+      <td>${e.escola||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="remEq('${e.id}')">Remover</button></td>
+    </tr>`).join('');
     ct.innerHTML=`
       <div class="table-wrap" style="margin-bottom:20px"><table>
-        <tr><th>Nome da Equipe</th><th>Ação</th></tr>
-        ${rows||'<tr><td colspan="2" style="text-align:center;color:#999">Nenhuma equipe</td></tr>'}
+        <tr><th>#</th><th>Nome</th><th>Escola</th><th>Ação</th></tr>
+        ${rows||'<tr><td colspan="4" style="text-align:center;color:#999;padding:20px">Nenhuma equipe cadastrada</td></tr>'}
       </table></div>
       <div class="divider"></div>
-      <p style="font-weight:600;margin-bottom:12px">Cadastrar nova equipe</p>
-      <div class="form-group"><label>Nome</label><input id="ne-nome" placeholder="Nome da equipe"></div>
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar nova equipe</p>
+      <div class="form-group"><label>Nome da equipe</label><input id="ne-nome" placeholder="Ex: Robonautas"></div>
+      <div class="form-group"><label>Escola / Instituição</label><input id="ne-escola" placeholder="Ex: Escola Municipal X"></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addEq()">Cadastrar Equipe</button>
       <div class="divider"></div>
-      <p style="font-weight:600;margin:16px 0 12px">Importar via CSV</p>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
       ${csvUI('equipe')}`;
   }
-  else if(sub==='notas-sala') {
+  else if(sub==='notas-sala'){
     title.textContent='Notas de Sala';
     await loadEquipes();
     const d=await fbGet('avaliacoes_sala')||{};
-    const rows=Object.entries(d).map(([k,v])=>{
+    const rows=Object.entries(d).sort((a,b)=>b[1].timestamp-a[1].timestamp).map(([k,v])=>{
       const eq=equipes.find(e=>e.id===v.equipeId);
-      const coms=CRIT.map(c=>{
-        const n=v.notas?.[c.id]||{};let h='';
-        if(n.comentario) h+=`<div class="comment-box">⚠️ <strong>${c.nome}:</strong> ${n.comentario}</div>`;
-        return h;
+      const coms=TODOS_CRIT.map(c=>{
+        const n=v.notas?.[c.id]||{};
+        return n.comentario?`<div class="comment-box">⚠️ <strong>${c.label}:</strong> ${n.comentario}</div>`:'';
       }).join('');
-      const fbGeral = [
-        v.feedbackPositivo ? `<div class="feedback-pos-box">✅ <strong>Muito bom:</strong> ${v.feedbackPositivo}</div>` : '',
-        v.feedbackMelhoria ? `<div class="feedback-mel-box">💡 <strong>Pensem sobre:</strong> ${v.feedbackMelhoria}</div>` : ''
+      const fbGeral=[
+        v.feedbackPositivo?`<div class="feedback-pos-box">✅ <strong>Muito bom:</strong> ${v.feedbackPositivo}</div>`:'',
+        v.feedbackMelhoria?`<div class="feedback-mel-box">💡 <strong>Pensem sobre:</strong> ${v.feedbackMelhoria}</div>`:''
       ].join('');
       return `<tr>
-        <td>${eq?eq.nome:v.equipeId}</td><td>${v.juiz}</td>
-        <td style="font-weight:700;color:var(--green-dark)">${v.total}/20</td>
-        <td style="text-align:center">${v.indicacao ? '⭐' : '—'}</td>
-        <td>${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
-        <td>${coms||''}${fbGeral||(!coms&&!fbGeral?'<span style="color:#999;font-size:12px">—</span>':'')}</td>
-        <td><div class="inline-flex">
-          <button class="btn btn-amber btn-sm" onclick="editSala('${k}')">Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button>
-        </div></td></tr>`;
+        <td style="font-weight:600">${eq?eq.nome:v.equipeId}</td>
+        <td>${v.juiz}</td>
+        <td style="font-weight:700;color:var(--marrom);font-family:'Nunito',sans-serif;font-size:16px">${v.total}/40</td>
+        <td style="text-align:center">${v.indicacao?'⭐':'—'}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
+        <td>${coms||''} ${fbGeral||(!coms&&!fbGeral?'<span style="color:#999;font-size:12px">—</span>':'')}</td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="btn btn-caramelo btn-sm" onclick="editarSala('${k}')">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button>
+          </div>
+        </td>
+      </tr>`;
     }).join('');
     ct.innerHTML=`
-      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="padding:10px 14px;font-size:14px;flex:1;min-width:200px">
-        <button class="btn btn-danger btn-sm" onclick="apagarTodasSala()" style="white-space:nowrap">🗑️ Apagar todas as notas de Sala</button>
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="flex:1;padding:10px 14px;font-size:14px">
+        <button class="btn btn-danger btn-sm" onclick="apagarTodasSala()">🗑️ Apagar todas</button>
       </div>
       <div class="table-wrap"><table id="tabela-sala">
         <tr><th>Equipe</th><th>Juiz</th><th>Nota</th><th>Indicação</th><th>Horário</th><th>Feedbacks</th><th>Ação</th></tr>
-        ${rows||'<tr><td colspan="7" style="text-align:center;color:#999">Nenhuma avaliação</td></tr>'}
+        ${rows||'<tr><td colspan="7" style="text-align:center;color:#999;padding:20px">Nenhuma avaliação registrada</td></tr>'}
       </table></div>`;
   }
-  else if(sub==='notas-arena') {
+  else if(sub==='notas-arena'){
     title.textContent='Notas de Arena';
-    await loadEquipes();
-    const d=await fbGet('rodadas_arena')||{};
-    const rows=Object.entries(d).map(([k,v])=>{
-      const eA=equipes.find(e=>e.id===v.equipeA),eB=equipes.find(e=>e.id===v.equipeB);
+    const data=await fbGet('arena')||{};
+    const todas=[];
+    Object.entries(data).forEach(([rodKey,arenas])=>{
+      Object.entries(arenas).forEach(([arKey,v])=>{todas.push(v);});
+    });
+    todas.sort((a,b)=>a.rodada-a.arena-(b.rodada-b.arena)||b.timestamp-a.timestamp);
+    const btnApagar=`<div style="margin-bottom:12px;text-align:right"><button class="btn btn-danger btn-sm" onclick="apagarTodasArena()">🗑️ Apagar todas as rodadas</button></div>`;
+    if(!todas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma rodada registrada.</p>';return;}
+    const rows=todas.map(v=>{
+      const ar=ARENAS[v.arena-1];
+      const venc=v.vencedor==='empate'?'🤝 Empate':v.vencedor==='vermelho'?'🔴 Vermelho':'🟡 Amarelo';
       return `<tr>
-        <td>${eA?eA.nome:v.equipeA}</td><td>${eB?eB.nome:v.equipeB}</td>
-        <td style="font-weight:700;color:var(--green-dark)">${v.totalAlianca}/100</td>
-        <td style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700">${v.tempoRodada||'—'}</td>
-        <td>${v.juiz}</td><td>${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</td>
-        <td><div class="inline-flex">
-          <button class="btn btn-amber btn-sm" onclick="editArena('${k}')">Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="delArena('${k}')">Apagar</button>
-        </div></td></tr>`;
+        <td style="font-weight:700">Rodada ${v.rodada}</td>
+        <td>${ar.emoji} Arena ${v.arena} — ${ar.cor}</td>
+        <td style="font-size:12px">
+          <div style="color:#b94040;font-weight:600">🔴 ${v.pecas_vermelho}p — ${(v.equipes_vermelho||[]).map(e=>e.nome).join(', ')}</div>
+          <div style="color:#b8860b;font-weight:600">🟡 ${v.pecas_amarelo}p — ${(v.equipes_amarelo||[]).map(e=>e.nome).join(', ')}</div>
+        </td>
+        <td style="font-weight:700">${venc}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${v.juiz}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="delArena(${v.rodada},${v.arena})">Apagar</button></td>
+      </tr>`;
     }).join('');
-    ct.innerHTML=`
-      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <input type="text" id="filtro-arena" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-arena','tabela-arena')" style="padding:10px 14px;font-size:14px;flex:1;min-width:200px">
-        <button class="btn btn-danger btn-sm" onclick="apagarTodasArena()" style="white-space:nowrap">🗑️ Apagar todas as notas de Arena</button>
-      </div>
-      <div class="table-wrap"><table id="tabela-arena">
-        <tr><th>Equipe A</th><th>Equipe B</th><th>Total</th><th>Tempo</th><th>Juiz</th><th>Horário</th><th>Ação</th></tr>
-        ${rows||'<tr><td colspan="7" style="text-align:center;color:#999">Nenhuma rodada</td></tr>'}
-      </table></div>`;
+    ct.innerHTML=btnApagar+`<div class="table-wrap"><table>
+      <tr><th>Rodada</th><th>Arena</th><th>Equipes e Peças</th><th>Vencedor</th><th>Juiz</th><th>Ação</th></tr>
+      ${rows}
+    </table></div>`;
   }
-  // ── NOTAS GERAIS: calcula o ranking final combinando sala e arena ──
-// Fórmula: (Média Sala / 20 × 100) × 0.75 + Pontos Arena × 0.25
-// Desempate: mais indicações de sala e/ou valores demonstrados na arena
-else if(sub==='notas-gerais') {
+  else if(sub==='senha'){
+    title.textContent='Alterar Senhas';
+    ct.innerHTML=`
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--marrom)">Senha do evento (juízes)</p>
+      <div class="form-group"><label>Nova senha do evento</label>
+        <div class="pass-wrap"><input type="password" id="s-evento" placeholder="Nova senha"><button type="button" class="btn-ver-senha" onclick="toggleSenha('s-evento',this)">👁</button></div>
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:24px" onclick="salvarSenha('evento')">Salvar senha do evento</button>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--marrom)">Senha do admin</p>
+      <div class="form-group"><label>Nova senha do admin</label>
+        <div class="pass-wrap"><input type="password" id="s-admin" placeholder="Nova senha admin"><button type="button" class="btn-ver-senha" onclick="toggleSenha('s-admin',this)">👁</button></div>
+      </div>
+      <button class="btn btn-primary" onclick="salvarSenha('admin')">Salvar senha do admin</button>
+      <div id="senha-msg" class="success-msg" style="margin-top:12px"></div>`;
+  }
+  else if(sub==='notas-gerais'){
     title.textContent='Notas Gerais — Ranking Final';
     await loadEquipes();
-    const sala = await fbGet('avaliacoes_sala') || {};
-    const arena = await fbGet('rodadas_arena') || {};
+    const sala=await fbGet('avaliacoes_sala')||{};
 
-    // Agrupa notas de sala por equipe
-    const salaMap = {};
-    Object.values(sala).forEach(v => {
-      if (!salaMap[v.equipeId]) salaMap[v.equipeId] = { notas:[], indicacoes:0 };
+    // Agrupa por equipe calculando média total e médias por categoria
+    const salaMap={};
+    Object.values(sala).forEach(v=>{
+      if(!salaMap[v.equipeId])salaMap[v.equipeId]={notas:[],indicacoes:0,cats:{challenge:[],corevalues:[],teammodel:[],coding:[],poster:[]}};
       salaMap[v.equipeId].notas.push(v.total);
-      if (v.indicacao) salaMap[v.equipeId].indicacoes++;
+      if(v.indicacao)salaMap[v.equipeId].indicacoes++;
+      const n=v.notas||{};
+      salaMap[v.equipeId].cats.challenge.push((n.ch_aprendeu?.valor||0)+(n.ch_impacto?.valor||0));
+      salaMap[v.equipeId].cats.corevalues.push((n.cv_usou?.valor||0)+(n.cv_habilidades?.valor||0));
+      salaMap[v.equipeId].cats.teammodel.push((n.tm_descricao?.valor||0)+(n.tm_exploreset?.valor||0));
+      salaMap[v.equipeId].cats.coding.push((n.co_motorizado?.valor||0)+(n.co_programou?.valor||0));
+      salaMap[v.equipeId].cats.poster.push((n.po_incluiu?.valor||0)+(n.po_jornada?.valor||0));
     });
 
-    // Pega pontos de arena por equipe + valores + tempo da rodada
-    const arenaMap = {};
-    Object.values(arena).forEach(v => {
-      arenaMap[v.equipeA] = { pts: v.totalAlianca, valores: v.valoresA || false, tempo: v.tempoRodada || null };
-      arenaMap[v.equipeB] = { pts: v.totalAlianca, valores: v.valoresB || false, tempo: v.tempoRodada || null };
-    });
+    const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
 
-    // Calcula nota final
-    const ranking = equipes.map(e => {
-      const sd = salaMap[e.id];
-      const ad = arenaMap[e.id];
-      const mediaSala = sd && sd.notas.length > 0 ? sd.notas.reduce((a,b)=>a+b,0)/sd.notas.length : null;
-      const ptsSala = mediaSala !== null ? (mediaSala/20)*100 : null;
-      const ptsArena = ad ? ad.pts : null;
-      const notaFinal = ptsSala !== null && ptsArena !== null ? (ptsSala*0.75)+(ptsArena*0.25)
-        : ptsSala !== null ? ptsSala*0.75
-        : ptsArena !== null ? ptsArena*0.25 : null;
-      return {
-        id: e.id, nome: e.nome,
-        mediaSala, avaliacoes: sd ? sd.notas.length : 0,
-        indicacoes: sd ? sd.indicacoes : 0,
-        ptsArena, valoresArena: ad ? ad.valores : false,
-        tempoArena: ad ? ad.tempo : null,
-        notaFinal
+    const CATS_INFO={
+      challenge:{label:'Challenge Solution',emoji:'🔬',cls:'cat-challenge'},
+      corevalues:{label:'Core Values',emoji:'🤝',cls:'cat-corevalues'},
+      teammodel:{label:'Team Model',emoji:'🤖',cls:'cat-teammodel'},
+      coding:{label:'Coding',emoji:'💻',cls:'cat-coding'},
+      poster:{label:'Team Poster',emoji:'🎨',cls:'cat-poster'}
+    };
+
+    const ranking=equipes.map(e=>{
+      const sd=salaMap[e.id];if(!sd)return null;
+      const media=avg(sd.notas);
+      const cats={
+        challenge:avg(sd.cats.challenge),
+        corevalues:avg(sd.cats.corevalues),
+        teammodel:avg(sd.cats.teammodel),
+        coding:avg(sd.cats.coding),
+        poster:avg(sd.cats.poster)
       };
-    }).filter(e => e.notaFinal !== null)
-      .sort((a,b) => b.notaFinal !== a.notaFinal ? b.notaFinal - a.notaFinal : b.indicacoes - a.indicacoes);
+      const melhorCat=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0];
+      return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes,cats,melhorCat};
+    }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
 
-    if (!ranking.length) { ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados suficientes ainda.</p>'; return; }
+    const semAval=equipes.filter(e=>!salaMap[e.id]);
+    if(!ranking.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados ainda.</p>';return;}
 
-    const rows = ranking.map((e,i) => {
-      const empate = i > 0 && ranking[i-1].notaFinal === e.notaFinal;
+    // ── Prêmio de cada equipe = categoria em que ela teve maior média ──
+    // Simples: cada equipe recebe o prêmio da sua melhor categoria.
+    // Várias equipes podem ganhar a mesma categoria.
+    // O ranking absoluto (1º/2º/3º) é pela média total — independente.
+
+    const rows=ranking.map((e,i)=>{
+      const empate=i>0&&ranking[i-1].media===e.media;
+      // Melhor categoria desta equipe (maior nota, desempate pela ordem)
+      const premioCat=Object.keys(CATS_INFO)
+        .sort((a,b)=>e.cats[b]-e.cats[a])[0];
       return `<tr>
-        <td style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--green-dark)">${i+1}º</td>
-        <td style="font-weight:600">${e.nome} ${empate ? '<span style="font-size:11px;background:#fff3e0;color:#e65100;padding:2px 6px;border-radius:4px;font-weight:600">EMPATE</span>' : ''}</td>
-        <td style="text-align:center">${e.mediaSala !== null ? e.mediaSala.toFixed(1)+'/20' : '—'}<br><span style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</span></td>
-        <td style="text-align:center">${e.ptsArena !== null ? e.ptsArena+'/100' : '—'}</td>
-        <td style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--green-dark)">${e.notaFinal.toFixed(1)}</td>
-        <td style="text-align:center;font-size:13px">
-          <div>${e.indicacoes > 0 ? `<span style="font-weight:700;color:#1565c0">⭐ Sala: ${e.indicacoes}/3</span>` : '<span style="color:#ccc">Sala: —</span>'}</div>
-          <div style="margin-top:4px">${e.valoresArena ? '<span style="font-weight:700;color:#00796b">🤝 Arena: Sim</span>' : '<span style="color:#ccc">Arena: —</span>'}</div>
-          <div style="margin-top:4px">${e.tempoArena ? `<span style="font-weight:700;color:#0D3B7A">⏱️ ${e.tempoArena}</span>` : '<span style="color:#ccc">Tempo: —</span>'}</div>
+        <td style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:${i<3?'var(--caramelo)':'var(--text-muted)'}">${i+1}º</td>
+        <td>
+          <div style="font-weight:700">${e.nome}${empate?' <span style="font-size:11px;background:#fef6e4;color:#a06010;padding:2px 6px;border-radius:4px;font-weight:700">EMPATE</span>':''}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${e.escola||''}</div>
+        </td>
+        <td style="text-align:center">
+          <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--marrom)">${e.media.toFixed(1)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${e.avaliacoes} juiz(es)</div>
+        </td>
+        <td style="font-size:12px;min-width:200px">
+          ${Object.entries(CATS_INFO).map(([cat,info])=>{
+            const isWinner=premioCat===cat;
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;margin-bottom:2px;background:${isWinner?'var(--bege-dark)':'transparent'}">
+              <span style="color:${isWinner?'var(--marrom)':'var(--text-muted)'};font-weight:${isWinner?'700':'400'}">${info.emoji} ${info.label}</span>
+              <span style="font-weight:700;color:${isWinner?'var(--caramelo-dark)':'var(--text)'};margin-left:8px">${e.cats[cat].toFixed(1)}/8${isWinner?' 🏅':''}</span>
+            </div>`;}).join('')}
+        </td>
+        <td style="text-align:center;vertical-align:middle">
+          ${premioCat?`<div style="background:var(--bege-dark);color:var(--marrom);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px">${CATS_INFO[premioCat].emoji} ${CATS_INFO[premioCat].label}</div>`:'<div style="font-size:11px;color:#ccc">—</div>'}
+          ${e.indicacoes>0?`<div style="font-size:12px;font-weight:700;color:var(--marrom);margin-top:4px">⭐ ${e.indicacoes} ind.</div>`:''}
         </td>
       </tr>`;
     }).join('');
 
-    ct.innerHTML = `
-      <p class="text-muted" style="margin-bottom:12px;font-size:13px">
-        Fórmula: <strong>(Média Sala / 20 × 100) × 0,75 + Pontos Arena × 0,25</strong>. Em caso de empate, mais indicações = melhor colocação.
-      </p>
+    ct.innerHTML=`
+      <p class="text-muted" style="margin-bottom:12px;font-size:13px">Ranking por <strong>média das avaliações (0–40)</strong>. Cada equipe recebe o prêmio da categoria em que mais se destacou. 🏅 = vencedor da categoria.</p>
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-        <input type="text" id="filtro-gerais" placeholder="🔍 Buscar por equipe..." oninput="filtrarTabela('filtro-gerais','tabela-gerais')" style="padding:10px 14px;font-size:14px;flex:1;min-width:200px">
-        <button class="btn btn-secondary btn-sm" onclick="exportarCSV()" style="white-space:nowrap">📥 Exportar CSV completo</button>
+        <input type="text" id="filtro-gerais" placeholder="🔍 Buscar por equipe..." oninput="filtrarTabela('filtro-gerais','tabela-gerais')" style="flex:1;padding:10px 14px;font-size:14px">
+        <button class="btn btn-caramelo btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
       </div>
       <div class="table-wrap"><table id="tabela-gerais">
-        <tr><th>#</th><th>Equipe</th><th>Nota Sala</th><th>Nota Arena</th><th>Total</th><th>Indicações</th></tr>
+        <tr><th>#</th><th>Equipe</th><th>Média</th><th>Por Categoria (máx. 8 cada)</th><th>Prêmio / Indicação</th></tr>
         ${rows}
-      </table></div>`;
-  }
-  else if(sub==='senha') {
-    title.textContent='Alterar Senhas';
-    ct.innerHTML=`
-      <div id="senha-msg" class="success-msg"></div>
-      <p style="font-weight:600;margin-bottom:12px">Senha do evento (juízes)</p>
-      <div class="form-group"><label>Nova senha do evento</label><div class="pass-wrap"><input type="password" id="se-evento" placeholder="Nova senha"><button type="button" class="btn-ver-senha" onclick="toggleSenha('se-evento',this)">👁</button></div></div>
-      <button class="btn btn-primary" style="margin-bottom:24px" onclick="chgSenha('evento')">Salvar senha do evento</button>
-      <div class="divider"></div>
-      <p style="font-weight:600;margin:16px 0 12px">Senha do admin</p>
-      <div class="form-group"><label>Nova senha do admin</label><div class="pass-wrap"><input type="password" id="se-admin" placeholder="Nova senha admin"><button type="button" class="btn-ver-senha" onclick="toggleSenha('se-admin',this)">👁</button></div></div>
-      <button class="btn btn-primary" onclick="chgSenha('admin')">Salvar senha do admin</button>`;
+      </table></div>
+      ${semAval.length?`<p class="text-muted" style="font-size:12px;margin-top:12px"><strong>Sem avaliação:</strong> ${semAval.map(e=>e.nome).join(', ')}</p>`:''}`;
   }
 };
 
-// CSV
-// Gera o HTML do componente de importação CSV (área de drop + mapeamento de colunas)
-function csvUI(tipo) {
-  return `
-    <div class="csv-drop" onclick="document.getElementById('csvf-${tipo}').click()">
-      <div class="csv-drop-icon">📂</div>
-      <div class="csv-drop-text">Clique para selecionar arquivo CSV</div>
-      <input type="file" id="csvf-${tipo}" accept=".csv" style="display:none" onchange="lerCSV('${tipo}',this)">
+window.remJuiz=async function(id){if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
+window.addJuiz=async function(){
+  const nomeEl=document.getElementById('nj-nome');
+  const perfilEl=document.getElementById('nj-perfil');
+  const arenaEl=document.getElementById('nj-arena');
+  if(!nomeEl||!perfilEl){alert('Erro: formulário não encontrado.');return;}
+  const nome=nomeEl.value.trim();
+  const perfilVal=perfilEl.value;
+  if(!nome){alert('Nome obrigatório.');return;}
+  const arenaNum=perfilVal==='arena'&&arenaEl?parseInt(arenaEl.value):null;
+  const dados={nome,perfil:perfilVal};
+  if(arenaNum)dados.arena=arenaNum;
+  const btn=document.querySelector('[onclick="addJuiz()"]');
+  if(btn){btn.textContent='Cadastrando...';btn.disabled=true;}
+  try{
+    await fbPush('juizes',dados);
+  }finally{
+    await irAdmin('juizes');
+  }
+};
+window.remEq=async function(id){
+  const eq=equipes.find(e=>e.id===id);
+  if(!confirm(`Remover equipe "${eq?.nome}"?`))return;
+  await fbDel(`equipes/${id}`);irAdmin('equipes');
+};
+window.addEq=async function(){
+  const nome=document.getElementById('ne-nome').value.trim();
+  const escola=document.getElementById('ne-escola').value.trim();
+  if(!nome){alert('Nome obrigatório.');return;}
+  await fbPush('equipes',{nome,escola});
+  alert(`Equipe "${nome}" cadastrada!`);irAdmin('equipes');
+};
+window.delSala=async function(id){
+  if(!confirm('Apagar esta avaliação permanentemente?'))return;
+  await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala');
+};
+
+window.editarSala=async function(id){
+  const title=document.getElementById('admin-sub-title');
+  const ct=document.getElementById('admin-sub-content');
+  ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
+  await loadEquipes();
+  const d=await fbGet('avaliacoes_sala')||{};
+  const v=d[id];if(!v){alert('Avaliação não encontrada.');return;}
+  const eq=equipes.find(e=>e.id===v.equipeId);
+  const nomeEq=eq?eq.nome:v.equipeId;
+  title.textContent='Editar Avaliação';
+
+  const camposCrit=CATEGORIAS.map(cat=>`
+    <div style="margin-bottom:16px">
+      <div class="categoria-header ${cat.cls}" style="margin-top:8px">${cat.emoji} ${cat.label}</div>
+      ${cat.criterios.map(cr=>{
+        const n=v.notas?.[cr.id]||{valor:1,comentario:''};
+        return `
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;background:white">
+          <div style="font-weight:700;font-size:13px;color:var(--marrom);margin-bottom:8px">${cr.label}</div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label>Nota (1–4)</label>
+            <select id="edit-${cr.id}-val" onchange="updEditTotal()">
+              ${[1,2,3,4].map(n=>`<option value="${n}" ${n===n?'selected':''}>
+                ${n} — ${LBL[n]}
+              </option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Comentário Excede</label>
+            <textarea id="edit-${cr.id}-com" placeholder="Obrigatório se nota = 4" style="min-height:50px;font-size:13px">${n.comentario||''}</textarea>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+
+  ct.innerHTML=`
+    <p style="font-size:14px;margin-bottom:16px"><strong>Equipe:</strong> ${nomeEq} &nbsp;|&nbsp; <strong>Juiz:</strong> ${v.juiz}</p>
+    ${camposCrit}
+    <div class="divider"></div>
+    <p style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--text);font-family:'Nunito',sans-serif">Feedback Geral</p>
+    <div class="form-group">
+      <label>✅ Muito bom</label>
+      <textarea id="edit-fb-pos" style="min-height:70px;font-size:14px">${v.feedbackPositivo||''}</textarea>
     </div>
-    <div class="csv-col-map" id="csvm-${tipo}">
-      <div class="csv-col-map-title">Selecione as colunas:</div>
-      <div id="csvf-fields-${tipo}"></div>
-      <button class="btn btn-primary mt-12" onclick="importCSV('${tipo}')">Importar</button>
+    <div class="form-group">
+      <label>💡 Pensem sobre</label>
+      <textarea id="edit-fb-mel" style="min-height:70px;font-size:14px">${v.feedbackMelhoria||''}</textarea>
     </div>
-    <div id="csvr-${tipo}"></div>`;
-}
-const csvData={};
-// Lê o arquivo CSV selecionado e exibe os campos para mapeamento de colunas
-window.lerCSV = function(tipo,inp) {
-  const f=inp.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    const lines=e.target.result.split('\n').filter(l=>l.trim());
-    const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
-    const rows=lines.slice(1).map(l=>l.split(',').map(c=>c.trim().replace(/"/g,'')));
-    csvData[tipo]={headers,rows};
-    document.getElementById(`csvm-${tipo}`).style.display='block';
-    const opts=headers.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
-    document.getElementById(`csvf-fields-${tipo}`).innerHTML = tipo==='equipe'
-      ? `<div class="form-group"><label>Coluna do nome da equipe</label><select id="csv-cnome-${tipo}">${opts}</select></div>`
-      : `<div class="form-group"><label>Coluna do nome do juiz</label><select id="csv-cnome-${tipo}">${opts}</select></div>
-         <div class="form-group"><label>Coluna da função (Sala/Arena)</label><select id="csv-cperfil-${tipo}">${opts}</select></div>`;
-  };
-  r.readAsText(f);
-};
-// Importa os dados do CSV para o Firebase após o mapeamento de colunas
-window.importCSV = async function(tipo) {
-  const d=csvData[tipo];if(!d)return;
-  const res=document.getElementById(`csvr-${tipo}`);
-  res.innerHTML='<div class="loading"><div class="spinner"></div>Importando...</div>';
-  let count=0;
-  const colNome=parseInt(document.getElementById(`csv-cnome-${tipo}`).value);
-  if(tipo==='equipe') {
-    for(const row of d.rows){const n=row[colNome];if(n){await fbPush('equipes',{nome:n});count++;}}
-  } else {
-    const colPerf=parseInt(document.getElementById(`csv-cperfil-${tipo}`).value);
-    for(const row of d.rows){
-      const n=row[colNome];
-      const p=(row[colPerf]||'').toLowerCase().includes('arena')?'arena':'sala';
-      if(n){await fbPush('juizes',{nome:n,perfil:p});count++;}
-    }
-  }
-  res.innerHTML=`<div class="success-msg" style="display:block">✅ ${count} ${tipo}(s) importado(s)!</div>`;
-  document.getElementById(`csvm-${tipo}`).style.display='none';
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <input type="checkbox" id="edit-indicacao" ${v.indicacao?'checked':''} style="width:20px;height:20px;accent-color:var(--caramelo)">
+      <label for="edit-indicacao" style="font-size:14px;font-weight:600;color:var(--marrom);text-transform:none;letter-spacing:0">⭐ Indicar para próxima fase</label>
+    </div>
+    <div style="text-align:center;padding:12px 0 20px">
+      <div style="font-family:'Nunito',sans-serif;font-size:42px;font-weight:900;color:var(--marrom);line-height:1" id="edit-total-preview">0</div>
+      <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;margin-top:4px">Pontos totais (máx. 40)</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="irAdmin('notas-sala')">← Cancelar</button>
+      <button class="btn btn-primary" style="flex:2" onclick="salvarEdicaoSala('${id}')">Salvar Alterações</button>
+    </div>`;
+
+  // Preencher selects com valores atuais
+  TODOS_CRIT.forEach(cr=>{
+    const sel=document.getElementById(`edit-${cr.id}-val`);
+    if(sel)sel.value=v.notas?.[cr.id]?.valor||1;
+  });
+  updEditTotal();
 };
 
-// Cadastra um novo juiz no Firebase
-window.addJuiz = async function() {
-  const n=document.getElementById('nj-nome').value.trim();
-  const p=document.getElementById('nj-perfil').value;
-  if(!n){alert('Digite o nome.');return;}
-  await fbPush('juizes',{nome:n,perfil:p});alert('Juiz cadastrado!');irAdmin('juizes');
+window.updEditTotal=function(){
+  let t=0;
+  TODOS_CRIT.forEach(cr=>{
+    const sel=document.getElementById(`edit-${cr.id}-val`);
+    if(sel)t+=parseInt(sel.value||1);
+  });
+  const el=document.getElementById('edit-total-preview');
+  if(el)el.textContent=t;
 };
-// Remove um juiz do Firebase pelo ID
-window.remJuiz = async function(id) { if(!confirm('Remover?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes'); };
-// Cadastra uma nova equipe no Firebase
-window.addEq = async function() {
-  const n=document.getElementById('ne-nome').value.trim();
-  if(!n){alert('Digite o nome.');return;}
-  await fbPush('equipes',{nome:n});alert('Equipe cadastrada!');irAdmin('equipes');
-};
-// Remove uma equipe do Firebase pelo ID
-window.remEq = async function(id) { if(!confirm('Remover?'))return;await fbDel(`equipes/${id}`);irAdmin('equipes'); };
-// Atualiza a senha (do evento ou do admin) no Firebase
-window.chgSenha = async function(tipo) {
-  const id=tipo==='evento'?'se-evento':'se-admin';
-  const v=document.getElementById(id).value.trim();
-  if(!v||v.length<4){alert('Mínimo 4 caracteres.');return;}
-  await fbPatch('config',{[tipo==='evento'?'senha_evento':'senha_admin']:v});
-  const m=document.getElementById('senha-msg');m.textContent='✅ Senha alterada!';m.style.display='block';
-  setTimeout(()=>m.style.display='none',3000);
-};
-// Apaga uma avaliação de sala do Firebase (somente admin)
-window.delSala = async function(id) { if(!confirm('Apagar avaliação?'))return;await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala'); };
-// Apaga uma rodada de arena do Firebase (somente admin)
-window.delArena = async function(id) { if(!confirm('Apagar rodada?'))return;await fbDel(`rodadas_arena/${id}`);irAdmin('notas-arena'); };
 
-// Apaga TODAS as avaliações de Sala de uma vez (uso: limpar rodadas de teste antes do torneio oficial).
-// Confirmação dupla: alerta de contagem + digitação da palavra "APAGAR" para evitar clique acidental.
-window.apagarTodasSala = async function() {
-  const d = await fbGet('avaliacoes_sala') || {};
-  const qtd = Object.keys(d).length;
-  if (qtd === 0) { alert('Não há avaliações de Sala para apagar.'); return; }
-  if (!confirm(`Isso vai apagar TODAS as ${qtd} avaliação(ões) de Sala registradas.\n\nEssa ação NÃO pode ser desfeita. Deseja continuar?`)) return;
-  const digitado = prompt('Para confirmar, digite APAGAR (em maiúsculas):');
-  if (digitado !== 'APAGAR') { alert('Confirmação incorreta. Nenhuma avaliação foi apagada.'); return; }
+window.salvarEdicaoSala=async function(id){
+  let notas={},ok=true;
+  TODOS_CRIT.forEach(cr=>{
+    if(!ok)return;
+    const val=parseInt(document.getElementById(`edit-${cr.id}-val`)?.value||1);
+    const comentario=document.getElementById(`edit-${cr.id}-com`)?.value.trim()||'';;
+    if(val===4&&!comentario){alert(`Comentário obrigatório para "${cr.label}" (Excede).`);ok=false;return;}
+    notas[cr.id]={valor:val,comentario};
+  });
+  if(!ok)return;
+  const feedbackPositivo=document.getElementById('edit-fb-pos').value.trim();
+  const feedbackMelhoria=document.getElementById('edit-fb-mel').value.trim();
+  if(!feedbackPositivo){alert('Preencha o campo "✅ Muito bom".');return;}
+  if(!feedbackMelhoria){alert('Preencha o campo "💡 Pensem sobre".');return;}
+  const indicacao=document.getElementById('edit-indicacao').checked;
+  const total=TODOS_CRIT.reduce((s,cr)=>s+notas[cr.id].valor,0);
+  const btn=document.querySelector('#admin-sub-content .btn-primary');
+  if(btn){btn.textContent='Salvando...';btn.disabled=true;}
+  try{
+    await fbPatch(`avaliacoes_sala/${id}`,{notas,total,feedbackPositivo,feedbackMelhoria,indicacao});
+    alert('✅ Avaliação atualizada com sucesso!');
+    irAdmin('notas-sala');
+  }catch(e){alert('Erro ao salvar. Tente novamente.');}
+  finally{if(btn){btn.textContent='Salvar Alterações';btn.disabled=false;}}
+};
+window.apagarTodasSala=async function(){
+  if(!confirm('Apagar TODAS as avaliações de sala? Esta ação não pode ser desfeita!'))return;
   await fbDel('avaliacoes_sala');
-  alert('Todas as avaliações de Sala foram apagadas.');
   irAdmin('notas-sala');
 };
 
-// Apaga TODAS as rodadas de Arena de uma vez (uso: limpar rodadas de teste antes do torneio oficial).
-window.apagarTodasArena = async function() {
-  const d = await fbGet('rodadas_arena') || {};
-  const qtd = Object.keys(d).length;
-  if (qtd === 0) { alert('Não há rodadas de Arena para apagar.'); return; }
-  if (!confirm(`Isso vai apagar TODAS as ${qtd} rodada(s) de Arena registradas.\n\nEssa ação NÃO pode ser desfeita. Deseja continuar?`)) return;
-  const digitado = prompt('Para confirmar, digite APAGAR (em maiúsculas):');
-  if (digitado !== 'APAGAR') { alert('Confirmação incorreta. Nenhuma rodada foi apagada.'); return; }
-  await fbDel('rodadas_arena');
-  alert('Todas as rodadas de Arena foram apagadas.');
+window.apagarTodasArena=async function(){
+  if(!confirm('Apagar TODAS as rodadas de arena? Esta ação não pode ser desfeita!'))return;
+  await fbDel('arena');
   irAdmin('notas-arena');
 };
 
-// Abre a tela de edição de uma avaliação de sala específica
-window.editSala = async function(id) {
-  const av=await fbGet(`avaliacoes_sala/${id}`);
-  await loadEquipes();
-  const eq=equipes.find(e=>e.id===av.equipeId);
-  document.getElementById('admin-sub-content').innerHTML=`
-    <p style="margin-bottom:16px"><strong>Equipe:</strong> ${eq?eq.nome:av.equipeId} | <strong>Juiz:</strong> ${av.juiz}</p>
-    ${CRIT.map(c=>{const n=av.notas?.[c.id]||{};return `
-      <div style="margin-bottom:12px;padding:12px;border:1.5px solid var(--border);border-radius:8px">
-        <div style="font-weight:600;margin-bottom:8px">${c.nome}</div>
-        <div class="form-group" style="margin-bottom:8px"><label>Nota (1–4)</label><input type="number" min="1" max="4" value="${n.valor||1}" id="ed-v-${c.id}"></div>
-        <div class="form-group" style="margin:0"><label>Comentário Excede</label><textarea id="ed-c-${c.id}" style="min-height:48px">${n.comentario||''}</textarea></div>
-      </div>`;}).join('')}
-    <div style="border:1.5px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px">
-      <div style="font-weight:600;margin-bottom:10px;font-size:14px">Feedback geral da apresentação</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-group" style="margin:0"><label>✅ Muito bom...</label><textarea id="ed-fbpos" style="min-height:64px">${av.feedbackPositivo||''}</textarea></div>
-        <div class="form-group" style="margin:0"><label>💡 Pensem sobre...</label><textarea id="ed-fbmel" style="min-height:64px">${av.feedbackMelhoria||''}</textarea></div>
-      </div>
-    </div>
-    <div id="ed-msg" class="success-msg" style="margin-top:12px"></div>
-    <div class="inline-flex" style="margin-top:16px">
-      <button class="btn btn-primary btn-sm" onclick="savSala('${id}')">Salvar</button>
-      <button class="btn btn-secondary btn-sm" onclick="irAdmin('notas-sala')">Cancelar</button>
-    </div>`;
+window.delArena=async function(rodada,arena){
+  if(!confirm(`Apagar resultado da Arena ${arena}, Rodada ${rodada}?`))return;
+  await fbDel(`arena/rodada_${rodada}/arena_${arena}`);
+  irAdmin('notas-arena');
 };
 
-// Salva as alterações feitas numa avaliação de sala no Firebase
-window.savSala = async function(id) {
-  let notas={},total=0;
-  CRIT.forEach(c=>{
-    const v=Math.min(4,Math.max(1,parseInt(document.getElementById(`ed-v-${c.id}`).value)||1));
-    notas[c.id]={valor:v,comentario:document.getElementById(`ed-c-${c.id}`).value.trim()};
-    total+=v;
-  });
-  const feedbackPositivo=document.getElementById('ed-fbpos').value.trim();
-  const feedbackMelhoria=document.getElementById('ed-fbmel').value.trim();
-  await fbPatch(`avaliacoes_sala/${id}`,{notas,total,feedbackPositivo,feedbackMelhoria,editadoPor:me,editadoEm:Date.now()});
-  const m=document.getElementById('ed-msg');m.textContent=`✅ Salvo! Total: ${total}/20`;m.style.display='block';
+window.salvarSenha=async function(tipo){
+  const val=document.getElementById(`s-${tipo}`).value.trim();
+  if(!val){alert('Digite a nova senha.');return;}
+  await fbPatch('config',tipo==='evento'?{senha_evento:val}:{senha_admin:val});
+  document.getElementById(`s-${tipo}`).value='';
+  const msg=document.getElementById('senha-msg');
+  msg.textContent=`✅ Senha ${tipo==='evento'?'do evento':'do admin'} atualizada!`;
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3000);
 };
 
-// Abre a tela de edição de uma rodada de arena específica
-window.editArena = async function(id) {
-  const rod=await fbGet(`rodadas_arena/${id}`);
-  await loadEquipes();
-  const eA=equipes.find(e=>e.id===rod.equipeA),eB=equipes.find(e=>e.id===rod.equipeB);
-  const nA=eA?eA.nome:rod.equipeA, nB=eB?eB.nome:rod.equipeB;
-  const rM=(ms,dados)=>ms.map(m=>`
-    <div class="missao-item ${dados?.[m.id]?'done':''}" id="edms-${m.id}" onclick="togEdMs('${m.id}')">
-      <span class="missao-name">${m.nome}</span><span class="missao-pts">${m.pts} pts</span>
-      <div class="missao-check"></div></div>`).join('');
-  document.getElementById('admin-sub-content').innerHTML=`
-    <p style="margin-bottom:16px">
-      <span class="chip" style="background:#fce4ec;color:#880e4f">🔴 ${nA}</span>
-      <span class="chip" style="background:#e3f2fd;color:#0d47a1">🔵 ${nB}</span>
-    </p>
-    <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div>${rM(MA,rod.missoesA)}</div>
-    <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div>${rM(MB,rod.missoesB)}</div>
-    <div style="margin-top:14px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
-      <div style="font-weight:600;margin-bottom:10px;font-size:14px">⏱️ Tempo gasto na rodada</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-        <div style="text-align:center">
-          <input type="number" id="ed-tempo-min" min="0" max="2" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[0] : ''}" placeholder="0" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
-        </div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green-dark);margin-bottom:14px">:</div>
-        <div style="text-align:center">
-          <input type="number" id="ed-tempo-seg" min="0" max="59" value="${rod.tempoRodada ? rod.tempoRodada.split(':')[1] : ''}" placeholder="00" style="width:70px;font-size:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;padding:8px 4px">
-          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:16px;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm)">
-      <div style="font-weight:600;margin-bottom:10px;font-size:14px">Valores durante a rodada</div>
-      <label style="display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;text-transform:none;font-weight:400;font-size:14px">
-        <input type="checkbox" id="ed-valores-a" ${rod.valoresA?'checked':''} style="width:18px;height:18px;cursor:pointer;accent-color:#1565c0">
-        🔴 ${nA} demonstrou valores
-      </label>
-      <textarea id="ed-justif-a" placeholder="Justificativa..." style="min-height:46px;font-size:13px;margin-bottom:14px">${rod.justifA||''}</textarea>
-      <label style="display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;text-transform:none;font-weight:400;font-size:14px">
-        <input type="checkbox" id="ed-valores-b" ${rod.valoresB?'checked':''} style="width:18px;height:18px;cursor:pointer;accent-color:#1565c0">
-        🔵 ${nB} demonstrou valores
-      </label>
-      <textarea id="ed-justif-b" placeholder="Justificativa..." style="min-height:46px;font-size:13px">${rod.justifB||''}</textarea>
-    </div>
-    <div id="ed-arena-msg" class="success-msg" style="margin-top:12px"></div>
-    <div class="inline-flex" style="margin-top:16px">
-      <button class="btn btn-primary btn-sm" onclick="savArena('${id}')">Salvar</button>
-      <button class="btn btn-secondary btn-sm" onclick="irAdmin('notas-arena')">Cancelar</button>
-    </div>`;
-};
-// Marca/desmarca missão na tela de edição do admin
-window.togEdMs = id => document.getElementById(`edms-${id}`)?.classList.toggle('done');
-// Salva as alterações feitas numa rodada de arena no Firebase
-window.savArena = async function(id) {
-  let mA={},mB={},pA=0,pB=0;
-  MA.forEach(m=>{const d=document.getElementById(`edms-${m.id}`)?.classList.contains('done');mA[m.id]=d;if(d)pA+=m.pts;});
-  MB.forEach(m=>{const d=document.getElementById(`edms-${m.id}`)?.classList.contains('done');mB[m.id]=d;if(d)pB+=m.pts;});
-  const valoresA=document.getElementById('ed-valores-a').checked;
-  const valoresB=document.getElementById('ed-valores-b').checked;
-  const justifA=document.getElementById('ed-justif-a').value.trim();
-  const justifB=document.getElementById('ed-justif-b').value.trim();
-  const edMin=parseInt(document.getElementById('ed-tempo-min').value||0);
-  const edSeg=parseInt(document.getElementById('ed-tempo-seg').value||0);
-  if((edMin*60+edSeg) > 150){ alert('Tempo máximo permitido é 2:30. Confira o tempo informado.'); return; }
-  const tempoRodada=`${edMin}:${String(edSeg).padStart(2,'0')}`;
-  await fbPatch(`rodadas_arena/${id}`,{missoesA:mA,missoesB:mB,ptsA:pA,ptsB:pB,totalAlianca:pA+pB,tempoRodada,valoresA,valoresB,justifA:valoresA?justifA:'',justifB:valoresB?justifB:'',editadoPor:me,editadoEm:Date.now()});
-  const m=document.getElementById('ed-arena-msg');m.textContent=`✅ Salvo! Total: ${pA+pB}/100`;m.style.display='block';
-};
-
-// ── TELÃO ──
-let tInt=null,sInt=null,vel=4000,tOff=0,tRows=0;
 
 // ═══════════════════════════════════════════════════════════════
-// PAINEL DO TELÃO
-// Exibe o placar de alianças em tempo real para o público.
-// Atualiza automaticamente a cada 10 segundos buscando dados no Firebase.
-// A rolagem automática passa por blocos de 5 linhas por vez.
+// JUIZ DE ARENA — FLUXO
 // ═══════════════════════════════════════════════════════════════
-window.irParaTelao = function() { show('screen-telao');startTelao(); };
-// Sai do telão e volta para a tela anterior conforme o perfil logado
-window.voltarDoTelao = function() {
-  clearInterval(tInt);clearInterval(sInt);
-  if(me) show(perfil==='admin'?'screen-admin':'screen-menu');
-  else show('screen-login');
-};
-// Altera a velocidade de rolagem do telão (Lento/Normal/Rápido)
-window.setVel = function(ms,btn) {
-  vel=ms;
-  document.querySelectorAll('.telao-speed-btn').forEach(b=>b.classList.remove('ativo'));
-  btn.classList.add('ativo');
-  clearInterval(sInt);startScroll();
-};
+let eqsVermelho=[],eqsAmarelo=[];
 
-// Busca as rodadas no Firebase e monta o ranking de alianças
-async function updTelao() {
-  const rod=await fbGet('rodadas_arena')||{};
+window.irParaArena=async function(){
   await loadEquipes();
+  // Definir arena do juiz logado (busca no cadastro)
+  const juizes=await fbGet('juizes')||{};
+  const juiz=Object.values(juizes).find(j=>j.nome.toLowerCase()===me.toLowerCase());
+  const arenaNum=juiz?.arena||null;
+  const arenaInfo=arenaNum?ARENAS[arenaNum-1]:null;
+  document.getElementById('arena-titulo').textContent=arenaInfo
+    ?`Arena ${arenaNum} — ${arenaInfo.emoji} ${arenaInfo.cor}`
+    :'Rodada de Arena';
+  eqsVermelho=[];eqsAmarelo=[];
+  renderLados();
+  fillSelectArena('add-eq-vermelho');
+  fillSelectArena('add-eq-amarelo');
+  document.getElementById('pecas-vermelho').value='';
+  document.getElementById('pecas-amarelo').value='';
+  document.getElementById('arena-rodada').value='';
+  document.getElementById('arena-error').style.display='none';
+  show('screen-arena');
+};
 
-  // Monta lista de alianças únicas com pontuação somada
-  const aliancas={};
-  Object.values(rod).forEach(r=>{
-    const eA=equipes.find(e=>e.id===r.equipeA);
-    const eB=equipes.find(e=>e.id===r.equipeB);
-    const nA=eA?eA.nome:r.equipeA;
-    const nB=eB?eB.nome:r.equipeB;
-    // chave canônica (sempre menor + maior para não duplicar)
-    const chave=[r.equipeA,r.equipeB].sort().join('|');
-    if(!aliancas[chave]) aliancas[chave]={nomeA:nA,nomeB:nB,rodadas:0,pts:0};
-    aliancas[chave].rodadas++;
-    aliancas[chave].pts+=r.totalAlianca;
+function fillSelectArena(id){
+  const s=document.getElementById(id);
+  s.innerHTML='<option value="">+ Adicionar equipe...</option>';
+  equipes.forEach(e=>{
+    const jaVerm=eqsVermelho.find(x=>x.id===e.id);
+    const jaAmar=eqsAmarelo.find(x=>x.id===e.id);
+    if(!jaVerm&&!jaAmar)s.innerHTML+=`<option value="${e.id}">${e.nome}</option>`;
+  });
+}
+
+function renderLados(){
+  ['vermelho','amarelo'].forEach(lado=>{
+    const lista=lado==='vermelho'?eqsVermelho:eqsAmarelo;
+    const div=document.getElementById(`equipes-${lado}-list`);
+    div.innerHTML=lista.map(e=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:white;border-radius:6px;margin-bottom:6px;border:1px solid var(--border)">
+        <span style="font-size:14px;font-weight:600">${e.nome}</span>
+        <button onclick="removerEquipeLado('${lado}','${e.id}')" style="background:none;border:none;cursor:pointer;color:#c44;font-size:18px;padding:0 4px">×</button>
+      </div>`).join('');
+    fillSelectArena(`add-eq-${lado}`);
+  });
+}
+
+window.adicionarEquipeLado=function(lado){
+  const sel=document.getElementById(`add-eq-${lado}`);
+  const id=sel.value;if(!id)return;
+  const eq=equipes.find(e=>e.id===id);if(!eq)return;
+  if(lado==='vermelho')eqsVermelho.push(eq);
+  else eqsAmarelo.push(eq);
+  renderLados();
+};
+
+window.removerEquipeLado=function(lado,id){
+  if(lado==='vermelho')eqsVermelho=eqsVermelho.filter(e=>e.id!==id);
+  else eqsAmarelo=eqsAmarelo.filter(e=>e.id!==id);
+  renderLados();
+};
+
+window.enviarArena=async function(){
+  const err=document.getElementById('arena-error');err.style.display='none';
+  const rodada=document.getElementById('arena-rodada').value;
+  if(!rodada){err.textContent='Selecione a rodada.';err.style.display='block';return;}
+  if(!eqsVermelho.length){err.textContent='Adicione ao menos uma equipe no lado Vermelho.';err.style.display='block';return;}
+  if(!eqsAmarelo.length){err.textContent='Adicione ao menos uma equipe no lado Amarelo.';err.style.display='block';return;}
+  const pecasV=parseInt(document.getElementById('pecas-vermelho').value)||0;
+  const pecasA=parseInt(document.getElementById('pecas-amarelo').value)||0;
+
+  // Arena do juiz
+  const juizes=await fbGet('juizes')||{};
+  const juiz=Object.values(juizes).find(j=>j.nome.toLowerCase()===me.toLowerCase());
+  const arenaNum=juiz?.arena||1;
+
+  const vencedor=pecasV>pecasA?'vermelho':pecasA>pecasV?'amarelo':'empate';
+
+  const btn=document.querySelector('#screen-arena .btn-primary');
+  btn.textContent='Enviando...';btn.disabled=true;
+  try{
+    await fbSet(`arena/rodada_${rodada}/arena_${arenaNum}`,{
+      rodada:parseInt(rodada),arena:arenaNum,
+      corArena:ARENAS[arenaNum-1].cor,
+      equipes_vermelho:eqsVermelho.map(e=>({id:e.id,nome:e.nome})),
+      equipes_amarelo:eqsAmarelo.map(e=>({id:e.id,nome:e.nome})),
+      pecas_vermelho:pecasV,pecas_amarelo:pecasA,
+      vencedor,juiz:me,timestamp:Date.now()
+    });
+    alert(`✅ Rodada registrada!\nArena ${arenaNum} — Rodada ${rodada}\n🔴 Vermelho: ${pecasV} peças\n🟡 Amarelo: ${pecasA} peças\nVencedor: ${vencedor==='empate'?'Empate':vencedor==='vermelho'?'🔴 Vermelho':'🟡 Amarelo'}`);
+    show('screen-menu');
+  }catch(e){err.textContent='Erro ao enviar. Tente novamente.';err.style.display='block';}
+  finally{btn.textContent='Confirmar e Enviar Rodada';btn.disabled=false;}
+};
+
+window.verMinhasRodadas=async function(){
+  show('screen-minhas-rodadas');
+  const ct=document.getElementById('minhas-rodadas-content');
+  ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
+  const data=await fbGet('arena')||{};
+  const minhas=[];
+  Object.entries(data).forEach(([rodKey,arenas])=>{
+    Object.entries(arenas||{}).forEach(([arKey,v])=>{
+      if(v.juiz===me)minhas.push(v);
+    });
+  });
+  minhas.sort((a,b)=>b.timestamp-a.timestamp);
+  if(!minhas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma rodada registrada.</p>';return;}
+  ct.innerHTML=`<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> rodada(s). Toque para expandir.</p>
+    <div id="cards-rodadas">`+
+  minhas.map((v,i)=>{
+    const arInfo=ARENAS[v.arena-1];
+    const venc=v.vencedor==='empate'?'🤝 Empate':v.vencedor==='vermelho'?'🔴 Vermelho venceu':'🟡 Amarelo venceu';
+    const uid=`rod-${v.arena}-${v.rodada}-${i}`;
+    return `
+    <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden" data-search="Arena ${v.arena} Rodada ${v.rodada}">
+      <div onclick="toggleCard('${uid}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
+        <div>
+          <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:15px">${arInfo.emoji} Arena ${v.arena} — ${arInfo.cor}</div>
+          <div style="font-size:12px;color:var(--text-muted)">Rodada ${v.rodada} · ${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-weight:700;font-size:14px;text-align:right">${venc}</div>
+          <div id="arrow-${uid}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
+        </div>
+      </div>
+      <div id="${uid}" style="display:none;padding:0 14px 14px;border-top:1px solid var(--border);background:#fafafa">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-top:12px">
+          <div style="background:#fdf5f5;border-radius:8px;padding:10px">
+            <div style="font-weight:700;color:#b94040;margin-bottom:4px">🔴 Vermelho — ${v.pecas_vermelho} peças</div>
+            <div style="color:var(--text-muted);font-size:12px">${(v.equipes_vermelho||[]).map(e=>e.nome).join(', ')}</div>
+          </div>
+          <div style="background:#fdf9ee;border-radius:8px;padding:10px">
+            <div style="font-weight:700;color:#b8860b;margin-bottom:4px">🟡 Amarelo — ${v.pecas_amarelo} peças</div>
+            <div style="color:var(--text-muted);font-size:12px">${(v.equipes_amarelo||[]).map(e=>e.nome).join(', ')}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+};
+
+// ═══════════════════════════════════════════════════════════════
+// TELÃO DA ARENA
+// ═══════════════════════════════════════════════════════════════
+let telaoTimer=null;
+
+window.abrirTelao=function(){show('screen-telao-arena');carregarTelao();telaoTimer=setInterval(carregarTelao,5000);};
+window.fecharTelao=function(){clearInterval(telaoTimer);show('screen-admin');};
+
+async function carregarTelao(){
+  const data=await fbGet('arena')||{};
+  // Encontrar a rodada mais recente com dados
+  const rodadas=Object.keys(data).map(k=>parseInt(k.replace('rodada_',''))).sort((a,b)=>b-a);
+  if(!rodadas.length){document.getElementById('telao-arena-body').innerHTML='<p style="text-align:center;opacity:0.4;padding:60px 0">Nenhuma rodada registrada ainda.</p>';return;}
+
+  const rodAtual=rodadas[0];
+  document.getElementById('telao-rodada-label').textContent=`Rodada ${rodAtual} — ao vivo`;
+  const arenas=data[`rodada_${rodAtual}`]||{};
+
+  const html=ARENAS.map(ar=>{
+    const v=arenas[`arena_${ar.num}`];
+    if(!v)return `
+      <div class="arena-card-telao" style="opacity:0.4">
+        <span class="arena-cor-badge" style="background:${ar.bg};color:${ar.clr}">${ar.emoji} Arena ${ar.num} — ${ar.cor}</span>
+        <div style="font-size:14px;opacity:0.5">Aguardando registro...</div>
+      </div>`;
+    const venc=v.vencedor==='empate'?'🤝 Empate':v.vencedor==='vermelho'?'🔴 Vermelho venceu!':'🟡 Amarelo venceu!';
+    return `
+      <div class="arena-card-telao">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span class="arena-cor-badge" style="background:${ar.bg};color:${ar.clr}">${ar.emoji} Arena ${ar.num} — ${ar.cor}</span>
+          <span style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:var(--caramelo)">${venc}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:rgba(185,64,64,0.15);border-radius:8px;padding:12px">
+            <div style="font-size:11px;text-transform:uppercase;opacity:0.7;margin-bottom:4px">🔴 Vermelho</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:#ff8080">${v.pecas_vermelho} <span style="font-size:14px;opacity:0.7">peças</span></div>
+            <div style="font-size:11px;opacity:0.6;margin-top:4px">${(v.equipes_vermelho||[]).map(e=>e.nome).join(' · ')}</div>
+          </div>
+          <div style="background:rgba(184,134,11,0.15);border-radius:8px;padding:12px">
+            <div style="font-size:11px;text-transform:uppercase;opacity:0.7;margin-bottom:4px">🟡 Amarelo</div>
+            <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:#ffd080">${v.pecas_amarelo} <span style="font-size:14px;opacity:0.7">peças</span></div>
+            <div style="font-size:11px;opacity:0.6;margin-top:4px">${(v.equipes_amarelo||[]).map(e=>e.nome).join(' · ')}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('telao-arena-body').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN: NOTAS DE ARENA
+// ═══════════════════════════════════════════════════════════════
+window.exportarCSV=async function(){
+  const btn=document.querySelector('[onclick="exportarCSV()"]');
+  if(btn){btn.textContent='⏳ Gerando...';btn.disabled=true;}
+  await loadEquipes();
+  const data=await fbGet('avaliacoes_sala')||{};
+
+  const CATS_EXP={
+    challenge:'Challenge Solution',
+    corevalues:'Core Values',
+    teammodel:'Team Model',
+    coding:'Coding',
+    poster:'Team Poster'
+  };
+  const avg=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
+
+  // Calcular médias por equipe para o CSV de ranking
+  const salaMap={};
+  Object.values(data).forEach(v=>{
+    if(!salaMap[v.equipeId])salaMap[v.equipeId]={notas:[],indicacoes:0,cats:{challenge:[],corevalues:[],teammodel:[],coding:[],poster:[]}};
+    salaMap[v.equipeId].notas.push(v.total);
+    if(v.indicacao)salaMap[v.equipeId].indicacoes++;
+    const n=v.notas||{};
+    salaMap[v.equipeId].cats.challenge.push((n.ch_aprendeu?.valor||0)+(n.ch_impacto?.valor||0));
+    salaMap[v.equipeId].cats.corevalues.push((n.cv_usou?.valor||0)+(n.cv_habilidades?.valor||0));
+    salaMap[v.equipeId].cats.teammodel.push((n.tm_descricao?.valor||0)+(n.tm_exploreset?.valor||0));
+    salaMap[v.equipeId].cats.coding.push((n.co_motorizado?.valor||0)+(n.co_programou?.valor||0));
+    salaMap[v.equipeId].cats.poster.push((n.po_incluiu?.valor||0)+(n.po_jornada?.valor||0));
   });
 
-  const sorted=Object.values(aliancas).sort((a,b)=>b.pts-a.pts);
-  const lista=document.getElementById('telao-lista');if(!lista)return;
-  tRows=sorted.length;
-  lista.innerHTML=sorted.length?sorted.map((a,i)=>`
-    <div class="telao-row">
-      <div class="telao-pos">${i+1}</div>
-      <div>
-        <div class="telao-equipe">${a.nomeA} <span style="opacity:0.5;font-size:16px">+</span> ${a.nomeB}</div>
-      </div>
-      <div><div class="telao-col-label">Rodadas</div><div class="telao-col-val">${a.rodadas}</div></div>
-      <div><div class="telao-col-label">Pontos</div><div class="telao-col-val">${a.pts}</div></div>
-      <div class="telao-total">${a.pts} pts</div>
-    </div>`).join('')
-  :'<p style="color:rgba(255,255,255,0.4);text-align:center;padding:40px">Aguardando rodadas...</p>';
-}
+  // ── ABA 1: Avaliações detalhadas ──
+  const cab1=[
+    'Equipe','Escola','Juiz','Data/Hora',
+    ...TODOS_CRIT.flatMap(cr=>[`${cr.label} (nota)`,`${cr.label} (comentário)`]),
+    'Total (0-40)','Indicação próxima fase','Feedback positivo','Feedback melhoria'
+  ];
+  const linhas=[cab1];
+  Object.values(data).sort((a,b)=>a.equipeId.localeCompare(b.equipeId)).forEach(v=>{
+    const eq=equipes.find(e=>e.id===v.equipeId);
+    const n=v.notas||{};
+    linhas.push([
+      eq?eq.nome:v.equipeId, eq?.escola||'',
+      v.juiz, new Date(v.timestamp).toLocaleString('pt-BR'),
+      ...TODOS_CRIT.flatMap(cr=>[n[cr.id]?.valor??'', n[cr.id]?.comentario??'']),
+      v.total??'', v.indicacao?'Sim':'Não',
+      v.feedbackPositivo||'', v.feedbackMelhoria||''
+    ]);
+  });
 
-// Inicia a rolagem automática do telão em blocos de 5 linhas
-function startScroll() {
-  const body=document.querySelector('.telao-body');if(!body)return;
-  const rowH=66; // altura de cada linha da aliança (maior por ter 2 nomes)
-  const vis=Math.floor((body.clientHeight-50)/rowH);
-  const bloco=5; // pula 5 linhas por vez
-  tOff=0;
-  clearInterval(sInt);
-  sInt=setInterval(()=>{
-    if(tRows<=vis)return;
-    const lista=document.getElementById('telao-lista');if(!lista)return;
-    tOff+=bloco;
-    if(tOff>=tRows){
-      // volta ao topo suavemente
-      setTimeout(()=>{
-        lista.style.transition='none';
-        lista.style.transform='translateY(0)';
-        tOff=0;
-        setTimeout(()=>lista.style.transition='transform 0.5s ease',50);
-      },600);
-      return;
-    }
-    lista.style.transform=`translateY(-${tOff*rowH}px)`;
-  },vel);
-}
+  // Linha em branco + separador
+  linhas.push([]);
+  linhas.push(['=== RANKING FINAL ===']);
+  linhas.push([]);
 
-// Inicializa o telão: busca dados, inicia rolagem e agenda atualização a cada 10s
-function startTelao() {
-  tOff=0;clearInterval(tInt);clearInterval(sInt);
-  const lista=document.getElementById('telao-lista');
-  if(lista){lista.style.transform='translateY(0)';lista.style.transition='transform 0.6s ease';}
-  updTelao().then(startScroll);
-  tInt=setInterval(updTelao,10000);
-}
+  // ── ABA 2: Ranking com categorias ──
+  const cab2=['#','Equipe','Escola','Nº Avaliações','Média Total (0-40)',
+    'Challenge Solution (0-8)','Core Values (0-8)','Team Model (0-8)',
+    'Coding (0-8)','Team Poster (0-8)',
+    'Prêmio de Categoria','Indicações'];
+  linhas.push(cab2);
 
-// Inicia o sistema — esta linha dispara tudo quando a página carrega
+  const ranking=equipes.map(e=>{
+    const sd=salaMap[e.id];if(!sd)return null;
+    const media=avg(sd.notas);
+    const cats={
+      challenge:avg(sd.cats.challenge),
+      corevalues:avg(sd.cats.corevalues),
+      teammodel:avg(sd.cats.teammodel),
+      coding:avg(sd.cats.coding),
+      poster:avg(sd.cats.poster)
+    };
+    const premioCat=Object.keys(CATS_EXP).sort((a,b)=>cats[b]-cats[a])[0];
+    return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes,cats,premioCat};
+  }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
+
+  ranking.forEach((e,i)=>{
+    linhas.push([
+      i+1, e.nome, e.escola||'', e.avaliacoes,
+      e.media.toFixed(2),
+      e.cats.challenge.toFixed(2),
+      e.cats.corevalues.toFixed(2),
+      e.cats.teammodel.toFixed(2),
+      e.cats.coding.toFixed(2),
+      e.cats.poster.toFixed(2),
+      CATS_EXP[e.premioCat]||'',
+      e.indicacoes
+    ]);
+  });
+
+  const bom='\uFEFF';
+  const csv=bom+linhas.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`TPR_Explore_2026_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  if(btn){btn.textContent='⬇ Exportar CSV';btn.disabled=false;}
+};
+
 init();
 </script>
 </body>

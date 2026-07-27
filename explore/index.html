@@ -294,7 +294,7 @@ tr:hover td{background:var(--bege);}
       </div>
       <div class="form-group" style="margin:0">
         <label>Peças transportadas</label>
-        <input type="number" id="pecas-vermelho" min="0" placeholder="0" style="font-size:28px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:12px">
+        <input type="number" id="pecas-vermelho" min="0" max="4" placeholder="0" style="font-size:28px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:12px" oninput="if(parseInt(this.value)>4)this.value=4;if(parseInt(this.value)<0)this.value=0">
       </div>
     </div>
 
@@ -309,7 +309,37 @@ tr:hover td{background:var(--bege);}
       </div>
       <div class="form-group" style="margin:0">
         <label>Peças transportadas</label>
-        <input type="number" id="pecas-amarelo" min="0" placeholder="0" style="font-size:28px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:12px">
+        <input type="number" id="pecas-amarelo" min="0" max="4" placeholder="0" style="font-size:28px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:12px" oninput="if(parseInt(this.value)>4)this.value=4;if(parseInt(this.value)<0)this.value=0">
+      </div>
+    </div>
+
+    <!-- CRONÔMETRO DA RODADA -->
+    <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bege)">
+      <p style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--marrom);font-family:'Nunito',sans-serif">⏱️ Cronômetro da rodada (máx. 3:00)</p>
+      <div style="text-align:center;margin-bottom:16px">
+        <div id="cronometro-display" style="font-family:'Nunito',sans-serif;font-size:52px;font-weight:900;color:var(--marrom);letter-spacing:1px;line-height:1">0:00.000</div>
+        <div style="display:flex;justify-content:center;gap:10px;margin-top:12px">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-cron-play" onclick="cronPlay()">▶ Iniciar</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-cron-pause" onclick="cronPause()" style="display:none">⏸ Pausar</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="cronZerar()">⏹ Zerar</button>
+        </div>
+      </div>
+      <p class="text-muted" style="font-size:11px;text-align:center;margin-bottom:10px">Ou preencha manualmente, se preferir:</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+        <div style="text-align:center">
+          <input type="number" id="tempo-min" min="0" max="3" placeholder="0" style="width:60px;font-size:26px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">min</div>
+        </div>
+        <div style="font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;color:var(--marrom);margin-bottom:14px">:</div>
+        <div style="text-align:center">
+          <input type="number" id="tempo-seg" min="0" max="59" placeholder="00" style="width:60px;font-size:26px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">seg</div>
+        </div>
+        <div style="font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;color:var(--marrom);margin-bottom:14px">.</div>
+        <div style="text-align:center">
+          <input type="number" id="tempo-ms" min="0" max="999" placeholder="000" style="width:70px;font-size:26px;font-family:'Nunito',sans-serif;font-weight:900;text-align:center;padding:8px 4px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:2px">ms</div>
+        </div>
       </div>
     </div>
 
@@ -1222,6 +1252,7 @@ window.irParaArena=async function(){
   fillSelectArena('add-eq-amarelo');
   document.getElementById('pecas-vermelho').value='';
   document.getElementById('pecas-amarelo').value='';
+  cronZerar();
   document.getElementById('arena-rodada').value='';
   document.getElementById('arena-error').style.display='none';
   show('screen-arena');
@@ -1265,6 +1296,78 @@ window.removerEquipeLado=function(lado,id){
   renderLados();
 };
 
+// ── CRONÔMETRO DA RODADA ──
+const CRON_LIMITE_MS = 180000; // 3:00.000
+let cronMsAcumulado = 0;
+let cronInicioTs = null;
+let cronIntervalo = null;
+let cronRodando = false;
+
+function cronMsAtual() {
+  if (!cronRodando) return cronMsAcumulado;
+  return cronMsAcumulado + (Date.now() - cronInicioTs);
+}
+
+function cronAtualizarDisplay() {
+  let totalMs = cronMsAtual();
+  if (totalMs > CRON_LIMITE_MS) totalMs = CRON_LIMITE_MS;
+  const min = Math.floor(totalMs / 60000);
+  const seg = Math.floor((totalMs % 60000) / 1000);
+  const ms = totalMs % 1000;
+  const el = document.getElementById('cronometro-display');
+  if(el) el.textContent = `${min}:${String(seg).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
+  const elMin = document.getElementById('tempo-min');
+  const elSeg = document.getElementById('tempo-seg');
+  const elMs  = document.getElementById('tempo-ms');
+  if(elMin) elMin.value = min;
+  if(elSeg) elSeg.value = String(seg).padStart(2,'0');
+  if(elMs)  elMs.value  = String(ms).padStart(3,'0');
+}
+
+window.cronPlay = function() {
+  if (cronRodando) return;
+  cronRodando = true;
+  cronInicioTs = Date.now();
+  const play  = document.getElementById('btn-cron-play');
+  const pause = document.getElementById('btn-cron-pause');
+  if(play)  play.style.display  = 'none';
+  if(pause) pause.style.display = 'inline-block';
+  cronIntervalo = setInterval(() => {
+    if (cronMsAtual() >= CRON_LIMITE_MS) {
+      cronMsAcumulado = CRON_LIMITE_MS;
+      cronAtualizarDisplay();
+      cronPause();
+      alert('⏱️ Tempo máximo de 3 minutos atingido! Contabilize as peças agora.');
+      return;
+    }
+    cronAtualizarDisplay();
+  }, 47);
+};
+
+window.cronPause = function() {
+  if (cronRodando) cronMsAcumulado = cronMsAtual();
+  cronRodando = false;
+  clearInterval(cronIntervalo);
+  const play  = document.getElementById('btn-cron-play');
+  const pause = document.getElementById('btn-cron-pause');
+  if(play)  play.style.display  = 'inline-block';
+  if(pause) pause.style.display = 'none';
+};
+
+window.cronZerar = function() {
+  cronPause();
+  cronMsAcumulado = 0;
+  cronAtualizarDisplay();
+};
+
+function cronObterTempo() {
+  const min = parseInt(document.getElementById('tempo-min')?.value) || 0;
+  const seg = parseInt(document.getElementById('tempo-seg')?.value) || 0;
+  const ms  = parseInt(document.getElementById('tempo-ms')?.value)  || 0;
+  if(min===0&&seg===0&&ms===0) return null;
+  return `${min}:${String(seg).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
+}
+
 window.enviarArena=async function(){
   const err=document.getElementById('arena-error');err.style.display='none';
   const rodada=document.getElementById('arena-rodada').value;
@@ -1280,6 +1383,7 @@ window.enviarArena=async function(){
   const arenaNum=juiz?.arena||1;
 
   const vencedor=pecasV>pecasA?'vermelho':pecasA>pecasV?'amarelo':'empate';
+  const tempo=cronObterTempo();
 
   const btn=document.querySelector('#screen-arena .btn-primary');
   btn.textContent='Enviando...';btn.disabled=true;
@@ -1290,7 +1394,7 @@ window.enviarArena=async function(){
       equipes_vermelho:eqsVermelho.map(e=>({id:e.id,nome:e.nome})),
       equipes_amarelo:eqsAmarelo.map(e=>({id:e.id,nome:e.nome})),
       pecas_vermelho:pecasV,pecas_amarelo:pecasA,
-      vencedor,juiz:me,timestamp:Date.now()
+      vencedor,tempo:tempo||null,juiz:me,timestamp:Date.now()
     });
     alert(`✅ Rodada registrada!\nArena ${arenaNum} — Rodada ${rodada}\n🔴 Vermelho: ${pecasV} peças\n🟡 Amarelo: ${pecasA} peças\nVencedor: ${vencedor==='empate'?'Empate':vencedor==='vermelho'?'🔴 Vermelho':'🟡 Amarelo'}`);
     show('screen-menu');

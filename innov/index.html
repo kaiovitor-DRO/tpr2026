@@ -47,8 +47,6 @@
   .login-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; display: inline-block; margin: 0 3px; animation: pulse 1.5s ease-in-out infinite; }
   .login-logo-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4);opacity:0.7} }
-  .btn-telao-direto { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); color: white; padding: 12px 28px; border-radius: 10px; cursor: pointer; font-size: 15px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; width: 100%; max-width: 400px; }
-  .btn-telao-direto:hover { background: rgba(255,255,255,0.25); }
   .form-group { margin-bottom: 18px; }
   label { display: block; font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
   input:not([type=checkbox]), select, textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'Barlow', sans-serif; font-size: 15px; color: var(--text); background: white; transition: border-color 0.2s; appearance: none; }
@@ -192,7 +190,6 @@
     <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
     <p class="text-muted mt-12" style="text-align:center;font-size:12px">Sessão expira após 30 min de inatividade</p>
   </div>
-  <button class="btn-telao-direto" onclick="irParaTelao()">📺 Ver Telão — sem login</button>
   <p style="color:rgba(255,255,255,0.45);font-size:11px;text-align:center;margin-top:8px;line-height:1.6;max-width:400px;padding:0 16px">
     TPR Innov 2026 · Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
   </p>
@@ -583,6 +580,15 @@ window.toggleSenha = function(id,btn) {
 // que as configurações de senha existam no Firebase.
 // ═══════════════════════════════════════════════════════════════
 async function init() {
+  // Acesso público direto ao Telão via URL (ex: ?telao=1), sem exigir login.
+  // Usado pelo botão "Placar da Arena" na página inicial do torneio.
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('telao') === '1') {
+    irParaTelao();
+    const cfg = await fbGet('config');
+    if(!cfg) await fbSet('config',{senha_evento:'tpr2026',senha_admin:'admin2026'});
+    return;
+  }
   show('screen-login');
   const cfg = await fbGet('config');
   if(!cfg) await fbSet('config',{senha_evento:'tpr2026',senha_admin:'admin2026'});
@@ -1702,6 +1708,9 @@ window.irParaTelao = function() { show('screen-telao');startTelao(); };
 window.voltarDoTelao = function() {
   clearInterval(tInt);clearInterval(sInt);
   if(me) show(perfil==='admin'?'screen-admin':'screen-menu');
+  else if (new URLSearchParams(window.location.search).get('telao') === '1') {
+    window.location.href = 'https://tprjp.com.br/';
+  }
   else show('screen-login');
 };
 // Altera a velocidade de rolagem do telão (Lento/Normal/Rápido)

@@ -367,19 +367,19 @@ tr:hover td{background:var(--bege);}
         <div style="font-size:12px;opacity:0.6" id="telao-rodada-label">Aguardando rodada...</div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span><span class="live-dot"></span><span style="font-size:12px;opacity:0.7">AO VIVO</span></span>
-      <select id="telao-rodada-sel" onchange="telaoRodadaSel=parseInt(this.value)||null;carregarTelao()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 10px;border-radius:6px;font-size:13px;cursor:pointer">
-        <option value="">Rodada atual</option>
-        <option value="1">Rodada 1</option>
-        <option value="2">Rodada 2</option>
-        <option value="3">Rodada 3</option>
-        <option value="4">Rodada 4</option>
-        <option value="5">Rodada 5</option>
-        <option value="6">Rodada 6</option>
-        <option value="7">Rodada 7</option>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap">
+      <span style="display:flex;align-items:center;gap:4px;white-space:nowrap"><span class="live-dot"></span><span style="font-size:12px;opacity:0.7">AO VIVO</span></span>
+      <select id="telao-rodada-sel" onchange="telaoRodadaSel=parseInt(this.value)||null;carregarTelao()" style="background:#3a302b;border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 10px;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap">
+        <option value="" style="background:#3a302b;color:white">Rodada atual</option>
+        <option value="1" style="background:#3a302b;color:white">Rodada 1</option>
+        <option value="2" style="background:#3a302b;color:white">Rodada 2</option>
+        <option value="3" style="background:#3a302b;color:white">Rodada 3</option>
+        <option value="4" style="background:#3a302b;color:white">Rodada 4</option>
+        <option value="5" style="background:#3a302b;color:white">Rodada 5</option>
+        <option value="6" style="background:#3a302b;color:white">Rodada 6</option>
+        <option value="7" style="background:#3a302b;color:white">Rodada 7</option>
       </select>
-      <button onclick="fecharTelao()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px">✕ Fechar</button>
+      <button onclick="fecharTelao()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap">✕ Fechar</button>
     </div>
   </div>
   <div class="telao-arena-body" id="telao-arena-body">

@@ -316,13 +316,9 @@
   <div class="card">
     <div class="card-title">Registro de Missões</div>
     <div class="chips" id="arena-chips"></div>
-    <p class="text-muted" style="margin-bottom:16px;font-size:13px">Toque na missão para marcar como concluída.</p>
-    <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div><div id="missoes-a"></div></div>
-    <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div><div id="missoes-b"></div></div>
-    <div class="total-pts"><div class="num" id="arena-total">0</div><div class="label">pontos da aliança (máx. 100)</div></div>
 
     <!-- TEMPO DA RODADA -->
-    <div style="margin-top:20px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
+    <div style="margin-top:4px;padding:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:#f8faff">
       <p style="font-weight:600;font-size:14px;margin-bottom:12px;color:var(--text)">⏱️ Tempo gasto na rodada</p>
 
       <!-- CRONÔMETRO: play/pause/zerar. Preenche automaticamente os campos min/seg/ms abaixo. -->
@@ -353,6 +349,11 @@
         </div>
       </div>
     </div>
+
+    <p class="text-muted" style="margin:16px 0;font-size:13px">Depois que o tempo acabar, revise com a equipe e toque na missão para marcar como concluída.</p>
+    <div class="robo-a missao-group"><div class="missao-group-title">🔴 Robô A</div><div id="missoes-a"></div></div>
+    <div class="robo-b missao-group"><div class="missao-group-title">🔵 Robô B</div><div id="missoes-b"></div></div>
+    <div class="total-pts"><div class="num" id="arena-total">0</div><div class="label">pontos da aliança (máx. 100)</div></div>
 
     <!-- VALORES NA RODADA -->
     <div style="margin-top:20px">
@@ -1280,7 +1281,7 @@ window.irAdmin = async function(sub) {
       <p style="font-weight:600;margin-bottom:12px">Cadastrar novo usuário</p>
       <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
       <div class="form-group"><label>Perfil</label><select id="nj-perfil"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option><option value="visualizador">Visualizador (somente leitura)</option></select></div>
-      <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
+      <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Usuário</button>
       <div class="divider"></div>
       <p style="font-weight:600;margin:16px 0 12px">Importar via CSV</p>
       ${csvUI('juiz')}`}`;
@@ -1549,7 +1550,7 @@ window.addJuiz = async function() {
   const n=document.getElementById('nj-nome').value.trim();
   const p=document.getElementById('nj-perfil').value;
   if(!n){alert('Digite o nome.');return;}
-  await fbPush('juizes',{nome:n,perfil:p});alert('Juiz cadastrado!');irAdmin('juizes');
+  await fbPush('juizes',{nome:n,perfil:p});alert('Usuário cadastrado!');irAdmin('juizes');
 };
 // Remove um juiz do Firebase pelo ID
 window.remJuiz = async function(id) { if(bloquearSeLeitura())return; if(!confirm('Remover?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes'); };

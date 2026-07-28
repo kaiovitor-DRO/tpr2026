@@ -526,6 +526,13 @@ window.toggleSenha=function(id,btn){
 // INIT
 // ═══════════════════════════════════════════════════════════════
 async function init(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('telao')==='1'){
+    abrirTelao();
+    const cfg=await fbGet('config');
+    if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026'});
+    return;
+  }
   show('screen-login');
   const cfg=await fbGet('config');
   if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026'});
@@ -1483,7 +1490,13 @@ window.fecharTelao=function(){
   clearInterval(telaoTimer);
   document.getElementById('screen-telao-arena').style.display='none';
   document.getElementById('app-header').style.display='block';
-  show('screen-admin');
+  if(me){
+    show('screen-admin');
+  } else if(new URLSearchParams(window.location.search).get('telao')==='1'){
+    window.location.href='https://tprjp.com.br/';
+  } else {
+    show('screen-login');
+  }
 };
 
 async function carregarTelao(){

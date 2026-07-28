@@ -538,12 +538,13 @@ document.addEventListener('keydown',resetInact);
 // NAVEGAÇÃO
 // ═══════════════════════════════════════════════════════════════
 function show(id){
-  document.querySelectorAll('.screen,.login-wrap').forEach(el=>{
+  document.querySelectorAll('.screen,.telao-arena,.login-wrap').forEach(el=>{
     el.classList.remove('active');
-    if(el.classList.contains('login-wrap'))el.style.display='none';
+    if(el.classList.contains('telao-arena')||el.classList.contains('login-wrap'))el.style.display='none';
   });
   const el=document.getElementById(id);
-  if(el.classList.contains('login-wrap'))el.style.display='flex';
+  if(el.classList.contains('telao-arena'))el.style.display='block';
+  else if(el.classList.contains('login-wrap'))el.style.display='flex';
   else el.classList.add('active');
 }
 window.voltar=show;
@@ -559,7 +560,11 @@ window.toggleSenha=function(id,btn){
 async function init(){
   const params=new URLSearchParams(window.location.search);
   if(params.get('telao')==='1'){
-    abrirTelao();
+    // Acesso público direto ao telão — sem login
+    document.getElementById('app-header').style.display='none';
+    show('screen-telao-arena');
+    carregarTelao();
+    telaoTimer=setInterval(carregarTelao,5000);
     const cfg=await fbGet('config');
     if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026'});
     return;
@@ -1513,25 +1518,17 @@ let telaoTimer=null;
 let telaoRodadaSel=null; // null = automático (rodada mais recente)
 
 window.abrirTelao=function(){
-  // Esconde tudo e mostra só o telão
-  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
   document.getElementById('app-header').style.display='none';
-  const tel=document.getElementById('screen-telao-arena');
-  tel.style.display='block';
+  show('screen-telao-arena');
   carregarTelao();
   telaoTimer=setInterval(carregarTelao,5000);
 };
 window.fecharTelao=function(){
   clearInterval(telaoTimer);
-  document.getElementById('screen-telao-arena').style.display='none';
-  // Só mostra header se estiver logado
   if(me){
     document.getElementById('app-header').style.display='block';
-    if(perfil==='admin'){
-      show('screen-admin');
-    } else {
-      show('screen-menu');
-    }
+    if(perfil==='admin') show('screen-admin');
+    else show('screen-menu');
   } else if(new URLSearchParams(window.location.search).get('telao')==='1'){
     window.location.href='https://tprjp.com.br/';
   } else {

@@ -159,6 +159,8 @@ tr:hover td{background:var(--bege);}
     </div>
     <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
     <p class="text-muted mt-12" style="text-align:center;font-size:11px">Sessão expira após 30 min de inatividade</p>
+    <div class="divider" style="margin:16px 0"></div>
+    <button class="btn btn-secondary" onclick="abrirTelao()" style="font-size:14px">📺 Ver Painel do Telão</button>
   </div>
   <p style="color:rgba(255,255,255,0.65);font-size:11px;text-align:center;margin-top:4px;line-height:1.7;max-width:400px;padding:0 16px;position:relative;z-index:1">
     Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
@@ -195,7 +197,8 @@ tr:hover td{background:var(--bege);}
     </div>
     <div id="menu-arena" style="display:none">
       <button class="btn btn-primary" style="margin-bottom:12px" onclick="irParaArena()">🏟️ Registrar Rodada de Arena</button>
-      <button class="btn btn-secondary" onclick="verMinhasRodadas()">📊 Ver rodadas registradas</button>
+      <button class="btn btn-secondary" style="margin-bottom:12px" onclick="verMinhasRodadas()">📊 Ver rodadas registradas</button>
+      <button class="btn btn-secondary" onclick="abrirTelao()">📺 Ver Painel do Telão</button>
     </div>
   </div>
 </div>
@@ -948,7 +951,7 @@ window.irAdmin=async function(sub){
     if(!todas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma rodada registrada.</p>';return;}
     const rows=todas.map(v=>{
       const ar=ARENAS[v.arena-1];
-      const venc=v.vencedor==='empate'?'🤝 Empate':v.vencedor==='vermelho'?'🔴 Vermelho':'🟡 Amarelo';
+      const total=(v.total_pecas!=null)?v.total_pecas:((v.pecas_vermelho||0)+(v.pecas_amarelo||0));
       return `<tr>
         <td style="font-weight:700">Rodada ${v.rodada}</td>
         <td>${ar.emoji} Arena ${v.arena} — ${ar.cor}</td>
@@ -956,14 +959,14 @@ window.irAdmin=async function(sub){
           <div style="color:#b94040;font-weight:600">🔴 ${v.pecas_vermelho}p — ${(v.equipes_vermelho||[]).map(e=>e.nome).join(', ')}</div>
           <div style="color:#b8860b;font-weight:600">🟡 ${v.pecas_amarelo}p — ${(v.equipes_amarelo||[]).map(e=>e.nome).join(', ')}</div>
         </td>
-        <td style="font-weight:700">${venc}</td>
+        <td style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--marrom)">🤝 ${total}p</td>
         <td style="font-size:12px;color:var(--text-muted);font-family:'Nunito',sans-serif;font-weight:700">⏱️ ${v.tempo||'—'}</td>
         <td style="font-size:12px;color:var(--text-muted)">${v.juiz}</td>
         <td><button class="btn btn-danger btn-sm" onclick="delArena(${v.rodada},${v.arena})">Apagar</button></td>
       </tr>`;
     }).join('');
     ct.innerHTML=btnApagar+`<div class="table-wrap"><table>
-      <tr><th>Rodada</th><th>Arena</th><th>Equipes e Peças</th><th>Vencedor</th><th>Tempo</th><th>Juiz</th><th>Ação</th></tr>
+      <tr><th>Rodada</th><th>Arena</th><th>Equipes e Peças</th><th>Total Aliança</th><th>Tempo</th><th>Juiz</th><th>Ação</th></tr>
       ${rows}
     </table></div>`;
   }
@@ -1400,7 +1403,7 @@ window.enviarArena=async function(){
   const juiz=Object.values(juizes).find(j=>j.nome.toLowerCase()===me.toLowerCase());
   const arenaNum=juiz?.arena||1;
 
-  const vencedor=pecasV>pecasA?'vermelho':pecasA>pecasV?'amarelo':'empate';
+  const totalPecas=pecasV+pecasA;
   const tempo=cronObterTempo();
 
   const btn=document.querySelector('#screen-arena .btn-primary');
@@ -1412,9 +1415,10 @@ window.enviarArena=async function(){
       equipes_vermelho:eqsVermelho.map(e=>({id:e.id,nome:e.nome})),
       equipes_amarelo:eqsAmarelo.map(e=>({id:e.id,nome:e.nome})),
       pecas_vermelho:pecasV,pecas_amarelo:pecasA,
-      vencedor,tempo:tempo||null,juiz:me,timestamp:Date.now()
+      total_pecas:totalPecas,
+      tempo:tempo||null,juiz:me,timestamp:Date.now()
     });
-    alert(`✅ Rodada registrada!\nArena ${arenaNum} — Rodada ${rodada}\n🔴 Vermelho: ${pecasV} peças\n🟡 Amarelo: ${pecasA} peças\nVencedor: ${vencedor==='empate'?'Empate':vencedor==='vermelho'?'🔴 Vermelho':'🟡 Amarelo'}`);
+    alert(`✅ Rodada registrada!\nArena ${arenaNum} — Rodada ${rodada}\n🔴 Vermelho: ${pecasV} peças\n🟡 Amarelo: ${pecasA} peças\n🤝 Total da aliança: ${totalPecas} peças`);
     show('screen-menu');
   }catch(e){err.textContent='Erro ao enviar. Tente novamente.';err.style.display='block';}
   finally{btn.textContent='Confirmar e Enviar Rodada';btn.disabled=false;}
@@ -1447,7 +1451,10 @@ window.verMinhasRodadas=async function(){
           <div style="font-size:12px;color:var(--text-muted)">Rodada ${v.rodada} · ${new Date(v.timestamp).toLocaleTimeString('pt-BR')}</div>
         </div>
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="font-weight:700;font-size:14px;text-align:right">${venc}</div>
+          <div style="text-align:right">
+            <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--marrom)">${(v.total_pecas!=null?v.total_pecas:(v.pecas_vermelho||0)+(v.pecas_amarelo||0))} peças</div>
+            <div style="font-size:11px;color:var(--text-muted)">🤝 total da aliança</div>
+          </div>
           <div id="arrow-${uid}" style="font-size:18px;color:var(--text-muted);transition:transform 0.2s">▼</div>
         </div>
       </div>
@@ -1529,12 +1536,12 @@ async function carregarTelao(){
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div style="background:rgba(185,64,64,0.15);border-radius:8px;padding:12px">
-            <div style="font-size:11px;text-transform:uppercase;opacity:0.7;margin-bottom:4px">🔴 Vermelho</div>
+            <div style="font-size:11px;text-transform:uppercase;opacity:0.7;margin-bottom:4px">🔴 Base Vermelha</div>
             <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:#ff8080">${v.pecas_vermelho} <span style="font-size:14px;opacity:0.7">peças</span></div>
             <div style="font-size:11px;opacity:0.6;margin-top:4px">${(v.equipes_vermelho||[]).map(e=>e.nome).join(' · ')}</div>
           </div>
           <div style="background:rgba(184,134,11,0.15);border-radius:8px;padding:12px">
-            <div style="font-size:11px;text-transform:uppercase;opacity:0.7;margin-bottom:4px">🟡 Amarelo</div>
+            <div style="font-size:11px;text-transform:uppercase;opacity:0.7;margin-bottom:4px">🟡 Base Amarela</div>
             <div style="font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;color:#ffd080">${v.pecas_amarelo} <span style="font-size:14px;opacity:0.7">peças</span></div>
             <div style="font-size:11px;opacity:0.6;margin-top:4px">${(v.equipes_amarelo||[]).map(e=>e.nome).join(' · ')}</div>
           </div>

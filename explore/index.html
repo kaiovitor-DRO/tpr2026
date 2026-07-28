@@ -424,7 +424,7 @@ tr:hover td{background:var(--bege);}
     <div class="admin-grid">
       <div class="admin-tile" onclick="irAdmin('juizes')">
         <div class="admin-tile-icon">👥</div>
-        <div class="admin-tile-title">Gerenciar Juízes</div>
+        <div class="admin-tile-title">Gerenciar Usuários</div>
         <div class="admin-tile-desc">Cadastrar, importar CSV e remover</div>
       </div>
       <div class="admin-tile" onclick="irAdmin('equipes')">
@@ -437,7 +437,7 @@ tr:hover td{background:var(--bege);}
         <div class="admin-tile-title">Notas de Sala</div>
         <div class="admin-tile-desc">Ver, editar e apagar avaliações</div>
       </div>
-      <div class="admin-tile" onclick="irAdmin('senha')">
+      <div class="admin-tile" id="tile-senha" onclick="irAdmin('senha')">
         <div class="admin-tile-icon">🔑</div>
         <div class="admin-tile-title">Alterar Senhas</div>
         <div class="admin-tile-desc">Senha do evento e do admin</div>
@@ -566,12 +566,12 @@ async function init(){
     carregarTelao();
     telaoTimer=setInterval(carregarTelao,5000);
     const cfg=await fbGet('config');
-    if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026'});
+    if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026',senha_visualizador:'visualizador2026'});
     return;
   }
   show('screen-login');
   const cfg=await fbGet('config');
-  if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026'});
+  if(!cfg)await fbSet('config',{senha_evento:'explore2026',senha_admin:'admin2026',senha_visualizador:'visualizador2026'});
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -589,13 +589,13 @@ window.fazerLogin=async function(){
     const cfg=await fbGet('config');
     if(!cfg){err.textContent='Erro ao conectar.';err.style.display='block';return;}
     if(nome.toLowerCase()==='admin'&&senha===cfg.senha_admin){me='admin';perfil='admin';entrar();return;}
-    if(senha!==cfg.senha_evento){err.textContent='Senha incorreta.';err.style.display='block';return;}
     const juizes=await fbGet('juizes')||{};
     const found=Object.entries(juizes).find(([k,v])=>v.nome.toLowerCase()===nome.toLowerCase());
-    if(!found){err.textContent='Juiz não encontrado. Contate o admin.';err.style.display='block';return;}
-    me=found[1].nome;
-    perfil=found[1].perfil||'sala'; // lê o perfil real do Firebase
-    entrar();
+    if(!found){err.textContent='Usuário não encontrado. Contate o admin.';err.style.display='block';return;}
+    const perfilEncontrado=found[1].perfil||'sala';
+    const senhaEsperada=perfilEncontrado==='visualizador'?cfg.senha_visualizador:cfg.senha_evento;
+    if(senha!==senhaEsperada){err.textContent='Senha incorreta.';err.style.display='block';return;}
+    me=found[1].nome;perfil=perfilEncontrado;entrar();
   }catch(e){err.textContent='Erro de conexão.';err.style.display='block';}
   finally{btn.textContent='ENTRAR';btn.disabled=false;}
 };
@@ -604,8 +604,15 @@ function entrar(){
   document.getElementById('app-header').style.display='block';
   document.getElementById('header-nome').textContent=me;
   const b=document.getElementById('header-badge');
+  const tileSenha=document.getElementById('tile-senha');
   if(perfil==='admin'){
-    b.textContent='Admin';b.className='badge badge-admin';show('screen-admin');
+    b.textContent='Admin';b.className='badge badge-admin';
+    if(tileSenha)tileSenha.style.display='';
+    show('screen-admin');
+  } else if(perfil==='visualizador'){
+    b.textContent='Visualizador';b.className='badge badge-sala';
+    if(tileSenha)tileSenha.style.display='none';
+    show('screen-admin');
   } else {
     b.textContent=perfil==='arena'?'Juiz de Arena':'Juiz de Sala';
     b.className=perfil==='arena'?'badge badge-arena':'badge badge-sala';
@@ -806,6 +813,7 @@ function csvUI(tipo) {
 
 let csvPendente={};
 window.importCSV=function(input,tipo){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
@@ -878,7 +886,7 @@ window.irAdmin=async function(sub){
   ct.innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
 
   if(sub==='juizes'){
-    title.textContent='Gerenciar Juízes';
+    title.textContent='Gerenciar Usuários';
     const d=await fbGet('juizes')||{};
     const rows=Object.entries(d).sort((a,b)=>a[1].nome.localeCompare(b[1].nome))
       .map(([k,v])=>{
@@ -886,13 +894,13 @@ window.irAdmin=async function(sub){
         const arInfo=isArena&&v.arena?ARENAS[v.arena-1]:null;
         const perfilLabel=isArena
           ?`🏟️ Juiz de Arena${arInfo?' — Arena '+v.arena+' '+arInfo.emoji+' '+arInfo.cor:''}`
-          :'📋 Juiz de Sala';
+          :v.perfil==='visualizador'?'👁️ Visualizador':'📋 Juiz de Sala';
         const perfilBg=isArena?'#fdf2ee':'var(--bege-dark)';
         const perfilClr=isArena?'#b94a10':'var(--marrom)';
         return `<tr>
           <td style="font-weight:600">${v.nome}</td>
           <td><span style="background:${perfilBg};color:${perfilClr};padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700">${perfilLabel}</span></td>
-          <td><button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button></td>
+          <td>${perfil!=='visualizador'?`<button class="btn btn-danger btn-sm" onclick="remJuiz('${k}')">Remover</button>`:'—'}</td>
         </tr>`;
       }).join('');
     ct.innerHTML=`
@@ -901,14 +909,16 @@ window.irAdmin=async function(sub){
         ${rows||'<tr><td colspan="3" style="text-align:center;color:#999;padding:20px">Nenhum juiz cadastrado</td></tr>'}
       </table></div>
       <div class="divider"></div>
-      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo juiz</p>
+      ${perfil!=='visualizador'?`
+      <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo usuário</p>
       <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
-      <div class="form-group"><label>Perfil</label><select id="nj-perfil" onchange="document.getElementById('campo-arena-num').style.display=this.value==='arena'?'block':'none'"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option></select></div>
+      <div class="form-group"><label>Perfil</label><select id="nj-perfil" onchange="document.getElementById('campo-arena-num').style.display=this.value==='arena'?'block':'none'"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option><option value="visualizador">Visualizador (somente leitura)</option></select></div>
       <div class="form-group" id="campo-arena-num" style="display:none"><label>Arena (1 a 6)</label><select id="nj-arena"><option value="1">Arena 1 — 🟢 Verde</option><option value="2">Arena 2 — 🟠 Laranja</option><option value="3">Arena 3 — 🟡 Amarelo</option><option value="4">Arena 4 — 🔵 Azul</option><option value="5">Arena 5 — 🔴 Vermelho</option><option value="6">Arena 6 — ⚪ Prata</option></select></div>
-      <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
+      <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Usuário</button>
       <div class="divider"></div>
       <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
-      ${csvUI('juiz')}`;
+      ${csvUI('juiz')}
+      `:'<p class="text-muted" style="text-align:center;padding:12px;font-size:13px;margin-top:8px">👁️ Somente leitura — cadastro não disponível.</p>'}`;
   }
   else if(sub==='equipes'){
     title.textContent='Gerenciar Equipes';
@@ -917,7 +927,7 @@ window.irAdmin=async function(sub){
       <td style="font-weight:700;color:var(--text-muted)">${i+1}</td>
       <td style="font-weight:600">${e.nome}</td>
       <td>${e.escola||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="remEq('${e.id}')">Remover</button></td>
+      <td>${perfil!=='visualizador'?`<button class="btn btn-danger btn-sm" onclick="remEq('${e.id}')">Remover</button>`:'—'}</td>
     </tr>`).join('');
     ct.innerHTML=`
       <div class="table-wrap" style="margin-bottom:20px"><table>
@@ -925,13 +935,15 @@ window.irAdmin=async function(sub){
         ${rows||'<tr><td colspan="4" style="text-align:center;color:#999;padding:20px">Nenhuma equipe cadastrada</td></tr>'}
       </table></div>
       <div class="divider"></div>
+      ${perfil!=='visualizador'?`
       <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar nova equipe</p>
       <div class="form-group"><label>Nome da equipe</label><input id="ne-nome" placeholder="Ex: Robonautas"></div>
       <div class="form-group"><label>Escola / Instituição</label><input id="ne-escola" placeholder="Ex: Escola Municipal X"></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addEq()">Cadastrar Equipe</button>
       <div class="divider"></div>
       <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>
-      ${csvUI('equipe')}`;
+      ${csvUI('equipe')}
+      `:'<p class="text-muted" style="text-align:center;padding:12px;font-size:13px;margin-top:8px">👁️ Somente leitura — cadastro não disponível.</p>'}`;
   }
   else if(sub==='notas-sala'){
     title.textContent='Notas de Sala';
@@ -956,8 +968,7 @@ window.irAdmin=async function(sub){
         <td>${coms||''} ${fbGeral||(!coms&&!fbGeral?'<span style="color:#999;font-size:12px">—</span>':'')}</td>
         <td>
           <div style="display:flex;flex-direction:column;gap:4px">
-            <button class="btn btn-caramelo btn-sm" onclick="editarSala('${k}')">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button>
+            ${perfil!=='visualizador'?`<button class="btn btn-caramelo btn-sm" onclick="editarSala('${k}')">Editar</button><button class="btn btn-danger btn-sm" onclick="delSala('${k}')">Apagar</button>`:'<span style="font-size:11px;color:var(--text-muted)">somente leitura</span>'}
           </div>
         </td>
       </tr>`;
@@ -965,7 +976,7 @@ window.irAdmin=async function(sub){
     ct.innerHTML=`
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <input type="text" id="filtro-sala" placeholder="🔍 Buscar por equipe ou juiz..." oninput="filtrarTabela('filtro-sala','tabela-sala')" style="flex:1;padding:10px 14px;font-size:14px">
-        <button class="btn btn-danger btn-sm" onclick="apagarTodasSala()">🗑️ Apagar todas</button>
+        ${perfil!=='visualizador'?'<button class="btn btn-danger btn-sm" onclick="apagarTodasSala()">🗑️ Apagar todas</button>':''}
       </div>
       <div class="table-wrap"><table id="tabela-sala">
         <tr><th>Equipe</th><th>Juiz</th><th>Nota</th><th>Indicação</th><th>Horário</th><th>Feedbacks</th><th>Ação</th></tr>
@@ -980,7 +991,7 @@ window.irAdmin=async function(sub){
       Object.entries(arenas).forEach(([arKey,v])=>{todas.push(v);});
     });
     todas.sort((a,b)=>a.rodada-a.arena-(b.rodada-b.arena)||b.timestamp-a.timestamp);
-    const btnApagar=`<div style="margin-bottom:12px;text-align:right"><button class="btn btn-danger btn-sm" onclick="apagarTodasArena()">🗑️ Apagar todas as rodadas</button></div>`;
+    const btnApagar=perfil!=='visualizador'?`<div style="margin-bottom:12px;text-align:right"><button class="btn btn-danger btn-sm" onclick="apagarTodasArena()">🗑️ Apagar todas as rodadas</button></div>`:'';
     if(!todas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Nenhuma rodada registrada.</p>';return;}
     const rows=todas.map(v=>{
       const ar=ARENAS[v.arena-1];
@@ -995,7 +1006,7 @@ window.irAdmin=async function(sub){
         <td style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--marrom)">🤝 ${total}p</td>
         <td style="font-size:12px;color:var(--text-muted);font-family:'Nunito',sans-serif;font-weight:700">⏱️ ${v.tempo||'—'}</td>
         <td style="font-size:12px;color:var(--text-muted)">${v.juiz}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="delArena(${v.rodada},${v.arena})">Apagar</button></td>
+        <td>${perfil!=='visualizador'?`<button class="btn btn-danger btn-sm" onclick="delArena(${v.rodada},${v.arena})">Apagar</button>`:'<span style="font-size:11px;color:var(--text-muted)">leitura</span>'}</td>
       </tr>`;
     }).join('');
     ct.innerHTML=btnApagar+`<div class="table-wrap"><table>
@@ -1017,6 +1028,12 @@ window.irAdmin=async function(sub){
         <div class="pass-wrap"><input type="password" id="s-admin" placeholder="Nova senha admin"><button type="button" class="btn-ver-senha" onclick="toggleSenha('s-admin',this)">👁</button></div>
       </div>
       <button class="btn btn-primary" onclick="salvarSenha('admin')">Salvar senha do admin</button>
+      <div class="divider"></div>
+      <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--marrom)">Senha dos visualizadores</p>
+      <div class="form-group"><label>Nova senha de visualizador</label>
+        <div class="pass-wrap"><input type="password" id="s-visualizador" placeholder="Nova senha visualizador"><button type="button" class="btn-ver-senha" onclick="toggleSenha('s-visualizador',this)">👁</button></div>
+      </div>
+      <button class="btn btn-primary" onclick="salvarSenha('visualizador')">Salvar senha do visualizador</button>
       <div id="senha-msg" class="success-msg" style="margin-top:12px"></div>`;
   }
   else if(sub==='notas-gerais'){
@@ -1114,8 +1131,10 @@ window.irAdmin=async function(sub){
   }
 };
 
-window.remJuiz=async function(id){if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
+window.remJuiz=async function(id){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}if(!confirm('Remover este juiz?'))return;await fbDel(`juizes/${id}`);irAdmin('juizes');};
 window.addJuiz=async function(){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   const nomeEl=document.getElementById('nj-nome');
   const perfilEl=document.getElementById('nj-perfil');
   const arenaEl=document.getElementById('nj-arena');
@@ -1135,11 +1154,13 @@ window.addJuiz=async function(){
   }
 };
 window.remEq=async function(id){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   const eq=equipes.find(e=>e.id===id);
   if(!confirm(`Remover equipe "${eq?.nome}"?`))return;
   await fbDel(`equipes/${id}`);irAdmin('equipes');
 };
 window.addEq=async function(){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   const nome=document.getElementById('ne-nome').value.trim();
   const escola=document.getElementById('ne-escola').value.trim();
   if(!nome){alert('Nome obrigatório.');return;}
@@ -1147,6 +1168,7 @@ window.addEq=async function(){
   alert(`Equipe "${nome}" cadastrada!`);irAdmin('equipes');
 };
 window.delSala=async function(id){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   if(!confirm('Apagar esta avaliação permanentemente?'))return;
   await fbDel(`avaliacoes_sala/${id}`);irAdmin('notas-sala');
 };
@@ -1256,27 +1278,32 @@ window.salvarEdicaoSala=async function(id){
   finally{if(btn){btn.textContent='Salvar Alterações';btn.disabled=false;}}
 };
 window.apagarTodasSala=async function(){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   if(!confirm('Apagar TODAS as avaliações de sala? Esta ação não pode ser desfeita!'))return;
   await fbDel('avaliacoes_sala');
   irAdmin('notas-sala');
 };
 
 window.apagarTodasArena=async function(){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   if(!confirm('Apagar TODAS as rodadas de arena? Esta ação não pode ser desfeita!'))return;
   await fbDel('arena');
   irAdmin('notas-arena');
 };
 
 window.delArena=async function(rodada,arena){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   if(!confirm(`Apagar resultado da Arena ${arena}, Rodada ${rodada}?`))return;
   await fbDel(`arena/rodada_${rodada}/arena_${arena}`);
   irAdmin('notas-arena');
 };
 
 window.salvarSenha=async function(tipo){
+  if(perfil==='visualizador'){alert('Acesso somente leitura: esta ação não está disponível para o seu usuário.');return;}
   const val=document.getElementById(`s-${tipo}`).value.trim();
   if(!val){alert('Digite a nova senha.');return;}
-  await fbPatch('config',tipo==='evento'?{senha_evento:val}:{senha_admin:val});
+  const patch=tipo==='evento'?{senha_evento:val}:tipo==='admin'?{senha_admin:val}:{senha_visualizador:val};
+  await fbPatch('config',patch);
   document.getElementById(`s-${tipo}`).value='';
   const msg=document.getElementById('senha-msg');
   msg.textContent=`✅ Senha ${tipo==='evento'?'do evento':'do admin'} atualizada!`;

@@ -159,8 +159,7 @@ tr:hover td{background:var(--bege);}
     </div>
     <button class="btn btn-primary" onclick="fazerLogin()">Entrar</button>
     <p class="text-muted mt-12" style="text-align:center;font-size:11px">Sessão expira após 30 min de inatividade</p>
-    <div class="divider" style="margin:16px 0"></div>
-    <button class="btn btn-secondary" onclick="abrirTelao()" style="font-size:14px">📺 Ver Painel do Telão</button>
+
   </div>
   <p style="color:rgba(255,255,255,0.65);font-size:11px;text-align:center;margin-top:4px;line-height:1.7;max-width:400px;padding:0 16px;position:relative;z-index:1">
     Criado por Divisão de Robótica e Cultura Maker — DRO<br>Todos os direitos reservados
@@ -1496,9 +1495,14 @@ window.abrirTelao=function(){
 window.fecharTelao=function(){
   clearInterval(telaoTimer);
   document.getElementById('screen-telao-arena').style.display='none';
-  document.getElementById('app-header').style.display='block';
+  // Só mostra header se estiver logado
   if(me){
-    show('screen-admin');
+    document.getElementById('app-header').style.display='block';
+    if(perfil==='admin'){
+      show('screen-admin');
+    } else {
+      show('screen-menu');
+    }
   } else if(new URLSearchParams(window.location.search).get('telao')==='1'){
     window.location.href='https://tprjp.com.br/';
   } else {
@@ -1524,13 +1528,13 @@ async function carregarTelao(){
         <span class="arena-cor-badge" style="background:${ar.bg};color:${ar.clr}">${ar.emoji} Arena ${ar.num} — ${ar.cor}</span>
         <div style="font-size:14px;opacity:0.5">Aguardando registro...</div>
       </div>`;
-    const venc=v.vencedor==='empate'?'🤝 Empate':v.vencedor==='vermelho'?'🔴 Vermelho venceu!':'🟡 Amarelo venceu!';
+        const totalP=(v.pecas_vermelho||0)+(v.pecas_amarelo||0);
     return `
       <div class="arena-card-telao">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <span class="arena-cor-badge" style="background:${ar.bg};color:${ar.clr}">${ar.emoji} Arena ${ar.num} — ${ar.cor}</span>
           <div style="text-align:right">
-            <span style="font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;color:var(--caramelo)">${venc}</span>
+            <span style="font-family:'Nunito',sans-serif;font-size:24px;font-weight:900;color:var(--caramelo)">🤝 ${totalP} peças</span>
             ${v.tempo?`<div style="font-size:12px;opacity:0.6;margin-top:2px">⏱️ ${v.tempo}</div>`:''}
           </div>
         </div>

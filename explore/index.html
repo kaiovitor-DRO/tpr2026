@@ -460,12 +460,12 @@ const INACT=30*60*1000;
 // ARENAS — 6 arenas com cores fixas
 // ═══════════════════════════════════════════════════════════════
 const ARENAS=[
-  {num:1,cor:'Vermelho',emoji:'🔴',bg:'#fdf5f5',clr:'#b94040'},
-  {num:2,cor:'Amarelo', emoji:'🟡',bg:'#fdf9ee',clr:'#b8860b'},
-  {num:3,cor:'Azul',    emoji:'🔵',bg:'#f0f4fb',clr:'#1a4a8c'},
-  {num:4,cor:'Verde',   emoji:'🟢',bg:'#f0f7f0',clr:'#2d6a2d'},
-  {num:5,cor:'Laranja', emoji:'🟠',bg:'#fdf2ee',clr:'#b94a10'},
-  {num:6,cor:'Roxo',    emoji:'🟣',bg:'#f4f0fb',clr:'#4a2a8c'}
+  {num:1,cor:'Verde',   emoji:'🟢',bg:'#f0f7f0',clr:'#2d6a2d'},
+  {num:2,cor:'Laranja', emoji:'🟠',bg:'#fdf2ee',clr:'#b94a10'},
+  {num:3,cor:'Amarelo', emoji:'🟡',bg:'#fdf9ee',clr:'#b8860b'},
+  {num:4,cor:'Azul',    emoji:'🔵',bg:'#f0f4fb',clr:'#1a4a8c'},
+  {num:5,cor:'Vermelho',emoji:'🔴',bg:'#fdf5f5',clr:'#b94040'},
+  {num:6,cor:'Prata',   emoji:'⚪',bg:'#f4f4f4',clr:'#555555'}
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -861,7 +861,7 @@ window.irAdmin=async function(sub){
       <p style="font-weight:700;margin-bottom:12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Cadastrar novo juiz</p>
       <div class="form-group"><label>Nome</label><input id="nj-nome" placeholder="Nome completo"></div>
       <div class="form-group"><label>Perfil</label><select id="nj-perfil" onchange="document.getElementById('campo-arena-num').style.display=this.value==='arena'?'block':'none'"><option value="sala">Juiz de Sala</option><option value="arena">Juiz de Arena</option></select></div>
-      <div class="form-group" id="campo-arena-num" style="display:none"><label>Arena (1 a 6)</label><select id="nj-arena"><option value="1">Arena 1 — 🔴 Vermelho</option><option value="2">Arena 2 — 🟡 Amarelo</option><option value="3">Arena 3 — 🔵 Azul</option><option value="4">Arena 4 — 🟢 Verde</option><option value="5">Arena 5 — 🟠 Laranja</option><option value="6">Arena 6 — 🟣 Roxo</option></select></div>
+      <div class="form-group" id="campo-arena-num" style="display:none"><label>Arena (1 a 6)</label><select id="nj-arena"><option value="1">Arena 1 — 🟢 Verde</option><option value="2">Arena 2 — 🟠 Laranja</option><option value="3">Arena 3 — 🟡 Amarelo</option><option value="4">Arena 4 — 🔵 Azul</option><option value="5">Arena 5 — 🔴 Vermelho</option><option value="6">Arena 6 — ⚪ Prata</option></select></div>
       <button class="btn btn-primary" style="margin-bottom:20px" onclick="addJuiz()">Cadastrar Juiz</button>
       <div class="divider"></div>
       <p style="font-weight:700;margin:16px 0 12px;font-family:'Nunito',sans-serif;text-transform:uppercase;font-size:13px;letter-spacing:0.5px;color:var(--marrom)">Importar via CSV</p>

@@ -482,12 +482,61 @@ tr:hover td{background:var(--bege);}
 // ═══════════════════════════════════════════════════════════════
 // FIREBASE — prefixo explore/
 // ═══════════════════════════════════════════════════════════════
-const DB='https://tpr-2026-innov-default-rtdb.firebaseio.com/explore';
-const fbGet=async p=>{try{return await(await fetch(`${DB}/${p}.json`)).json();}catch{return null;}};
-const fbSet=(p,v)=>fetch(`${DB}/${p}.json`,{method:'PUT',body:JSON.stringify(v)});
-const fbPush=(p,v)=>fetch(`${DB}/${p}.json`,{method:'POST',body:JSON.stringify(v)}).then(r=>r.json());
-const fbPatch=(p,v)=>fetch(`${DB}/${p}.json`,{method:'PATCH',body:JSON.stringify(v)});
-const fbDel=p=>fetch(`${DB}/${p}.json`,{method:'DELETE'});
+const FIREBASE_API_KEY = 'AIzaSyAhMkIYGBiLGv_z2N3ojVfpI5Ld3S4xx5A';
+let fbAuthToken = null;
+let fbRefreshToken = null;
+let fbAuthReady = null;
+
+async function fbAuthAnonimo() {
+  const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({returnSecureToken:true})
+  });
+  const data = await res.json();
+  if (!data.idToken) throw new Error('Falha na autenticação anônima do Firebase');
+  fbAuthToken = data.idToken;
+  fbRefreshToken = data.refreshToken;
+  agendarRenovacaoToken(parseInt(data.expiresIn) || 3600);
+}
+
+async function fbRenovarToken() {
+  try {
+    const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: `grant_type=refresh_token&refresh_token=${fbRefreshToken}`
+    });
+    const data = await res.json();
+    if (!data.id_token) throw new Error('refresh falhou');
+    fbAuthToken = data.id_token;
+    fbRefreshToken = data.refresh_token;
+    agendarRenovacaoToken(parseInt(data.expires_in) || 3600);
+  } catch (e) {
+    fbAuthAnonimo().catch(()=>{});
+  }
+}
+
+function agendarRenovacaoToken(expiraEmSegundos) {
+  const msAteRenovar = Math.max((expiraEmSegundos - 300) * 1000, 30000);
+  setTimeout(fbRenovarToken, msAteRenovar);
+}
+
+function fbGarantirAuth() {
+  if (!fbAuthReady) fbAuthReady = fbAuthAnonimo();
+  return fbAuthReady;
+}
+
+function fbUrl(p) {
+  return `${DB}/${p}.json?auth=${fbAuthToken}`;
+}
+
+const DB = 'https://tpr-2026-innov-default-rtdb.firebaseio.com/explore';
+const fbGet = async p => { try { await fbGarantirAuth(); return await (await fetch(fbUrl(p))).json(); } catch { return null; } };
+const fbSet = async (p,v) => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'PUT',body:JSON.stringify(v)}); };
+const fbPush = async (p,v) => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'POST',body:JSON.stringify(v)}).then(r=>r.json()); };
+const fbPatch = async (p,v) => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'PATCH',body:JSON.stringify(v)}); };
+const fbDel = async p => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'DELETE'}); };
 
 // ═══════════════════════════════════════════════════════════════
 // ESTADO GLOBAL

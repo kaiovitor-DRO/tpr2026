@@ -250,11 +250,11 @@ tr:hover td{background:var(--bege);}
         </div>
       </label>
       <div id="indicacao-motivo-wrap" style="display:none">
-        <div style="font-size:12px;font-weight:700;color:var(--caramelo-dark);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">⭐ Motivo da indicação (uso interno)</div>
+        <div style="font-size:12px;font-weight:700;color:var(--caramelo-dark);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">⭐ Observação da indicação para próxima etapa — obrigatório</div>
         <textarea id="indicacao-motivo" placeholder="Por que você está indicando esta equipe para a fase nacional?" style="min-height:70px;resize:vertical;font-size:13px;border-color:var(--caramelo)"></textarea>
       </div>
       <div id="sem-indicacao-wrap" style="margin-top:8px">
-        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">💬 Observação (uso interno, opcional)</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">💬 Observação da indicação para próxima etapa — obrigatório</div>
         <textarea id="sem-indicacao-motivo" placeholder="Alguma observação sobre esta equipe? (não indicada)" style="min-height:60px;resize:vertical;font-size:13px"></textarea>
       </div>
     </div>
@@ -792,6 +792,8 @@ window.enviarRubricas=async function(){
   const indicacao=document.getElementById('indicacao-proxima-fase').checked;
   const indicacaoMotivo=indicacao?document.getElementById('indicacao-motivo').value.trim():'';
   const semIndicacaoMotivo=!indicacao?document.getElementById('sem-indicacao-motivo').value.trim():'';
+  const motivoObrigatorio=indicacao?indicacaoMotivo:semIndicacaoMotivo;
+  if(!motivoObrigatorio){alert('Preencha a "Observação da indicação para próxima etapa" antes de enviar.');return;}
   const total=TODOS_CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
   const btn=document.querySelector('#screen-rubricas .btn-primary');
   btn.textContent='Enviando...';btn.disabled=true;
@@ -852,7 +854,7 @@ window.verMinhasAvaliacoes=async function(){
         </div>
         <div style="margin-bottom:10px">
           <div style="font-size:11px;font-weight:700;color:var(--caramelo-dark);text-transform:uppercase;margin-bottom:4px">
-            ${v.indicacao?'⭐ Motivo da indicação (interno)':'💬 Observação interna (opcional)'}
+            '⭐ Observação da indicação para próxima etapa'
           </div>
           <textarea id="fbmotivo-${k}" style="min-height:60px;resize:vertical;font-size:13px">${v.indicacao?(v.indicacaoMotivo||''):(v.semIndicacaoMotivo||'')}</textarea>
         </div>

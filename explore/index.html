@@ -242,13 +242,21 @@ tr:hover td{background:var(--bege);}
       </div>
     </div>
     <div style="background:#fef6e4;border:1.5px solid #f0d080;border-radius:var(--radius-sm);padding:16px;margin-bottom:4px">
-      <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text)">
-        <input type="checkbox" id="indicacao-proxima-fase" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--caramelo)">
+      <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;text-transform:none;font-size:14px;font-weight:400;color:var(--text);margin-bottom:10px">
+        <input type="checkbox" id="indicacao-proxima-fase" onchange="document.getElementById('indicacao-motivo-wrap').style.display=this.checked?'block':'none';document.getElementById('sem-indicacao-wrap').style.display=this.checked?'none':'block'" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--caramelo)">
         <div>
           <div style="font-weight:700;font-size:15px;color:var(--marrom);margin-bottom:2px">⭐ Indicar para próxima fase</div>
           <div style="font-size:12px;color:var(--text-muted);line-height:1.4">Esta indicação não altera a nota. Serve apenas como critério de desempate caso duas equipes terminem com a mesma pontuação final.</div>
         </div>
       </label>
+      <div id="indicacao-motivo-wrap" style="display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--caramelo-dark);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">⭐ Motivo da indicação (uso interno)</div>
+        <textarea id="indicacao-motivo" placeholder="Por que você está indicando esta equipe para a fase nacional?" style="min-height:70px;resize:vertical;font-size:13px;border-color:var(--caramelo)"></textarea>
+      </div>
+      <div id="sem-indicacao-wrap" style="margin-top:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">💬 Observação (uso interno, opcional)</div>
+        <textarea id="sem-indicacao-motivo" placeholder="Alguma observação sobre esta equipe? (não indicada)" style="min-height:60px;resize:vertical;font-size:13px"></textarea>
+      </div>
     </div>
     <div id="rubrica-error-bottom" class="error-msg" style="margin-top:16px"></div>
     <button class="btn btn-primary mt-12" onclick="enviarRubricas()">Confirmar e Enviar Avaliação</button>
@@ -665,6 +673,10 @@ window.irParaRubricas=async function(){
   document.getElementById('fb-geral-pos').value='';
   document.getElementById('fb-geral-mel').value='';
   document.getElementById('indicacao-proxima-fase').checked=false;
+  document.getElementById('indicacao-motivo').value='';
+  document.getElementById('sem-indicacao-motivo').value='';
+  document.getElementById('indicacao-motivo-wrap').style.display='none';
+  document.getElementById('sem-indicacao-wrap').style.display='block';
   document.getElementById('rubrica-error').style.display='none';
   show('screen-rubricas');
 };
@@ -729,11 +741,13 @@ window.enviarRubricas=async function(){
   if(!feedbackPositivo){alert('Preencha o campo "✅ Muito bom..." antes de enviar.');return;}
   if(!feedbackMelhoria){alert('Preencha o campo "💡 Pensem sobre..." antes de enviar.');return;}
   const indicacao=document.getElementById('indicacao-proxima-fase').checked;
+  const indicacaoMotivo=indicacao?document.getElementById('indicacao-motivo').value.trim():'';
+  const semIndicacaoMotivo=!indicacao?document.getElementById('sem-indicacao-motivo').value.trim():'';
   const total=TODOS_CRIT.reduce((s,c)=>s+notas[c.id].valor,0);
   const btn=document.querySelector('#screen-rubricas .btn-primary');
   btn.textContent='Enviando...';btn.disabled=true;
   try{
-    await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,indicacao,timestamp:Date.now()});
+    await fbPush('avaliacoes_sala',{equipeId:eqId,juiz:me,notas,total,feedbackPositivo,feedbackMelhoria,indicacao,indicacaoMotivo,semIndicacaoMotivo,timestamp:Date.now()});
     alert(`✅ Avaliação enviada!\nEquipe: ${equipes.find(e=>e.id===eqId)?.nome}\nTotal: ${total}/40`);
     show('screen-menu');
   }catch(e){alert('Erro ao enviar. Tente novamente.');}
@@ -751,14 +765,14 @@ window.verMinhasAvaliacoes=async function(){
   const data=await fbGet('avaliacoes_sala')||{};
   const minhas=Object.entries(data).filter(([k,v])=>v.juiz===me).sort((a,b)=>b[1].timestamp-a[1].timestamp);
   if(!minhas.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:20px">Você ainda não fez nenhuma avaliação.</p>';return;}
-  ct.innerHTML=`<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Toque para expandir.</p>
+  ct.innerHTML=`<p class="text-muted" style="margin-bottom:12px;font-size:13px">Total: <strong>${minhas.length}</strong> avaliação(ões). Toque para expandir. <span style="color:var(--verde)">Você pode editar os comentários abaixo.</span></p>
     <div style="margin-bottom:12px"><input type="text" id="filtro-minhas-aval" placeholder="🔍 Buscar por equipe..." oninput="filtrarCards('filtro-minhas-aval','cards-aval')" style="padding:10px 14px;font-size:14px"></div>
     <div id="cards-aval">`+
   minhas.map(([k,v])=>{
     const eq=equipes.find(e=>e.id===v.equipeId);
     const nomeEq=eq?eq.nome:v.equipeId;
     const hora=new Date(v.timestamp).toLocaleTimeString('pt-BR');
-    const detalhes=CATEGORIAS.map(cat=>`
+    const criteriosHtml=CATEGORIAS.map(cat=>`
       <div style="margin-bottom:10px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">${cat.emoji} ${cat.label}</div>
         ${cat.criterios.map(cr=>{const n=v.notas?.[cr.id];return n?`
@@ -768,9 +782,35 @@ window.verMinhasAvaliacoes=async function(){
           </div>
           ${n.comentario?`<div class="comment-box">${n.comentario}</div>`:''}
         `:'';}).join('')}
-      </div>`).join('')+
-      (v.feedbackPositivo?`<div class="feedback-pos-box">✅ ${v.feedbackPositivo}</div>`:'')+
-      (v.feedbackMelhoria?`<div class="feedback-mel-box">💡 ${v.feedbackMelhoria}</div>`:'');
+      </div>`).join('');
+
+    // Feedbacks editáveis
+    const feedbacksHtml=`
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--marrom)">
+          💬 Feedback geral
+          <span style="font-weight:400;color:var(--verde);font-size:12px"> (você pode editar)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--verde);text-transform:uppercase;margin-bottom:4px">✅ Muito bom...</div>
+            <textarea id="fbpos-${k}" style="min-height:70px;resize:vertical;font-size:13px">${v.feedbackPositivo||''}</textarea>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--vermelho);text-transform:uppercase;margin-bottom:4px">💡 Pensem sobre...</div>
+            <textarea id="fbmel-${k}" style="min-height:70px;resize:vertical;font-size:13px">${v.feedbackMelhoria||''}</textarea>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--caramelo-dark);text-transform:uppercase;margin-bottom:4px">
+            ${v.indicacao?'⭐ Motivo da indicação (interno)':'💬 Observação interna (opcional)'}
+          </div>
+          <textarea id="fbmotivo-${k}" style="min-height:60px;resize:vertical;font-size:13px">${v.indicacao?(v.indicacaoMotivo||''):(v.semIndicacaoMotivo||'')}</textarea>
+        </div>
+        <div id="fb-save-msg-${k}" class="success-msg"></div>
+        <button class="btn btn-caramelo btn-sm" onclick="salvarFeedbackJuiz('${k}',${v.indicacao})">💾 Salvar comentários</button>
+      </div>`;
+
     return `
     <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden" data-search="${nomeEq}">
       <div onclick="toggleCard('aval-${k}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:white;user-select:none">
@@ -788,7 +828,10 @@ window.verMinhasAvaliacoes=async function(){
         </div>
       </div>
       <div id="aval-${k}" style="display:none;padding:0 16px 16px;border-top:1px solid var(--border);background:#fafafa">
-        <div style="margin-top:12px">${detalhes}</div>
+        <div style="margin-top:12px">
+          ${criteriosHtml}
+          ${feedbacksHtml}
+        </div>
       </div>
     </div>`;
   }).join('')+'</div>';
@@ -1296,6 +1339,22 @@ window.delArena=async function(rodada,arena){
   if(!confirm(`Apagar resultado da Arena ${arena}, Rodada ${rodada}?`))return;
   await fbDel(`arena/rodada_${rodada}/arena_${arena}`);
   irAdmin('notas-arena');
+};
+
+window.salvarFeedbackJuiz=async function(id,indicacao){
+  const pos=document.getElementById(`fbpos-${id}`).value.trim();
+  const mel=document.getElementById(`fbmel-${id}`).value.trim();
+  const motivo=document.getElementById(`fbmotivo-${id}`).value.trim();
+  const patch={feedbackPositivo:pos,feedbackMelhoria:mel};
+  if(indicacao) patch.indicacaoMotivo=motivo;
+  else patch.semIndicacaoMotivo=motivo;
+  const btn=document.querySelector(`[onclick="salvarFeedbackJuiz('${id}',${indicacao})"]`);
+  if(btn){btn.textContent='Salvando...';btn.disabled=true;}
+  await fbPatch(`avaliacoes_sala/${id}`,patch);
+  const msg=document.getElementById(`fb-save-msg-${id}`);
+  msg.textContent='✅ Comentários salvos!';msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3000);
+  if(btn){btn.textContent='💾 Salvar comentários';btn.disabled=false;}
 };
 
 window.salvarSenha=async function(tipo){

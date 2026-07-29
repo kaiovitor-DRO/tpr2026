@@ -1211,7 +1211,7 @@ window.irAdmin=async function(sub){
         </td>
         <td style="text-align:center;vertical-align:middle">
           ${premioCat?`<div style="background:var(--bege-dark);color:var(--marrom);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px">${CATS_INFO[premioCat].emoji} ${CATS_INFO[premioCat].label}</div>`:'<div style="font-size:11px;color:#ccc">—</div>'}
-          ${e.indicacoes>0?`<div style="font-size:12px;color:var(--text-muted);margin-top:4px">⭐ ${e.indicacoes} indicada(s) para nacional</div>`:''}`
+          ${e.indicacoes>0?`<div style="font-size:12px;color:var(--text-muted);margin-top:4px">⭐ ${e.indicacoes} indicada(s) para nacional</div>`:''}
         </td>
       </tr>`;
     }).join('');

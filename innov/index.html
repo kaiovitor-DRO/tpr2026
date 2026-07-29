@@ -447,18 +447,78 @@
 // os dados: equipes, juízes, avaliações e rodadas de arena.
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// AUTENTICAÇÃO ANÔNIMA (Firebase Auth)
+// Necessária porque as regras do Realtime Database foram fechadas para
+// "auth != null" — isto é, só quem tiver um token válido do Firebase
+// consegue ler/escrever. Login anônimo não pede nada do usuário: só
+// identifica "isto é uma sessão do app rodando", bloqueando bots e
+// scanners que vasculham bancos Firebase abertos pela internet.
+// ═══════════════════════════════════════════════════════════════
+const FIREBASE_API_KEY = 'AIzaSyAhMkIYGBiLGv_z2N3ojVfpI5Ld3S4xx5A';
+let fbAuthToken = null;
+let fbRefreshToken = null;
+let fbAuthReady = null; // Promise que resolve quando o primeiro login termina
+
+async function fbAuthAnonimo() {
+  const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({returnSecureToken:true})
+  });
+  const data = await res.json();
+  if (!data.idToken) throw new Error('Falha na autenticação anônima do Firebase');
+  fbAuthToken = data.idToken;
+  fbRefreshToken = data.refreshToken;
+  agendarRenovacaoToken(parseInt(data.expiresIn) || 3600);
+}
+
+async function fbRenovarToken() {
+  try {
+    const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: `grant_type=refresh_token&refresh_token=${fbRefreshToken}`
+    });
+    const data = await res.json();
+    if (!data.id_token) throw new Error('refresh falhou');
+    fbAuthToken = data.id_token;
+    fbRefreshToken = data.refresh_token;
+    agendarRenovacaoToken(parseInt(data.expires_in) || 3600);
+  } catch (e) {
+    // Se a renovação falhar por qualquer motivo, faz um novo login anônimo do zero
+    fbAuthAnonimo().catch(()=>{});
+  }
+}
+
+function agendarRenovacaoToken(expiraEmSegundos) {
+  const msAteRenovar = Math.max((expiraEmSegundos - 300) * 1000, 30000); // renova 5 min antes de expirar
+  setTimeout(fbRenovarToken, msAteRenovar);
+}
+
+// Garante que existe um token válido antes de qualquer chamada ao banco
+function fbGarantirAuth() {
+  if (!fbAuthReady) fbAuthReady = fbAuthAnonimo();
+  return fbAuthReady;
+}
+
+// Monta a URL final do Firebase já com o token de autenticação anexado
+function fbUrl(p) {
+  return `${DB}/${p}.json?auth=${fbAuthToken}`;
+}
+
 // Endereço base do banco de dados no Firebase
 const DB = 'https://tpr-2026-innov-default-rtdb.firebaseio.com';
 // Lê dados de um caminho no Firebase (ex: 'equipes', 'config')
-const fbGet = async p => { try { return await (await fetch(`${DB}/${p}.json`)).json(); } catch { return null; } };
+const fbGet = async p => { try { await fbGarantirAuth(); return await (await fetch(fbUrl(p))).json(); } catch { return null; } };
 // Grava (substitui completamente) dados num caminho do Firebase
-const fbSet = (p,v) => fetch(`${DB}/${p}.json`,{method:'PUT',body:JSON.stringify(v)});
+const fbSet = async (p,v) => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'PUT',body:JSON.stringify(v)}); };
 // Adiciona novo item numa lista — Firebase gera um ID único automático
-const fbPush = (p,v) => fetch(`${DB}/${p}.json`,{method:'POST',body:JSON.stringify(v)}).then(r=>r.json());
+const fbPush = async (p,v) => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'POST',body:JSON.stringify(v)}).then(r=>r.json()); };
 // Atualiza campos específicos sem apagar os demais dados do item
-const fbPatch = (p,v) => fetch(`${DB}/${p}.json`,{method:'PATCH',body:JSON.stringify(v)});
+const fbPatch = async (p,v) => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'PATCH',body:JSON.stringify(v)}); };
 // Apaga permanentemente um item do Firebase
-const fbDel = p => fetch(`${DB}/${p}.json`,{method:'DELETE'});
+const fbDel = async p => { await fbGarantirAuth(); return fetch(fbUrl(p),{method:'DELETE'}); };
 
 // ═══════════════════════════════════════════════════════════════
 // ESTADO GLOBAL DA APLICAÇÃO

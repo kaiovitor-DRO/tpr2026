@@ -246,7 +246,7 @@ tr:hover td{background:var(--bege);}
         <input type="checkbox" id="indicacao-proxima-fase" onchange="document.getElementById('indicacao-motivo-wrap').style.display=this.checked?'block':'none';document.getElementById('sem-indicacao-wrap').style.display=this.checked?'none':'block'" style="width:20px;height:20px;margin-top:2px;flex-shrink:0;cursor:pointer;accent-color:var(--caramelo)">
         <div>
           <div style="font-weight:700;font-size:15px;color:var(--marrom);margin-bottom:2px">⭐ Indicar para próxima fase</div>
-          <div style="font-size:12px;color:var(--text-muted);line-height:1.4">Esta indicação não altera a nota. Serve apenas como critério de desempate caso duas equipes terminem com a mesma pontuação final.</div>
+          <div style="font-size:12px;color:var(--text-muted);line-height:1.4">Esta indicação não altera a nota nem o ranking. Serve apenas para monitoramento interno da progressão das equipes para a fase nacional.</div>
         </div>
       </label>
       <div id="indicacao-motivo-wrap" style="display:none">
@@ -458,7 +458,7 @@ tr:hover td{background:var(--bege);}
       <div class="admin-tile" onclick="irAdmin('notas-gerais')">
         <div class="admin-tile-icon">🏅</div>
         <div class="admin-tile-title">Notas Gerais</div>
-        <div class="admin-tile-desc">Ranking final com desempate</div>
+        <div class="admin-tile-desc">Ranking final por média e categorias</div>
       </div>
       <div class="admin-tile" onclick="abrirTelao()" style="grid-column:1/-1;max-width:320px;margin:0 auto">
         <div class="admin-tile-icon">📺</div>
@@ -1169,7 +1169,14 @@ window.irAdmin=async function(sub){
       };
       const melhorCat=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0];
       return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes,cats,melhorCat};
-    }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
+    }).filter(Boolean).sort((a,b)=>{
+      if(b.media!==a.media) return b.media-a.media;
+      if(b.cats.corevalues!==a.cats.corevalues) return b.cats.corevalues-a.cats.corevalues;
+      if(b.cats.challenge!==a.cats.challenge) return b.cats.challenge-a.cats.challenge;
+      if(b.cats.teammodel!==a.cats.teammodel) return b.cats.teammodel-a.cats.teammodel;
+      if(b.cats.coding!==a.cats.coding) return b.cats.coding-a.cats.coding;
+      return b.cats.poster-a.cats.poster;
+    });
 
     const semAval=equipes.filter(e=>!salaMap[e.id]);
     if(!ranking.length){ct.innerHTML='<p class="text-muted" style="text-align:center;padding:30px">Nenhuma equipe com dados ainda.</p>';return;}
@@ -1181,7 +1188,7 @@ window.irAdmin=async function(sub){
 
     const rows=ranking.map((e,i)=>{
       const empate=i>0&&ranking[i-1].media===e.media;
-      // Melhor categoria desta equipe (maior nota, desempate pela ordem)
+      // Prêmio da equipe = categoria com maior média
       const premioCat=Object.keys(CATS_INFO)
         .sort((a,b)=>e.cats[b]-e.cats[a])[0];
       return `<tr>
@@ -1204,19 +1211,19 @@ window.irAdmin=async function(sub){
         </td>
         <td style="text-align:center;vertical-align:middle">
           ${premioCat?`<div style="background:var(--bege-dark);color:var(--marrom);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px">${CATS_INFO[premioCat].emoji} ${CATS_INFO[premioCat].label}</div>`:'<div style="font-size:11px;color:#ccc">—</div>'}
-          ${e.indicacoes>0?`<div style="font-size:12px;font-weight:700;color:var(--marrom);margin-top:4px">⭐ ${e.indicacoes} ind.</div>`:''}
+          ${e.indicacoes>0?`<div style="font-size:12px;color:var(--text-muted);margin-top:4px">⭐ ${e.indicacoes} indicada(s) para nacional</div>`:''}`
         </td>
       </tr>`;
     }).join('');
 
     ct.innerHTML=`
-      <p class="text-muted" style="margin-bottom:12px;font-size:13px">Ranking por <strong>média das avaliações (0–40)</strong>. Cada equipe recebe o prêmio da categoria em que mais se destacou. 🏅 = vencedor da categoria.</p>
+      <p class="text-muted" style="margin-bottom:12px;font-size:13px">Ranking por <strong>média das avaliações (0–40)</strong>. Empate: desempate por Core Values → Challenge → Team Model → Coding → Poster. 🏅 = melhor categoria da equipe.</p>
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <input type="text" id="filtro-gerais" placeholder="🔍 Buscar por equipe..." oninput="filtrarTabela('filtro-gerais','tabela-gerais')" style="flex:1;padding:10px 14px;font-size:14px">
         <button class="btn btn-caramelo btn-sm" onclick="exportarCSV()">📥 Exportar CSV</button>
       </div>
       <div class="table-wrap"><table id="tabela-gerais">
-        <tr><th>#</th><th>Equipe</th><th>Média</th><th>Por Categoria (máx. 8 cada)</th><th>Prêmio / Indicação</th></tr>
+        <tr><th>#</th><th>Equipe</th><th>Média</th><th>Por Categoria (máx. 8 cada)</th><th>Prêmio / Monitoramento</th></tr>
         ${rows}
       </table></div>
       ${semAval.length?`<p class="text-muted" style="font-size:12px;margin-top:12px"><strong>Sem avaliação:</strong> ${semAval.map(e=>e.nome).join(', ')}</p>`:''}`;
@@ -1791,7 +1798,14 @@ window.exportarCSV=async function(){
     };
     const premioCat=Object.keys(CATS_EXP).sort((a,b)=>cats[b]-cats[a])[0];
     return{...e,media,avaliacoes:sd.notas.length,indicacoes:sd.indicacoes,cats,premioCat};
-  }).filter(Boolean).sort((a,b)=>b.media-a.media||b.indicacoes-a.indicacoes);
+  }).filter(Boolean).sort((a,b)=>{
+    if(b.media!==a.media) return b.media-a.media;
+    if(b.cats.corevalues!==a.cats.corevalues) return b.cats.corevalues-a.cats.corevalues;
+    if(b.cats.challenge!==a.cats.challenge) return b.cats.challenge-a.cats.challenge;
+    if(b.cats.teammodel!==a.cats.teammodel) return b.cats.teammodel-a.cats.teammodel;
+    if(b.cats.coding!==a.cats.coding) return b.cats.coding-a.cats.coding;
+    return b.cats.poster-a.cats.poster;
+  });
 
   ranking.forEach((e,i)=>{
     linhas.push([

@@ -78,22 +78,7 @@
   .cta-groups {
     display:grid; width:100%;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "ei ee"
-      "ci ce"
-      "si se";
     gap:10px 22px;
-  }
-  .eyebrow.innov { grid-area: ei; }
-  .eyebrow.explore { grid-area: ee; }
-  .cta.primary.innov { grid-area: ci; }
-  .cta.primary.explore { grid-area: ce; }
-  .cta.secondary.innov { grid-area: si; }
-  .cta.secondary.explore { grid-area: se; }
-  .cta-groups .eyebrow {
-    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px;
-    letter-spacing:2px; text-transform:uppercase; color: var(--sand);
-    text-align:center;
   }
   .cta {
     font-family:'Baloo 2', sans-serif; font-weight:700; font-size:15px;
@@ -164,9 +149,6 @@
     .cta { font-size:14px; padding:12px 18px; }
     .cta-groups {
       grid-template-columns: 1fr;
-      grid-template-areas:
-        "ei" "ci" "si"
-        "ee" "ce" "se";
     }
     .fossils img { height:50px; }
     .fossils img:nth-child(2) { height:38px; }
@@ -186,12 +168,8 @@
       <img class="logo" src="./LOGO-TPR__1_.png" alt="Torneio Pessoense de Robótica">
 
       <div class="cta-groups">
-        <div class="eyebrow innov">Innov</div>
-        <div class="eyebrow explore">Explore</div>
-        <a href="https://datastudio.google.com/reporting/d5263622-86a4-4f26-ac26-c9e16f21ef2a" class="cta primary innov">📅 Cronograma de Equipes Innov</a>
-        <a href="https://datastudio.google.com/reporting/3370c30d-777b-44ab-bec2-c4342cdfbb45" class="cta primary explore">📅 Cronograma de Equipes Explore</a>
-        <a href="https://tprjp.com.br/innov/?telao=1" class="cta secondary innov">📺 Placar da Arena Innov</a>
-        <a href="https://tprjp.com.br/explore/?telao=1" class="cta secondary explore">📺 Placar da Arena Explore</a>
+        <a href="https://tprjp.com.br/innov/?ranking=1" class="cta primary innov">🏅 Resultado Geral Innov</a>
+        <a href="https://tprjp.com.br/explore/?ranking=1" class="cta primary explore">🏅 Resultado Geral Explore</a>
       </div>
     </div>
   </div>
